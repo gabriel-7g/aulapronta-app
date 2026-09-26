@@ -18,7 +18,7 @@ import {
 
 /* PÁGINAS */
 
-import Login from './pages/Login';
+import Login from './pages/login';
 
 import CriarConta from './pages/CriarConta';
 

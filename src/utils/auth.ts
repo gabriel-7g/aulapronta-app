@@ -12,18 +12,18 @@ export interface UsuarioLogado {
   email: string;
 }
 
-/*
-  Chaves usadas pelo navegador.
-*/
 const USUARIOS_KEY = 'lousaUsuarios';
 const SESSAO_KEY = 'lousaSessao';
 
 
-/*
-  Retorna todos os usuários cadastrados.
-*/
+/* =========================================================
+   USUÁRIOS
+   ========================================================= */
+
 export const obterUsuarios = (): Usuario[] => {
-  const dados = localStorage.getItem(USUARIOS_KEY);
+  const dados = localStorage.getItem(
+    USUARIOS_KEY
+  );
 
   if (!dados) {
     return [];
@@ -37,9 +37,10 @@ export const obterUsuarios = (): Usuario[] => {
 };
 
 
-/*
-  Cria um novo usuário.
-*/
+/* =========================================================
+   CRIAR USUÁRIO
+   ========================================================= */
+
 export const criarUsuario = (
   nome: string,
   email: string,
@@ -96,27 +97,25 @@ export const criarUsuario = (
 };
 
 
-/*
-  Faz login verificando e-mail e senha.
-*/
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
 export const fazerLogin = (
   email: string,
   senha: string
 ) => {
-  const usuarios =
-    obterUsuarios();
+  const usuarios = obterUsuarios();
 
-  const emailNormalizado =
-    email
-      .trim()
-      .toLowerCase();
+  const emailNormalizado = email
+    .trim()
+    .toLowerCase();
 
-  const usuario =
-    usuarios.find(
-      (item) =>
-        item.email.toLowerCase() ===
-        emailNormalizado
-    );
+  const usuario = usuarios.find(
+    (item) =>
+      item.email.toLowerCase() ===
+      emailNormalizado
+  );
 
   if (!usuario) {
     return {
@@ -134,17 +133,15 @@ export const fazerLogin = (
     };
   }
 
-  const usuarioLogado:
-    UsuarioLogado = {
-      id: usuario.id,
-      nome: usuario.nome,
-      email: usuario.email
-    };
+  const usuarioLogado: UsuarioLogado = {
+    id: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email
+  };
 
   /*
-    sessionStorage:
-    mantém login enquanto a sessão da aba
-    permanecer aberta.
+    A sessão fica somente enquanto
+    o navegador/aba estiver aberto.
   */
   sessionStorage.setItem(
     SESSAO_KEY,
@@ -158,10 +155,11 @@ export const fazerLogin = (
 };
 
 
-/*
-  Verifica se existe usuário logado.
-*/
-export const estaAutenticado = () => {
+/* =========================================================
+   VERIFICAR LOGIN
+   ========================================================= */
+
+export const estaAutenticado = (): boolean => {
   return Boolean(
     sessionStorage.getItem(
       SESSAO_KEY
@@ -170,9 +168,10 @@ export const estaAutenticado = () => {
 };
 
 
-/*
-  Retorna o usuário da sessão.
-*/
+/* =========================================================
+   PEGAR USUÁRIO LOGADO
+   ========================================================= */
+
 export const obterUsuarioLogado =
   (): UsuarioLogado | null => {
 
@@ -193,11 +192,32 @@ export const obterUsuarioLogado =
   };
 
 
-/*
-  Encerra a sessão.
-*/
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
 export const sair = () => {
+  /*
+    Apaga somente a sessão.
+
+    NÃO apaga:
+    - conta
+    - e-mail
+    - planejamentos
+  */
   sessionStorage.removeItem(
     SESSAO_KEY
+  );
+
+  /*
+    Também limpamos dados temporários
+    de navegação.
+  */
+  sessionStorage.removeItem(
+    'planoEmCriacao'
+  );
+
+  sessionStorage.removeItem(
+    'planoSelecionado'
   );
 };
