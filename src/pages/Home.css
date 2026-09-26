@@ -1,0 +1,776 @@
+/* =========================================================
+   TEMA "LOUSA" — CRIAR PLANO DE AULA
+   ========================================================= */
+
+.conteudo-lousa {
+  --background: #f6f1e4;
+}
+
+.pagina-criar-plano {
+  --verde-lousa-900: #132720;
+  --verde-lousa-800: #193227;
+  --verde-lousa-700: #20402f;
+
+  --papel: #f6f1e4;
+  --papel-escuro: #ece4d0;
+
+  --branco-giz: #f1efe0;
+  --amarelo-giz: #e5c35d;
+
+  --vermelho-caneta: #b04a3a;
+
+  --tinta: #221f19;
+  --tinta-suave: #5a5548;
+
+  --borda: rgba(34, 31, 25, 0.14);
+
+  --fonte-titulo: 'Fraunces', serif;
+  --fonte-texto: 'Work Sans', sans-serif;
+  --fonte-manual: 'Caveat', cursive;
+
+  display: block;
+
+  min-height: 100%;
+
+  background: var(--papel);
+
+  color: var(--tinta);
+
+  font-family: var(--fonte-texto);
+
+  line-height: 1.5;
+
+  -webkit-font-smoothing: antialiased;
+}
+
+.pagina-criar-plano * {
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   ACESSIBILIDADE — MOVIMENTOS
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .pagina-criar-plano * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+
+/* =========================================================
+   CABEÇALHO
+   ========================================================= */
+
+.cabecalho {
+  width: min(1100px, 100%);
+
+  margin: 0 auto;
+
+  display: grid;
+
+  grid-template-columns: 1fr auto 1fr;
+
+  align-items: center;
+
+  padding: 22px 20px 4px;
+}
+
+
+/* espaço invisível à esquerda para manter a logo centralizada */
+
+.cabecalho-espaco {
+  width: 100%;
+}
+
+
+/* =========================================================
+   LOGO / MARCA
+   ========================================================= */
+
+.marca {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 9px;
+
+  font-family: var(--fonte-titulo);
+
+  font-size: 1.2rem;
+
+  font-weight: 600;
+}
+
+.marca-simbolo {
+  width: 24px;
+
+  height: 24px;
+
+  border-radius: 4px;
+
+  background: var(--verde-lousa-700);
+
+  position: relative;
+
+  flex: none;
+}
+
+.marca-simbolo::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 5px;
+
+  border: 1.3px solid var(--amarelo-giz);
+
+  border-radius: 2px;
+}
+
+
+/* =========================================================
+   BOTÃO "MEUS PLANEJAMENTOS"
+   ========================================================= */
+
+.botao-meus-planejamentos {
+  justify-self: end;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-height: 38px;
+
+  padding: 8px 12px;
+
+  border: 1px solid transparent;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: var(--verde-lousa-700);
+
+  font-family: var(--fonte-texto);
+
+  font-size: 0.82rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.botao-meus-planejamentos:hover {
+  background: rgba(32, 64, 47, 0.07);
+
+  border-color: rgba(32, 64, 47, 0.08);
+}
+
+.botao-meus-planejamentos:active {
+  transform: translateY(1px);
+}
+
+.botao-meus-planejamentos:focus-visible {
+  outline: 2px solid var(--amarelo-giz);
+
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   LAYOUT GERAL
+   ========================================================= */
+
+.layout-principal {
+  max-width: 980px;
+
+  margin: 0 auto;
+
+  padding: 20px 20px 64px;
+
+  display: grid;
+
+  grid-template-columns: 1fr 300px;
+
+  gap: 40px;
+
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .layout-principal {
+    grid-template-columns: 1fr;
+
+    max-width: 560px;
+  }
+}
+
+
+/* =========================================================
+   FORMULÁRIO
+   ========================================================= */
+
+.secao-formulario {
+  animation: subir 0.5s ease-out both;
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+.formulario-cabecalho {
+  margin-bottom: 26px;
+}
+
+.formulario-titulo {
+  font-family: var(--fonte-titulo);
+
+  font-weight: 500;
+
+  font-size: clamp(1.5rem, 4.5vw, 1.9rem);
+
+  line-height: 1.25;
+
+  margin: 0 0 8px;
+}
+
+.destaque {
+  position: relative;
+
+  display: inline-block;
+}
+
+
+/* =========================================================
+   SUBLINHADO DE GIZ
+   ========================================================= */
+
+.sublinhado-giz {
+  position: absolute;
+
+  left: -2%;
+
+  right: -2%;
+
+  bottom: -0.1em;
+
+  width: 104%;
+
+  height: 0.5em;
+
+  overflow: visible;
+}
+
+.sublinhado-giz path {
+  fill: none;
+
+  stroke: var(--amarelo-giz);
+
+  stroke-width: 6;
+
+  stroke-linecap: round;
+
+  stroke-dasharray: 260;
+
+  stroke-dashoffset: 260;
+
+  animation: desenhar 1s 0.35s ease-out forwards;
+}
+
+@keyframes desenhar {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.formulario-descricao {
+  color: var(--tinta-suave);
+
+  font-size: 0.95rem;
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   CAMPOS
+   ========================================================= */
+
+.campo-grupo {
+  margin-bottom: 22px;
+}
+
+.campo-linha {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 16px;
+}
+
+.campo-rotulo {
+  display: block;
+
+  font-size: 0.85rem;
+
+  font-weight: 600;
+
+  color: var(--tinta-suave);
+
+  margin-bottom: 8px;
+}
+
+.campo-select,
+.campo-texto,
+.campo-textarea {
+  width: 100%;
+
+  background: #ffffff;
+
+  border: 1.5px solid var(--borda);
+
+  border-radius: 8px;
+
+  padding: 12px 14px;
+
+  font-family: var(--fonte-texto);
+
+  font-size: 0.96rem;
+
+  color: var(--tinta);
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.campo-select:focus,
+.campo-texto:focus,
+.campo-textarea:focus {
+  outline: none;
+
+  border-color: var(--verde-lousa-700);
+
+  box-shadow: 0 0 0 3px rgba(32, 64, 47, 0.06);
+}
+
+.campo-textarea {
+  resize: vertical;
+
+  min-height: 80px;
+}
+
+
+/* =========================================================
+   SELETOR DE MATÉRIA
+   ========================================================= */
+
+.grade-materias {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 10px;
+}
+
+.materia-cartao {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #ffffff;
+
+  border: 1.5px solid var(--borda);
+
+  border-radius: 10px;
+
+  padding: 14px 8px;
+
+  min-height: 52px;
+
+  font-family: var(--fonte-texto);
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.materia-cartao:hover {
+  transform: translateY(-1px);
+}
+
+.materia-cartao:focus-visible {
+  outline: 2px solid var(--amarelo-giz);
+
+  outline-offset: 2px;
+}
+
+.materia-cartao.selecionada {
+  border-color: var(--amarelo-giz);
+
+  background: #fdf8ea;
+
+  box-shadow: 0 0 0 1.5px var(--amarelo-giz) inset;
+}
+
+.materia-nome {
+  font-size: 0.85rem;
+
+  font-weight: 600;
+
+  text-align: center;
+
+  color: var(--tinta);
+}
+
+
+/* =========================================================
+   BOTÃO GERAR PLANO
+   ========================================================= */
+
+.botao-gerar {
+  display: block;
+
+  width: 100%;
+
+  background: var(--verde-lousa-700);
+
+  color: var(--branco-giz);
+
+  border: none;
+
+  border-radius: 9px;
+
+  padding: 16px 20px;
+
+  font-family: var(--fonte-texto);
+
+  font-weight: 700;
+
+  font-size: 1rem;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease,
+    opacity 0.15s ease;
+}
+
+.botao-gerar:not(:disabled):hover {
+  background: var(--verde-lousa-800);
+}
+
+.botao-gerar:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.botao-gerar:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+.botao-gerar:focus-visible {
+  outline: 2px solid var(--amarelo-giz);
+
+  outline-offset: 2px;
+}
+
+.dica-preenchimento {
+  margin: 10px 2px 0;
+
+  font-size: 0.82rem;
+
+  color: var(--tinta-suave);
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   RASCUNHO AO VIVO
+   ========================================================= */
+
+.pre-visualizacao {
+  position: sticky;
+
+  top: 20px;
+
+  animation: subir 0.5s 0.1s ease-out both;
+}
+
+.rascunho-cartao {
+  position: relative;
+
+  background: #ffffff;
+
+  border-radius: 10px;
+
+  padding: 26px 20px 22px;
+
+  box-shadow: 0 18px 34px rgba(34, 31, 25, 0.14);
+
+  transform: rotate(1.5deg);
+}
+
+
+/* fita */
+
+.rascunho-fita {
+  position: absolute;
+
+  top: -12px;
+
+  left: 50%;
+
+  transform:
+    translateX(-50%)
+    rotate(-2deg);
+
+  width: 74px;
+
+  height: 22px;
+
+  background: rgba(229, 195, 93, 0.55);
+
+  border: 1px solid rgba(229, 195, 93, 0.7);
+}
+
+
+/* etiqueta */
+
+.rascunho-etiqueta {
+  display: block;
+
+  font-family: var(--fonte-manual);
+
+  font-size: 1.15rem;
+
+  color: var(--vermelho-caneta);
+
+  transform: rotate(-1.5deg);
+
+  margin-bottom: 14px;
+}
+
+
+/* matéria */
+
+.rascunho-linha {
+  padding-bottom: 14px;
+
+  border-bottom: 1px dashed var(--borda);
+
+  margin-bottom: 14px;
+}
+
+.rascunho-materia {
+  font-family: var(--fonte-titulo);
+
+  font-weight: 600;
+
+  font-size: 1.05rem;
+
+  color: var(--tinta);
+}
+
+
+/* tags */
+
+.rascunho-tags {
+  display: flex;
+
+  gap: 8px;
+
+  margin-bottom: 14px;
+
+  flex-wrap: wrap;
+}
+
+.rascunho-tag {
+  font-size: 0.78rem;
+
+  font-weight: 600;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  border: 1px dashed var(--borda);
+
+  color: var(--tinta-suave);
+
+  text-transform: capitalize;
+}
+
+.rascunho-tag.preenchida {
+  border-style: solid;
+
+  border-color: var(--verde-lousa-700);
+
+  background: rgba(32, 64, 47, 0.06);
+
+  color: var(--verde-lousa-700);
+}
+
+
+/* tema */
+
+.rascunho-tema {
+  margin: 0;
+
+  font-size: 0.92rem;
+
+  color: var(--tinta-suave);
+
+  font-style: italic;
+}
+
+.rascunho-tema.preenchida {
+  color: var(--tinta);
+
+  font-style: normal;
+
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 860px) {
+
+  .pre-visualizacao {
+    position: static;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .cabecalho {
+    grid-template-columns: auto 1fr;
+
+    gap: 12px;
+
+    padding: 18px 16px 5px;
+  }
+
+  /*
+    No desktop existe um espaço invisível para
+    deixar a logo perfeitamente centralizada.
+
+    No celular ele não é necessário.
+  */
+  .cabecalho-espaco {
+    display: none;
+  }
+
+  .marca {
+    justify-self: start;
+
+    justify-content: flex-start;
+  }
+
+  .botao-meus-planejamentos {
+    justify-self: end;
+
+    font-size: 0.76rem;
+
+    padding: 7px 9px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE PEQUENO
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .campo-linha {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+  }
+
+  .grade-materias {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .layout-principal {
+    padding-left: 16px;
+
+    padding-right: 16px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE MUITO PEQUENO
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  .cabecalho {
+    padding-left: 12px;
+
+    padding-right: 12px;
+  }
+
+  .botao-meus-planejamentos {
+    font-size: 0.7rem;
+
+    padding: 7px 6px;
+  }
+
+  .marca {
+    font-size: 1.1rem;
+  }
+
+  .marca-simbolo {
+    width: 22px;
+
+    height: 22px;
+  }
+
+}
