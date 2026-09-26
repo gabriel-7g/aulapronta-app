@@ -15,7 +15,12 @@ import {
   IonReactRouter
 } from '@ionic/react-router';
 
+
 /* PÁGINAS */
+
+import Login from './pages/Login';
+
+import CriarConta from './pages/CriarConta';
 
 import Home from './pages/Home';
 
@@ -23,7 +28,15 @@ import PlanoGerado from './pages/PlanoGerado';
 
 import Planejamentos from './pages/Planejamentos';
 
-/* IONIC CSS */
+
+/* AUTENTICAÇÃO */
+
+import {
+  estaAutenticado
+} from './utils/auth';
+
+
+/* IONIC */
 
 import '@ionic/react/css/core.css';
 
@@ -45,15 +58,50 @@ import '@ionic/react/css/flex-utils.css';
 
 import '@ionic/react/css/display.css';
 
+
 /* DARK MODE */
 
 import '@ionic/react/css/palettes/dark.system.css';
+
 
 /* THEME */
 
 import './theme/variables.css';
 
+
 setupIonicReact();
+
+
+/*
+  Componente usado para impedir acesso
+  às páginas privadas sem login.
+*/
+
+interface RotaProtegidaProps {
+  children: React.ReactNode;
+}
+
+const RotaProtegida:
+React.FC<RotaProtegidaProps> = ({
+  children
+}) => {
+
+  if (!estaAutenticado()) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  return (
+    <>
+      {children}
+    </>
+  );
+};
+
 
 const App: React.FC = () => (
   <IonApp>
@@ -62,44 +110,117 @@ const App: React.FC = () => (
 
       <IonRouterOutlet>
 
-        {/* HOME */}
+
+        {/* =========================
+            LOGIN
+        ========================= */}
 
         <Route
-          path="/home"
+          path="/login"
           element={
-            <Home />
+            <Login />
           }
         />
 
-        {/* PLANO GERADO */}
+
+        {/* =========================
+            CRIAR CONTA
+        ========================= */}
 
         <Route
-          path="/plano-gerado"
+          path="/criar-conta"
           element={
-            <PlanoGerado />
+            <CriarConta />
           }
         />
 
-        {/* PLANEJAMENTOS SALVOS */}
+
+        {/* =========================
+            MEUS PLANEJAMENTOS
+        ========================= */}
 
         <Route
           path="/planejamentos"
           element={
-            <Planejamentos />
+            <RotaProtegida>
+
+              <Planejamentos />
+
+            </RotaProtegida>
           }
         />
 
-        {/* REDIRECIONAMENTO */}
+
+        {/* =========================
+            CRIAR PLANO
+        ========================= */}
+
+        <Route
+          path="/home"
+          element={
+            <RotaProtegida>
+
+              <Home />
+
+            </RotaProtegida>
+          }
+        />
+
+
+        {/* =========================
+            PLANO GERADO
+        ========================= */}
+
+        <Route
+          path="/plano-gerado"
+          element={
+            <RotaProtegida>
+
+              <PlanoGerado />
+
+            </RotaProtegida>
+          }
+        />
+
+
+        {/* =========================
+            PÁGINA INICIAL
+        ========================= */}
 
         <Route
           path="/"
           element={
+            estaAutenticado()
+              ? (
+                <Navigate
+                  to="/planejamentos"
+                  replace
+                />
+              )
+              : (
+                <Navigate
+                  to="/login"
+                  replace
+                />
+              )
+          }
+        />
+
+
+        {/* =========================
+            URL INVÁLIDA
+        ========================= */}
+
+        <Route
+          path="*"
+          element={
             <Navigate
-              to="/planejamentos"
+              to="/"
               replace
             />
           }
         />
+
 
       </IonRouterOutlet>
 
