@@ -1,0 +1,343 @@
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.conteudo-404 {
+  --background: #f6f1e4;
+}
+
+
+.pagina-404 {
+  min-height: 100vh;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 30px 20px;
+
+  background:
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(229, 195, 93, 0.12),
+      transparent 28%
+    ),
+    #f6f1e4;
+
+  color: #221f19;
+
+  font-family:
+    'Work Sans',
+    sans-serif;
+}
+
+
+/* =========================================================
+   MARCA
+   ========================================================= */
+
+.marca-404 {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  margin-bottom: 28px;
+
+  color: #221f19;
+
+  font-family:
+    'Fraunces',
+    serif;
+
+  font-size: 1.25rem;
+
+  font-weight: 600;
+}
+
+
+.marca-404-simbolo {
+  position: relative;
+
+  width: 28px;
+
+  height: 28px;
+
+  border-radius: 4px;
+
+  background: #20402f;
+}
+
+
+.marca-404-simbolo::after {
+  content: '';
+
+  position: absolute;
+
+  inset: 5px;
+
+  border:
+    1.5px solid
+    #e5c35d;
+
+  border-radius: 2px;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.card-404 {
+  position: relative;
+
+  width:
+    min(
+      560px,
+      100%
+    );
+
+  padding:
+    45px
+    38px;
+
+  border:
+    1px solid
+    rgba(34, 31, 25, 0.09);
+
+  border-radius: 14px;
+
+  background: #fffdf7;
+
+  box-shadow:
+    0 20px 60px
+    rgba(34, 31, 25, 0.08);
+
+  text-align: center;
+}
+
+
+.fita-404 {
+  position: absolute;
+
+  top: -10px;
+
+  left: 50%;
+
+  width: 76px;
+
+  height: 22px;
+
+  transform:
+    translateX(-50%)
+    rotate(-2deg);
+
+  background:
+    rgba(229, 195, 93, 0.65);
+}
+
+
+/* =========================================================
+   404
+   ========================================================= */
+
+.numero-404 {
+  margin-bottom: 4px;
+
+  color:
+    rgba(32, 64, 47, 0.12);
+
+  font-family:
+    'Fraunces',
+    serif;
+
+  font-size:
+    clamp(
+      5rem,
+      15vw,
+      8rem
+    );
+
+  font-weight: 700;
+
+  line-height: 0.95;
+}
+
+
+.etiqueta-404 {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #b04a3a;
+
+  font-family:
+    'Caveat',
+    cursive;
+
+  font-size: 1.2rem;
+}
+
+
+.card-404 h1 {
+  max-width: 430px;
+
+  margin:
+    0 auto
+    12px;
+
+  color: #221f19;
+
+  font-family:
+    'Fraunces',
+    serif;
+
+  font-size:
+    clamp(
+      1.7rem,
+      5vw,
+      2.4rem
+    );
+
+  font-weight: 600;
+
+  line-height: 1.15;
+}
+
+
+.card-404 p {
+  max-width: 420px;
+
+  margin:
+    0 auto
+    26px;
+
+  color: #625d50;
+
+  font-size: 0.9rem;
+
+  line-height: 1.65;
+}
+
+
+/* =========================================================
+   BOTÃO
+   ========================================================= */
+
+.botao-voltar-404 {
+  min-height: 46px;
+
+  padding:
+    0 22px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #20402f;
+
+  color: #f4f0df;
+
+  font-family:
+    'Work Sans',
+    sans-serif;
+
+  font-size: 0.82rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
+}
+
+
+.botao-voltar-404:hover {
+  background: #193227;
+}
+
+
+.botao-voltar-404:active {
+  transform:
+    translateY(1px);
+}
+
+
+.botao-voltar-404:focus-visible {
+  outline:
+    3px solid
+    rgba(229, 195, 93, 0.75);
+
+  outline-offset: 3px;
+}
+
+
+/* =========================================================
+   RODAPÉ
+   ========================================================= */
+
+.rodape-404 {
+  margin:
+    22px 0 0;
+
+  color:
+    rgba(34, 31, 25, 0.55);
+
+  font-size: 0.75rem;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .pagina-404 {
+    padding:
+      22px 14px;
+  }
+
+
+  .card-404 {
+    padding:
+      38px 20px
+      32px;
+  }
+
+
+  .numero-404 {
+    font-size: 5rem;
+  }
+
+
+  .botao-voltar-404 {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .botao-voltar-404 {
+    transition: none;
+  }
+
+}

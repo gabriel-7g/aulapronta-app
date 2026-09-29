@@ -1,0 +1,198 @@
+/* =========================================================
+   ACESSIBILIDADE GLOBAL — LOUSA
+   ========================================================= */
+
+
+/* =========================================================
+   FOCO VISÍVEL
+   ========================================================= */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #d6a900;
+  outline-offset: 3px;
+}
+
+
+/*
+  Não removemos o foco do navegador
+  quando ele é necessário para navegação
+  por teclado.
+*/
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color:
+    rgba(32, 64, 47, 0.15);
+}
+
+
+/* =========================================================
+   TAMANHO MÍNIMO DE ÁREA CLICÁVEL
+   ========================================================= */
+
+button,
+select {
+  min-height: 44px;
+}
+
+
+/* =========================================================
+   CAMPOS DESABILITADOS
+   ========================================================= */
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.65;
+}
+
+
+/* =========================================================
+   TEXTO SOMENTE PARA LEITOR DE TELA
+   ========================================================= */
+
+.sr-only {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  padding: 0;
+  margin: -1px;
+
+  overflow: hidden;
+
+  clip: rect(0, 0, 0, 0);
+
+  white-space: nowrap;
+
+  border: 0;
+}
+
+
+/* =========================================================
+   INPUT INVÁLIDO
+   ========================================================= */
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: #a6352a;
+}
+
+
+/* =========================================================
+   ELEMENTOS SELECIONADOS
+   ========================================================= */
+
+button[aria-pressed="true"] {
+  outline:
+    2px solid
+    rgba(32, 64, 47, 0.55);
+
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   CONTRASTE DE PLACEHOLDER
+   ========================================================= */
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b675c;
+
+  opacity: 1;
+}
+
+
+/* =========================================================
+   LINKS
+   ========================================================= */
+
+a {
+  text-decoration-thickness: 0.08em;
+
+  text-underline-offset: 0.16em;
+}
+
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+  }
+
+}
+
+
+/* =========================================================
+   ALTO CONTRASTE DO SISTEMA
+   ========================================================= */
+
+@media (
+  forced-colors:
+  active
+) {
+
+  button,
+  input,
+  select,
+  textarea {
+    border:
+      1px solid
+      ButtonText;
+  }
+
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline:
+      3px solid
+      Highlight;
+  }
+
+
+  .planejamento-card,
+  .auth-card,
+  .folha-plano,
+  .admin-card,
+  .gerando-cartao,
+  .card-404 {
+    border:
+      1px solid
+      CanvasText;
+  }
+
+}

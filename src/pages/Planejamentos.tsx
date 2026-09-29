@@ -1,6 +1,4 @@
 import React, {
-  useEffect,
-  useMemo,
   useState
 } from 'react';
 
@@ -17,14 +15,12 @@ import {
 } from '../utils/auth';
 
 import {
-  duplicarPlanejamentoDoUsuario,
-  excluirPlanejamentoDoUsuario,
-  listarPlanejamentosDoUsuario
-} from '../services/planejamentoService';
-
-import {
   PlanejamentoSalvo
 } from '../types/planejamento';
+
+import {
+  usePlanejamentos
+} from '../hooks/usePlanejamentos';
 
 import ModalConfirmacao
   from '../components/ModalConfirmacao';
@@ -32,42 +28,12 @@ import ModalConfirmacao
 import PlanejamentoCard
   from '../components/PlanejamentoCard';
 
+import FiltrosPlanejamentos
+  from '../components/FiltrosPlanejamentos';
+
 import './Planejamentos.css';
 import './FiltrosPlanejamentos.css';
 
-
-/* =========================================================
-   TIPOS
-   ========================================================= */
-
-type TipoOrdenacao =
-  | 'recentes'
-  | 'antigos'
-  | 'titulo-az'
-  | 'titulo-za';
-
-
-/* =========================================================
-   FUNÇÕES AUXILIARES
-   ========================================================= */
-
-const normalizarTexto = (
-  texto: string
-) => {
-  return texto
-    .normalize('NFD')
-    .replace(
-      /[\u0300-\u036f]/g,
-      ''
-    )
-    .toLowerCase()
-    .trim();
-};
-
-
-/* =========================================================
-   PÁGINA
-   ========================================================= */
 
 const Planejamentos:
 React.FC = () => {
@@ -80,45 +46,42 @@ React.FC = () => {
 
 
   /* =======================================================
-     ESTADOS
+     DADOS E FILTROS
      ======================================================= */
 
-  const [
+  const {
     planejamentos,
-    setPlanejamentos
-  ] =
-    useState<PlanejamentoSalvo[]>([]);
+    planejamentosFiltrados,
 
-
-  const [
     busca,
-    setBusca
-  ] =
-    useState('');
+    setBusca,
 
-
-  const [
     filtroMateria,
-    setFiltroMateria
-  ] =
-    useState('todas');
+    setFiltroMateria,
 
-
-  const [
     filtroTurma,
-    setFiltroTurma
-  ] =
-    useState('todas');
+    setFiltroTurma,
 
-
-  const [
     ordenacao,
-    setOrdenacao
-  ] =
-    useState<TipoOrdenacao>(
-      'recentes'
+    setOrdenacao,
+
+    materiasDisponiveis,
+    turmasDisponiveis,
+
+    filtrosAtivos,
+
+    limparFiltros,
+    duplicarPlanejamento,
+    excluirPlanejamento
+  } =
+    usePlanejamentos(
+      usuario?.id
     );
 
+
+  /* =======================================================
+     ESTADOS DA PÁGINA
+     ======================================================= */
 
   const [
     planejamentoParaExcluir,
@@ -137,282 +100,7 @@ React.FC = () => {
 
 
   /* =======================================================
-     CARREGAR PLANEJAMENTOS
-     ======================================================= */
-
-  const carregarPlanejamentos =
-    () => {
-
-      if (!usuario) {
-        setPlanejamentos([]);
-        return;
-      }
-
-      setPlanejamentos(
-        listarPlanejamentosDoUsuario(
-          usuario.id
-        )
-      );
-
-    };
-
-
-  useEffect(() => {
-
-    if (!usuario?.id) {
-      setPlanejamentos([]);
-      return;
-    }
-
-    setPlanejamentos(
-      listarPlanejamentosDoUsuario(
-        usuario.id
-      )
-    );
-
-  }, [usuario?.id]);
-
-
-  /* =======================================================
-     OPÇÕES DOS FILTROS
-     ======================================================= */
-
-  const materiasDisponiveis =
-    useMemo(() => {
-
-      const materias =
-        planejamentos
-          .map(
-            (plano) =>
-              plano.dados.materia.trim()
-          )
-          .filter(Boolean);
-
-
-      return Array
-        .from(
-          new Set(materias)
-        )
-        .sort(
-          (a, b) =>
-            a.localeCompare(
-              b,
-              'pt-BR'
-            )
-        );
-
-    }, [planejamentos]);
-
-
-  const turmasDisponiveis =
-    useMemo(() => {
-
-      const turmas =
-        planejamentos
-          .map(
-            (plano) =>
-              plano.dados.turma.trim()
-          )
-          .filter(Boolean);
-
-
-      return Array
-        .from(
-          new Set(turmas)
-        )
-        .sort(
-          (a, b) =>
-            a.localeCompare(
-              b,
-              'pt-BR',
-              {
-                numeric: true
-              }
-            )
-        );
-
-    }, [planejamentos]);
-
-
-  /* =======================================================
-     BUSCA, FILTROS E ORDENAÇÃO
-     ======================================================= */
-
-  const planejamentosFiltrados =
-    useMemo(() => {
-
-      let resultado = [
-        ...planejamentos
-      ];
-
-
-      /* BUSCA */
-
-      const termo =
-        normalizarTexto(busca);
-
-
-      if (termo) {
-
-        resultado =
-          resultado.filter(
-            (plano) => {
-
-              const texto =
-                normalizarTexto(
-                  [
-                    plano.conteudo.titulo,
-                    plano.dados.tema,
-                    plano.dados.materia,
-                    plano.dados.turma,
-                    plano.conteudo.objetivo
-                  ].join(' ')
-                );
-
-
-              return texto.includes(
-                termo
-              );
-
-            }
-          );
-
-      }
-
-
-      /* MATÉRIA */
-
-      if (
-        filtroMateria !==
-        'todas'
-      ) {
-
-        resultado =
-          resultado.filter(
-            (plano) =>
-              plano.dados.materia ===
-              filtroMateria
-          );
-
-      }
-
-
-      /* TURMA */
-
-      if (
-        filtroTurma !==
-        'todas'
-      ) {
-
-        resultado =
-          resultado.filter(
-            (plano) =>
-              plano.dados.turma ===
-              filtroTurma
-          );
-
-      }
-
-
-      /* ORDENAÇÃO */
-
-      resultado.sort(
-        (a, b) => {
-
-          switch (ordenacao) {
-
-            case 'antigos':
-              return (
-                new Date(
-                  a.atualizadoEm
-                ).getTime() -
-                new Date(
-                  b.atualizadoEm
-                ).getTime()
-              );
-
-
-            case 'titulo-az':
-              return (
-                a.conteudo.titulo
-                  .localeCompare(
-                    b.conteudo.titulo,
-                    'pt-BR'
-                  )
-              );
-
-
-            case 'titulo-za':
-              return (
-                b.conteudo.titulo
-                  .localeCompare(
-                    a.conteudo.titulo,
-                    'pt-BR'
-                  )
-              );
-
-
-            case 'recentes':
-            default:
-              return (
-                new Date(
-                  b.atualizadoEm
-                ).getTime() -
-                new Date(
-                  a.atualizadoEm
-                ).getTime()
-              );
-
-          }
-
-        }
-      );
-
-
-      return resultado;
-
-    }, [
-      planejamentos,
-      busca,
-      filtroMateria,
-      filtroTurma,
-      ordenacao
-    ]);
-
-
-  /* =======================================================
-     FILTROS
-     ======================================================= */
-
-  const filtrosAtivos =
-    busca.trim() !== '' ||
-    filtroMateria !== 'todas' ||
-    filtroTurma !== 'todas' ||
-    ordenacao !== 'recentes';
-
-
-  const limparFiltros =
-    () => {
-
-      setBusca('');
-
-      setFiltroMateria(
-        'todas'
-      );
-
-      setFiltroTurma(
-        'todas'
-      );
-
-      setOrdenacao(
-        'recentes'
-      );
-
-    };
-
-
-  /* =======================================================
-     ABRIR
+     ABRIR PLANO
      ======================================================= */
 
   const abrirPlanejamento = (
@@ -421,7 +109,8 @@ React.FC = () => {
 
     if (
       !usuario ||
-      plano.usuarioId !== usuario.id
+      plano.usuarioId !==
+        usuario.id
     ) {
       return;
     }
@@ -445,31 +134,19 @@ React.FC = () => {
      DUPLICAR
      ======================================================= */
 
-  const duplicarPlanejamento = (
+  const duplicar = (
     plano: PlanejamentoSalvo
   ) => {
 
-    if (
-      !usuario ||
-      plano.usuarioId !== usuario.id
-    ) {
-      return;
-    }
-
-
     const copia =
-      duplicarPlanejamentoDoUsuario(
-        plano.id,
-        usuario.id
+      duplicarPlanejamento(
+        plano.id
       );
 
 
     if (!copia) {
       return;
     }
-
-
-    carregarPlanejamentos();
 
 
     setMensagem(
@@ -480,179 +157,108 @@ React.FC = () => {
 
 
   /* =======================================================
-     EXCLUIR
+     EXCLUSÃO
      ======================================================= */
 
   const solicitarExclusao = (
     plano: PlanejamentoSalvo
   ) => {
+    setPlanejamentoParaExcluir(
+      plano
+    );
+  };
 
-    if (
-      !usuario ||
-      plano.usuarioId !== usuario.id
-    ) {
+
+  const cancelarExclusao = () => {
+    setPlanejamentoParaExcluir(
+      null
+    );
+  };
+
+
+  const confirmarExclusao = () => {
+
+    if (!planejamentoParaExcluir) {
       return;
     }
 
 
+    const excluido =
+      excluirPlanejamento(
+        planejamentoParaExcluir.id
+      );
+
+
     setPlanejamentoParaExcluir(
-      plano
+      null
     );
 
+
+    if (excluido) {
+      setMensagem(
+        'Planejamento excluído com sucesso.'
+      );
+    }
+
   };
-
-
-  const cancelarExclusao =
-    () => {
-
-      setPlanejamentoParaExcluir(
-        null
-      );
-
-    };
-
-
-  const confirmarExclusao =
-    () => {
-
-      if (
-        !usuario ||
-        !planejamentoParaExcluir
-      ) {
-        return;
-      }
-
-
-      if (
-        planejamentoParaExcluir
-          .usuarioId !==
-        usuario.id
-      ) {
-
-        setPlanejamentoParaExcluir(
-          null
-        );
-
-        return;
-
-      }
-
-
-      const excluido =
-        excluirPlanejamentoDoUsuario(
-          planejamentoParaExcluir.id,
-          usuario.id
-        );
-
-
-      setPlanejamentoParaExcluir(
-        null
-      );
-
-
-      if (excluido) {
-
-        carregarPlanejamentos();
-
-        setMensagem(
-          'Planejamento excluído com sucesso.'
-        );
-
-      }
-
-    };
 
 
   /* =======================================================
      NOVO PLANO
      ======================================================= */
 
-  const criarNovoPlano =
-    () => {
+  const criarNovoPlano = () => {
 
-      sessionStorage.removeItem(
-        'planoSelecionado'
-      );
+    sessionStorage.removeItem(
+      'planoSelecionado'
+    );
 
-      sessionStorage.removeItem(
-        'planoEmCriacao'
-      );
+    sessionStorage.removeItem(
+      'planoEmCriacao'
+    );
 
 
-      router.push(
-        '/home',
-        'forward'
-      );
+    router.push(
+      '/home',
+      'forward'
+    );
 
-    };
+  };
 
 
   /* =======================================================
      LOGOUT
      ======================================================= */
 
-  const fazerLogout =
-    () => {
+  const fazerLogout = () => {
 
-      sair();
+    sair();
 
-      router.push(
-        '/login',
-        'root'
-      );
-
-    };
-
-
-  /* =======================================================
-     ORDENAÇÃO
-     ======================================================= */
-
-  const alterarOrdenacao = (
-    evento:
-      React.ChangeEvent<HTMLSelectElement>
-  ) => {
-
-    setOrdenacao(
-      evento.target.value as TipoOrdenacao
+    router.push(
+      '/login',
+      'root'
     );
+
   };
+
+
   /* =======================================================
      CONTADOR
      ======================================================= */
 
+  const total =
+    planejamentos.length;
+
+  const totalExibido =
+    planejamentosFiltrados.length;
+
+
   const textoContador =
-    () => {
-
-      if (
-        planejamentosFiltrados.length !==
-        planejamentos.length
-      ) {
-
-        return (
-          `${planejamentosFiltrados.length} de ${planejamentos.length} planejamentos`
-        );
-
-      }
-
-
-      if (
-        planejamentos.length ===
-        1
-      ) {
-
-        return (
-          '1 planejamento salvo'
-        );
-
-      }
-
-
-      return (
-        `${planejamentos.length} planejamentos salvos`
-      );
-
-    };
+    totalExibido !== total
+      ? `${totalExibido} de ${total} planejamentos`
+      : total === 1
+        ? '1 planejamento salvo'
+        : `${total} planejamentos salvos`;
 
 
   /* =======================================================
@@ -660,73 +266,41 @@ React.FC = () => {
      ======================================================= */
 
   return (
-
     <IonPage>
 
       <IonContent
         fullscreen
-        className=
-          "conteudo-planejamentos"
+        className="conteudo-planejamentos"
       >
 
-        <div
-          className=
-            "pagina-planejamentos"
-        >
+        <div className="pagina-planejamentos">
 
 
           {/* =============================================
               TOPO
              ============================================= */}
 
-          <header
-            className=
-              "planejamentos-topo"
-          >
+          <header className="planejamentos-topo">
 
-            <div
-              className=
-                "planejamentos-usuario"
-            >
+            <div className="planejamentos-usuario">
 
-              <div
-                className=
-                  "usuario-avatar"
-              >
-                {
-                  usuario?.nome
-                    ? usuario.nome
-                        .charAt(0)
-                        .toUpperCase()
-                    : 'U'
-                }
+              <div className="usuario-avatar">
+                {usuario?.nome
+                  ? usuario.nome
+                      .charAt(0)
+                      .toUpperCase()
+                  : 'U'}
               </div>
 
 
-              <div
-                className=
-                  "usuario-informacoes"
-              >
+              <div className="usuario-informacoes">
 
-                <span
-                  className=
-                    "usuario-nome"
-                >
-                  {
-                    usuario?.nome ||
-                    'Usuário'
-                  }
+                <span className="usuario-nome">
+                  {usuario?.nome || 'Usuário'}
                 </span>
 
-
-                <span
-                  className=
-                    "usuario-email"
-                >
-                  {
-                    usuario?.email ||
-                    ''
-                  }
+                <span className="usuario-email">
+                  {usuario?.email || ''}
                 </span>
 
               </div>
@@ -734,33 +308,21 @@ React.FC = () => {
             </div>
 
 
-            <div
-              className=
-                "marca-planejamentos"
-            >
+            <div className="marca-planejamentos">
 
-              <span
-                className=
-                  "marca-simbolo-planejamentos"
-              />
+              <span className="marca-simbolo-planejamentos" />
 
               Lousa
 
             </div>
 
 
-            <div
-              className=
-                "acoes-topo-planejamentos"
-            >
+            <div className="acoes-topo-planejamentos">
 
               <button
                 type="button"
-                className=
-                  "botao-novo-topo"
-                onClick={
-                  criarNovoPlano
-                }
+                className="botao-novo-topo"
+                onClick={criarNovoPlano}
               >
                 + Novo plano
               </button>
@@ -768,11 +330,8 @@ React.FC = () => {
 
               <button
                 type="button"
-                className=
-                  "botao-sair"
-                onClick={
-                  fazerLogout
-                }
+                className="botao-sair"
+                onClick={fazerLogout}
               >
                 Sair
               </button>
@@ -786,508 +345,181 @@ React.FC = () => {
               CONTEÚDO
              ============================================= */}
 
-          <main
-            className=
-              "planejamentos-container"
-          >
+          <main className="planejamentos-container">
 
-            <section
-              className=
-                "planejamentos-cabecalho"
-            >
+            <section className="planejamentos-cabecalho">
 
-              <span
-                className=
-                  "planejamentos-etiqueta"
-              >
+              <span className="planejamentos-etiqueta">
                 sua estante
               </span>
-
 
               <h1>
                 Meus planejamentos
               </h1>
 
-
               <p>
-                Seus planos de aula
-                salvos ficam organizados aqui.
+                Seus planos de aula salvos ficam organizados aqui.
               </p>
 
             </section>
 
 
             {/* ===========================================
-                ESTADO VAZIO
+                SEM PLANOS
                =========================================== */}
 
-            {
-              planejamentos.length === 0
+            {total === 0 ? (
 
-                ? (
+              <section className="estado-vazio">
 
-                  <section
-                    className=
-                      "estado-vazio"
-                  >
+                <div
+                  className="estado-vazio-icone"
+                  aria-hidden="true"
+                >
+                  ✎
+                </div>
+
+
+                <h2>
+                  Você ainda não possui planejamentos
+                </h2>
+
+
+                <p>
+                  Crie seu primeiro plano de aula e ele aparecerá aqui.
+                </p>
+
+
+                <button
+                  type="button"
+                  className="botao-criar-primeiro"
+                  onClick={criarNovoPlano}
+                >
+                  Criar planejamento
+                </button>
+
+              </section>
+
+            ) : (
+
+              <>
+
+                {/* FILTROS */}
+
+                <FiltrosPlanejamentos
+                  busca={busca}
+                  materia={filtroMateria}
+                  turma={filtroTurma}
+                  ordenacao={ordenacao}
+
+                  materias={materiasDisponiveis}
+                  turmas={turmasDisponiveis}
+
+                  filtrosAtivos={filtrosAtivos}
+
+                  onBusca={setBusca}
+                  onMateria={setFiltroMateria}
+                  onTurma={setFiltroTurma}
+                  onOrdenacao={setOrdenacao}
+
+                  onLimpar={limparFiltros}
+                />
+
+
+                {/* CONTADOR */}
+
+                <div
+                  className="lista-cabecalho lista-cabecalho-filtros"
+                  aria-live="polite"
+                >
+
+                  <span>
+                    {textoContador}
+                  </span>
+
+
+                  {filtrosAtivos && (
+                    <span className="indicador-filtro-ativo">
+                      Filtros ativos
+                    </span>
+                  )}
+
+                </div>
+
+
+                {/* SEM RESULTADOS */}
+
+                {totalExibido === 0 ? (
+
+                  <section className="estado-sem-resultados">
 
                     <div
-                      className=
-                        "estado-vazio-icone"
+                      className="estado-sem-resultados-icone"
                       aria-hidden="true"
                     >
-                      ✎
+                      ⌕
                     </div>
 
 
                     <h2>
-                      Você ainda não
-                      possui planejamentos
+                      Nenhum planejamento encontrado
                     </h2>
 
 
                     <p>
-                      Crie seu primeiro plano
-                      de aula e ele aparecerá aqui.
+                      Não encontramos planejamentos com os filtros selecionados.
                     </p>
 
 
                     <button
                       type="button"
-                      className=
-                        "botao-criar-primeiro"
-                      onClick={
-                        criarNovoPlano
-                      }
+                      className="botao-limpar-resultados"
+                      onClick={limparFiltros}
                     >
-                      Criar planejamento
+                      Limpar filtros
                     </button>
 
                   </section>
 
-                )
+                ) : (
 
-                : (
+                  /* CARDS */
 
-                  <>
+                  <section className="grade-planejamentos">
 
-                    {/* =====================================
-                        BUSCA
-                       ===================================== */}
+                    {planejamentosFiltrados.map(
+                      (plano) => (
 
-                    <section
-                      className=
-                        "planejamentos-ferramentas"
-                      aria-label=
-                        "Busca, filtros e ordenação dos planejamentos"
-                    >
-
-                      <div
-                        className=
-                          "campo-filtro campo-busca"
-                      >
-
-                        <label
-                          htmlFor=
-                            "busca-planejamentos"
-                        >
-                          Buscar
-                        </label>
-
-
-                        <div
-                          className=
-                            "busca-input-wrapper"
-                        >
-
-                          <span
-                            className=
-                              "icone-busca"
-                            aria-hidden="true"
-                          >
-                            ⌕
-                          </span>
-
-
-                          <input
-                            id=
-                              "busca-planejamentos"
-                            type="search"
-                            placeholder=
-                              "Buscar por título, tema, matéria..."
-                            value={
-                              busca
-                            }
-                            onChange={
-                              (evento) =>
-                                setBusca(
-                                  evento.target.value
-                                )
-                            }
-                          />
-
-
-                          {
-                            busca && (
-
-                              <button
-                                type="button"
-                                className=
-                                  "botao-limpar-busca"
-                                aria-label=
-                                  "Limpar busca"
-                                title=
-                                  "Limpar busca"
-                                onClick={() =>
-                                  setBusca('')
-                                }
-                              >
-                                ×
-                              </button>
-
-                            )
+                        <PlanejamentoCard
+                          key={plano.id}
+                          plano={plano}
+                          onAbrir={
+                            abrirPlanejamento
                           }
+                          onDuplicar={
+                            duplicar
+                          }
+                          onExcluir={
+                            solicitarExclusao
+                          }
+                        />
 
-                        </div>
+                      )
+                    )}
 
-                      </div>
+                  </section>
 
+                )}
 
-                      {/* ===================================
-                          FILTROS
-                         =================================== */}
+              </>
 
-                      <div
-                        className=
-                          "filtros-planejamentos-grid"
-                      >
-
-                        <div
-                          className=
-                            "campo-filtro"
-                        >
-
-                          <label
-                            htmlFor=
-                              "filtro-materia"
-                          >
-                            Matéria
-                          </label>
-
-
-                          <select
-                            id=
-                              "filtro-materia"
-                            value={
-                              filtroMateria
-                            }
-                            onChange={
-                              (evento) =>
-                                setFiltroMateria(
-                                  evento.target.value
-                                )
-                            }
-                          >
-
-                            <option
-                              value="todas"
-                            >
-                              Todas as matérias
-                            </option>
-
-
-                            {
-                              materiasDisponiveis
-                                .map(
-                                  (materia) => (
-
-                                    <option
-                                      key={materia}
-                                      value={materia}
-                                    >
-                                      {materia}
-                                    </option>
-
-                                  )
-                                )
-                            }
-
-                          </select>
-
-                        </div>
-
-
-                        <div
-                          className=
-                            "campo-filtro"
-                        >
-
-                          <label
-                            htmlFor=
-                              "filtro-turma"
-                          >
-                            Turma
-                          </label>
-
-
-                          <select
-                            id=
-                              "filtro-turma"
-                            value={
-                              filtroTurma
-                            }
-                            onChange={
-                              (evento) =>
-                                setFiltroTurma(
-                                  evento.target.value
-                                )
-                            }
-                          >
-
-                            <option
-                              value="todas"
-                            >
-                              Todas as turmas
-                            </option>
-
-
-                            {
-                              turmasDisponiveis
-                                .map(
-                                  (turma) => (
-
-                                    <option
-                                      key={turma}
-                                      value={turma}
-                                    >
-                                      {turma}
-                                    </option>
-
-                                  )
-                                )
-                            }
-
-                          </select>
-
-                        </div>
-
-
-                        <div
-                          className=
-                            "campo-filtro"
-                        >
-
-                          <label
-                            htmlFor=
-                              "ordenacao-planejamentos"
-                          >
-                            Ordenar por
-                          </label>
-
-
-                          <select
-                            id=
-                              "ordenacao-planejamentos"
-                            value={
-                              ordenacao
-                            }
-                            onChange={
-                              alterarOrdenacao
-                            }
-                          >
-
-                            <option
-                              value="recentes"
-                            >
-                              Mais recentes
-                            </option>
-
-                            <option
-                              value="antigos"
-                            >
-                              Mais antigos
-                            </option>
-
-                            <option
-                              value="titulo-az"
-                            >
-                              Título A–Z
-                            </option>
-
-                            <option
-                              value="titulo-za"
-                            >
-                              Título Z–A
-                            </option>
-
-                          </select>
-
-                        </div>
-
-                      </div>
-
-
-                      {
-                        filtrosAtivos && (
-
-                          <div
-                            className=
-                              "area-limpar-filtros"
-                          >
-
-                            <button
-                              type="button"
-                              className=
-                                "botao-limpar-filtros"
-                              onClick={
-                                limparFiltros
-                              }
-                            >
-                              × Limpar busca e filtros
-                            </button>
-
-                          </div>
-
-                        )
-                      }
-
-                    </section>
-
-
-                    {/* =====================================
-                        CONTADOR
-                       ===================================== */}
-
-                    <div
-                      className=
-                        "lista-cabecalho lista-cabecalho-filtros"
-                      aria-live="polite"
-                    >
-
-                      <span>
-                        {
-                          textoContador()
-                        }
-                      </span>
-
-
-                      {
-                        filtrosAtivos && (
-
-                          <span
-                            className=
-                              "indicador-filtro-ativo"
-                          >
-                            Filtros ativos
-                          </span>
-
-                        )
-                      }
-
-                    </div>
-
-
-                    {/* =====================================
-                        RESULTADOS
-                       ===================================== */}
-
-                    {
-                      planejamentosFiltrados
-                        .length === 0
-
-                        ? (
-
-                          <section
-                            className=
-                              "estado-sem-resultados"
-                          >
-
-                            <div
-                              className=
-                                "estado-sem-resultados-icone"
-                              aria-hidden="true"
-                            >
-                              ⌕
-                            </div>
-
-
-                            <h2>
-                              Nenhum planejamento
-                              encontrado
-                            </h2>
-
-
-                            <p>
-                              Não encontramos
-                              planejamentos com
-                              os filtros selecionados.
-                            </p>
-
-
-                            <button
-                              type="button"
-                              className=
-                                "botao-limpar-resultados"
-                              onClick={
-                                limparFiltros
-                              }
-                            >
-                              Limpar filtros
-                            </button>
-
-                          </section>
-
-                        )
-
-                        : (
-
-                          <section
-                            className=
-                              "grade-planejamentos"
-                          >
-
-                            {
-                              planejamentosFiltrados
-                                .map(
-                                  (plano) => (
-
-                                    <PlanejamentoCard
-                                      key={
-                                        plano.id
-                                      }
-                                      plano={
-                                        plano
-                                      }
-                                      onAbrir={
-                                        abrirPlanejamento
-                                      }
-                                      onDuplicar={
-                                        duplicarPlanejamento
-                                      }
-                                      onExcluir={
-                                        solicitarExclusao
-                                      }
-                                    />
-
-                                  )
-                                )
-                            }
-
-                          </section>
-
-                        )
-                    }
-
-                  </>
-
-                )
-            }
+            )}
 
           </main>
 
 
           {/* =============================================
-              EXCLUSÃO
+              MODAL
              ============================================= */}
 
           <ModalConfirmacao
@@ -1296,21 +528,25 @@ React.FC = () => {
                 planejamentoParaExcluir
               )
             }
-            titulo=
-              "Excluir planejamento?"
+
+            titulo="Excluir planejamento?"
+
             descricao={
               planejamentoParaExcluir
                 ? `Tem certeza de que deseja excluir "${planejamentoParaExcluir.conteudo.titulo}"? Essa ação não poderá ser desfeita.`
                 : ''
             }
-            textoCancelar=
-              "Cancelar"
-            textoConfirmar=
-              "Excluir planejamento"
+
+            textoCancelar="Cancelar"
+
+            textoConfirmar="Excluir planejamento"
+
             perigo
+
             onCancelar={
               cancelarExclusao
             }
+
             onConfirmar={
               confirmarExclusao
             }
@@ -1325,13 +561,13 @@ React.FC = () => {
             isOpen={
               Boolean(mensagem)
             }
-            message={
-              mensagem
-            }
-            duration={
-              1800
-            }
+
+            message={mensagem}
+
+            duration={1800}
+
             position="top"
+
             onDidDismiss={() =>
               setMensagem('')
             }
@@ -1342,7 +578,6 @@ React.FC = () => {
       </IonContent>
 
     </IonPage>
-
   );
 
 };

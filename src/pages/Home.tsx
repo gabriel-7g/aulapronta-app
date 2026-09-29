@@ -284,16 +284,11 @@ const Home: React.FC = () => {
                 </p>
 
               </div>
-
-
               {/* MATÉRIA */}
-
               <div className="campo-grupo">
-
                 <span className="campo-rotulo">
                   Matéria
                 </span>
-
 
                 <div className="grade-materias">
 
@@ -624,23 +619,11 @@ const Home: React.FC = () => {
                       : 'duração'}
 
                   </span>
-
                 </div>
-
-
                 <p
                   className={
-                    `rascunho-tema ${
-                      tema
-                        ? 'preenchida'
-                        : ''
-                    }`
-                  }
-                >
-
-                  {tema ||
-                    'o tema da aula aparece aqui...'}
-
+                    `rascunho-tema ${tema? 'preenchida': ''}`}>
+                  {tema ||'o tema da aula aparece aqui...'}
                 </p>
 
               </div>
@@ -656,6 +639,5 @@ const Home: React.FC = () => {
     </IonPage>
   );
 };
-
 
 export default Home;

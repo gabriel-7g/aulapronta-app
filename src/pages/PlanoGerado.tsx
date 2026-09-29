@@ -1,6 +1,4 @@
-import React, {
-  useState
-} from 'react';
+import React, { useState } from 'react';
 
 import {
   IonContent,
@@ -11,6 +9,11 @@ import {
 import {
   obterUsuarioLogado
 } from '../utils/auth';
+
+import {
+  limparContextoPlano,
+  obterContextoPlano
+} from '../utils/planoSessao';
 
 import {
   salvarPlanejamento
@@ -25,233 +28,267 @@ import {
 import './PlanoGerado.css';
 
 
-const PlanoGerado: React.FC = () => {
-  const router =
-    useIonRouter();
+/* =========================================================
+   FUNÇÕES AUXILIARES
+   ========================================================= */
 
-  const usuario =
-    obterUsuarioLogado();
-
-
-  /* =======================================================
-     PLANO SALVO SELECIONADO
-     ======================================================= */
-
-  const planoSelecionadoString =
-    sessionStorage.getItem(
-      'planoSelecionado'
-    );
-
-  let planoSelecionado:
-    PlanejamentoSalvo | null =
-    null;
-
-
+const gerarId = (): string => {
   if (
-    planoSelecionadoString &&
-    usuario
+    typeof crypto !== 'undefined' &&
+    crypto.randomUUID
   ) {
-
-    try {
-
-      const planoTemporario:
-        PlanejamentoSalvo =
-        JSON.parse(
-          planoSelecionadoString
-        );
-
-      /*
-        SEGURANÇA:
-
-        O plano só será carregado
-        se pertencer ao usuário logado.
-      */
-      if (
-        planoTemporario.usuarioId ===
-        usuario.id
-      ) {
-
-        planoSelecionado =
-          planoTemporario;
-
-      }
-
-    } catch {
-
-      planoSelecionado =
-        null;
-
-    }
+    return crypto.randomUUID();
   }
 
-
-  /* =======================================================
-     DADOS VINDOS DA HOME
-     ======================================================= */
-
-  const dadosSalvos =
-    sessionStorage.getItem(
-      'planoEmCriacao'
-    );
-
-  let dadosFormulario:
-    DadosPlano | null =
-    null;
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
+};
 
 
-  if (dadosSalvos) {
+const criarConteudoInicial = (
+  dados: DadosPlano
+): ConteudoPlano => {
+  return {
+    titulo:
+      dados.tema,
 
-    try {
+    objetivo:
+      `Compreender os principais conceitos relacionados ao tema "${dados.tema}" e aplicá-los em situações práticas.`,
 
-      dadosFormulario =
-        JSON.parse(
-          dadosSalvos
-        );
+    introducao:
+      'Inicie a aula retomando conhecimentos prévios da turma por meio de perguntas rápidas. Apresente o assunto de maneira contextualizada e explique o que será trabalhado durante a aula.',
 
-    } catch {
+    desenvolvimento:
+      'Apresente os conceitos principais de forma progressiva, utilizando exemplos claros e situações próximas da realidade dos alunos. Durante a explicação, estimule a participação da turma com perguntas e pequenos desafios.',
 
-      dadosFormulario =
-        null;
+    atividade:
+      'Proponha uma atividade prática em que os alunos possam aplicar os conceitos apresentados. A atividade poderá ser realizada individualmente ou em pequenos grupos.',
 
-    }
-  }
+    recursos:
+      'Quadro, material didático, atividades impressas e recursos digitais, quando disponíveis.',
+
+    avaliacao:
+      'A avaliação será realizada de maneira contínua, considerando a participação dos alunos, a realização da atividade proposta e a compreensão demonstrada durante a aula.'
+  };
+};
+
+
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+const PlanoGerado: React.FC = () => {
+  const router = useIonRouter();
+  const usuario = obterUsuarioLogado();
 
 
   /*
-    Se estamos abrindo um plano salvo,
-    usamos os dados dele.
+    O contexto é lido apenas uma vez.
 
-    Caso contrário usamos os dados
-    vindos da Home.
+    Isso é importante porque, depois de salvarmos,
+    os dados temporários são removidos da sessão.
   */
 
-  const dados:
-    DadosPlano =
-    planoSelecionado?.dados ||
-    dadosFormulario || {
-      materia:
-        'Português',
-
-      materiaId:
-        'portugues',
-
-      turma:
-        '6º ano',
-
-      duracao:
-        '50',
-
-      tema:
-        'Plano de aula',
-
-      observacoes:
-        ''
-    };
+  const [contexto] = useState(() =>
+    obterContextoPlano(usuario?.id)
+  );
 
 
-  /* =======================================================
-     CONTEÚDO
+  const [conteudo, setConteudo] =
+    useState<ConteudoPlano | null>(() => {
+      if (!contexto) {
+        return null;
+      }
 
-     Por enquanto ainda é MOCK.
-
-     Depois será substituído pela IA.
-     ======================================================= */
-
-  const conteudoInicial:
-    ConteudoPlano =
-    planoSelecionado?.conteudo || {
-
-      titulo:
-        dados.tema ||
-        'Plano de aula',
-
-      objetivo:
-        `Compreender os principais conceitos relacionados ao tema "${dados.tema}" e aplicá-los em situações práticas.`,
-
-      introducao:
-        'Inicie a aula retomando conhecimentos prévios da turma por meio de perguntas rápidas. Apresente o assunto de maneira contextualizada e explique o que será trabalhado durante a aula.',
-
-      desenvolvimento:
-        'Apresente os conceitos principais de forma progressiva, utilizando exemplos claros e situações próximas da realidade dos alunos. Durante a explicação, estimule a participação da turma com perguntas e pequenos desafios.',
-
-      atividade:
-        'Proponha uma atividade prática em que os alunos possam aplicar os conceitos apresentados. A atividade poderá ser realizada individualmente ou em pequenos grupos.',
-
-      recursos:
-        'Quadro, material didático, atividades impressas e recursos digitais, quando disponíveis.',
-
-      avaliacao:
-        'A avaliação será realizada de maneira contínua, considerando a participação dos alunos, a realização da atividade proposta e a compreensão demonstrada durante a aula.'
-    };
+      return (
+        contexto.planoSelecionado?.conteudo ??
+        criarConteudoInicial(contexto.dados)
+      );
+    });
 
 
-  const [
-    conteudo,
-    setConteudo
-  ] =
-    useState<ConteudoPlano>(
-      conteudoInicial
-    );
-
-
-  const [
-    editando,
-    setEditando
-  ] =
+  const [editando, setEditando] =
     useState(false);
 
+  const [salvando, setSalvando] =
+    useState(false);
+
+  const [mensagemSucesso, setMensagemSucesso] =
+    useState('');
+
+  const [mensagemErro, setMensagemErro] =
+    useState('');
+
 
   /* =======================================================
-     ATUALIZAR CONTEÚDO
+     CONTEXTO INVÁLIDO
+     ======================================================= */
+
+  if (!usuario) {
+    return (
+      <IonPage>
+        <IonContent fullscreen>
+
+          <div className="pagina-plano-gerado">
+
+            <main className="plano-container">
+
+              <section className="folha-plano">
+
+                <span className="fita-plano" />
+
+                <div className="plano-cabecalho">
+
+                  <span className="plano-etiqueta">
+                    acesso inválido
+                  </span>
+
+                  <h1>
+                    Sessão não encontrada
+                  </h1>
+
+                  <p>
+                    Faça login novamente para acessar seus planejamentos.
+                  </p>
+
+                  <div className="acoes-plano">
+
+                    <button
+                      type="button"
+                      className="botao-salvar botao-salvar-grande"
+                      onClick={() =>
+                        router.push(
+                          '/login',
+                          'root'
+                        )
+                      }
+                    >
+                      Ir para o login
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+            </main>
+
+          </div>
+
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+
+  if (!contexto || !conteudo) {
+    return (
+      <IonPage>
+        <IonContent fullscreen>
+
+          <div className="pagina-plano-gerado">
+
+            <header className="plano-topo">
+
+              <div className="topo-espaco" />
+
+              <div className="marca-plano">
+                <span className="marca-simbolo-plano" />
+                Lousa
+              </div>
+
+              <div className="topo-espaco" />
+
+            </header>
+
+
+            <main className="plano-container">
+
+              <section className="folha-plano">
+
+                <span className="fita-plano" />
+
+                <div className="plano-cabecalho">
+
+                  <span className="plano-etiqueta">
+                    dados inválidos
+                  </span>
+
+                  <h1>
+                    Planejamento indisponível
+                  </h1>
+
+                  <p>
+                    Não encontramos dados válidos para exibir este
+                    planejamento. Ele pode ter sido removido ou o
+                    endereço foi acessado diretamente.
+                  </p>
+
+
+                  <div className="acoes-plano">
+
+                    <button
+                      type="button"
+                      className="botao-salvar botao-salvar-grande"
+                      onClick={() =>
+                        router.push(
+                          '/planejamentos',
+                          'root'
+                        )
+                      }
+                    >
+                      Voltar para meus planejamentos
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+            </main>
+
+          </div>
+
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+
+  const {
+    dados,
+    planoSelecionado
+  } = contexto;
+
+
+  /* =======================================================
+     EDIÇÃO
      ======================================================= */
 
   const atualizarCampo = (
-    campo:
-      keyof ConteudoPlano,
-
-    valor:
-      string
+    campo: keyof ConteudoPlano,
+    valor: string
   ) => {
+    setConteudo((anterior) => {
+      if (!anterior) {
+        return anterior;
+      }
 
-    setConteudo(
-      (anterior) => ({
+      return {
         ...anterior,
-
-        [campo]:
-          valor
-      })
-    );
+        [campo]: valor
+      };
+    });
   };
 
-
-  /* =======================================================
-     EDITAR
-     ======================================================= */
 
   const editarPlano = () => {
-    setEditando(
-      true
-    );
-  };
-
-
-  /* =======================================================
-     GERAR ID
-     ======================================================= */
-
-  const gerarId = () => {
-
-    if (
-      typeof crypto !==
-        'undefined' &&
-      crypto.randomUUID
-    ) {
-
-      return crypto.randomUUID();
-    }
-
-    return Date.now()
-      .toString();
+    setMensagemSucesso('');
+    setMensagemErro('');
+    setEditando(true);
   };
 
 
@@ -260,98 +297,98 @@ const PlanoGerado: React.FC = () => {
      ======================================================= */
 
   const salvarPlano = () => {
-
-    /*
-      Sem usuário logado não salvamos nada.
-    */
-    if (!usuario) {
-
-      router.push(
-        '/login',
-        'root'
-      );
-
+    if (salvando) {
       return;
     }
 
+    setSalvando(true);
+    setMensagemErro('');
+    setMensagemSucesso('');
+
+
+    const eraEdicao =
+      Boolean(
+        planoSelecionado
+      );
 
     const agora =
-      new Date()
-        .toISOString();
+      new Date().toISOString();
 
 
     const planejamento:
       PlanejamentoSalvo = {
-
-      /*
-        Se for edição:
-        mantém o ID existente.
-
-        Se for novo:
-        gera novo ID.
-      */
       id:
-        planoSelecionado?.id ||
+        planoSelecionado?.id ??
         gerarId(),
 
-
-      /*
-        AQUI ESTÁ A PRINCIPAL ALTERAÇÃO.
-
-        O plano pertence ao usuário
-        atualmente logado.
-      */
       usuarioId:
         usuario.id,
 
-
       criadoEm:
-        planoSelecionado?.criadoEm ||
+        planoSelecionado?.criadoEm ??
         agora,
-
 
       atualizadoEm:
         agora,
 
-
       dados,
-
 
       conteudo
     };
 
 
-    /*
-      O service salva ou atualiza.
-    */
-    salvarPlanejamento(
-      planejamento
-    );
+    try {
+      salvarPlanejamento(
+        planejamento
+      );
+
+      setEditando(false);
+
+      setMensagemSucesso(
+        eraEdicao
+          ? 'Alterações salvas com sucesso.'
+          : 'Planejamento salvo com sucesso.'
+      );
 
 
-    /*
-      Dados temporários não são
-      mais necessários.
-    */
-    sessionStorage.removeItem(
-      'planoSelecionado'
-    );
+      /*
+        Agora que o plano foi realmente salvo,
+        podemos limpar os dados temporários.
+      */
 
-    sessionStorage.removeItem(
-      'planoEmCriacao'
-    );
+      limparContextoPlano();
 
 
-    /*
-      Retorna para a página
-      do usuário.
-    */
-    router.push(
-      '/planejamentos',
-      'forward'
-    );
+      /*
+        Dá tempo de o usuário visualizar
+        a mensagem antes do redirecionamento.
+      */
+
+      window.setTimeout(() => {
+        router.push(
+          '/planejamentos',
+          'root'
+        );
+      }, 1200);
+
+    } catch (erro) {
+      console.error(
+        'Erro ao salvar planejamento:',
+        erro
+      );
+
+      setSalvando(false);
+
+      setMensagemErro(
+        'Não foi possível salvar o planejamento. Tente novamente.'
+      );
+    }
   };
 
+
+  /* =======================================================
+     INTERFACE
+     ======================================================= */
 
   return (
     <IonPage>
@@ -360,16 +397,16 @@ const PlanoGerado: React.FC = () => {
 
         <div className="pagina-plano-gerado">
 
-
-          {/* ===============================================
-              CABEÇALHO
-          =============================================== */}
+          {/* =============================================
+              TOPO
+             ============================================= */}
 
           <header className="plano-topo">
 
             <button
               type="button"
               className="botao-voltar"
+              disabled={salvando}
               onClick={() =>
                 router.goBack()
               }
@@ -379,11 +416,8 @@ const PlanoGerado: React.FC = () => {
 
 
             <div className="marca-plano">
-
               <span className="marca-simbolo-plano" />
-
               Lousa
-
             </div>
 
 
@@ -394,10 +428,9 @@ const PlanoGerado: React.FC = () => {
 
           <main className="plano-container">
 
-
-            {/* =============================================
+            {/* ===========================================
                 TÍTULO
-            ============================================= */}
+               =========================================== */}
 
             <section className="plano-cabecalho">
 
@@ -410,13 +443,12 @@ const PlanoGerado: React.FC = () => {
 
                 <input
                   className="titulo-edicao"
-                  value={
-                    conteudo.titulo
-                  }
-                  onChange={(e) =>
+                  value={conteudo.titulo}
+                  aria-label="Título do planejamento"
+                  onChange={(evento) =>
                     atualizarCampo(
                       'titulo',
-                      e.target.value
+                      evento.target.value
                     )
                   }
                 />
@@ -432,21 +464,19 @@ const PlanoGerado: React.FC = () => {
 
               <p>
                 Seu planejamento está pronto.
-                Você pode revisar, editar e
-                salvar antes de utilizá-lo.
+                Você pode revisar, editar e salvar antes de utilizá-lo.
               </p>
 
             </section>
 
 
-            {/* =============================================
+            {/* ===========================================
                 RESUMO
-            ============================================= */}
+               =========================================== */}
 
             <section className="resumo-aula">
 
               <div>
-
                 <span className="resumo-rotulo">
                   Matéria
                 </span>
@@ -454,12 +484,10 @@ const PlanoGerado: React.FC = () => {
                 <strong>
                   {dados.materia}
                 </strong>
-
               </div>
 
 
               <div>
-
                 <span className="resumo-rotulo">
                   Turma
                 </span>
@@ -467,32 +495,27 @@ const PlanoGerado: React.FC = () => {
                 <strong>
                   {dados.turma}
                 </strong>
-
               </div>
 
 
               <div>
-
                 <span className="resumo-rotulo">
                   Duração
                 </span>
 
                 <strong>
-
                   {dados.duracao
                     ? `${dados.duracao} min`
                     : 'Não informada'}
-
                 </strong>
-
               </div>
 
             </section>
 
 
-            {/* =============================================
-                FOLHA
-            ============================================= */}
+            {/* ===========================================
+                CONTEÚDO
+               =========================================== */}
 
             <section className="folha-plano">
 
@@ -503,15 +526,9 @@ const PlanoGerado: React.FC = () => {
                 numero="01"
                 titulo="Objetivo da aula"
                 campo="objetivo"
-                valor={
-                  conteudo.objetivo
-                }
-                editando={
-                  editando
-                }
-                atualizar={
-                  atualizarCampo
-                }
+                valor={conteudo.objetivo}
+                editando={editando}
+                atualizar={atualizarCampo}
               />
 
 
@@ -519,15 +536,9 @@ const PlanoGerado: React.FC = () => {
                 numero="02"
                 titulo="Introdução"
                 campo="introducao"
-                valor={
-                  conteudo.introducao
-                }
-                editando={
-                  editando
-                }
-                atualizar={
-                  atualizarCampo
-                }
+                valor={conteudo.introducao}
+                editando={editando}
+                atualizar={atualizarCampo}
               />
 
 
@@ -535,15 +546,9 @@ const PlanoGerado: React.FC = () => {
                 numero="03"
                 titulo="Desenvolvimento"
                 campo="desenvolvimento"
-                valor={
-                  conteudo.desenvolvimento
-                }
-                editando={
-                  editando
-                }
-                atualizar={
-                  atualizarCampo
-                }
+                valor={conteudo.desenvolvimento}
+                editando={editando}
+                atualizar={atualizarCampo}
               />
 
 
@@ -551,15 +556,9 @@ const PlanoGerado: React.FC = () => {
                 numero="04"
                 titulo="Atividade"
                 campo="atividade"
-                valor={
-                  conteudo.atividade
-                }
-                editando={
-                  editando
-                }
-                atualizar={
-                  atualizarCampo
-                }
+                valor={conteudo.atividade}
+                editando={editando}
+                atualizar={atualizarCampo}
               />
 
 
@@ -567,15 +566,9 @@ const PlanoGerado: React.FC = () => {
                 numero="05"
                 titulo="Recursos"
                 campo="recursos"
-                valor={
-                  conteudo.recursos
-                }
-                editando={
-                  editando
-                }
-                atualizar={
-                  atualizarCampo
-                }
+                valor={conteudo.recursos}
+                editando={editando}
+                atualizar={atualizarCampo}
               />
 
 
@@ -583,23 +576,17 @@ const PlanoGerado: React.FC = () => {
                 numero="06"
                 titulo="Avaliação"
                 campo="avaliacao"
-                valor={
-                  conteudo.avaliacao
-                }
-                editando={
-                  editando
-                }
-                atualizar={
-                  atualizarCampo
-                }
+                valor={conteudo.avaliacao}
+                editando={editando}
+                atualizar={atualizarCampo}
               />
 
             </section>
 
 
-            {/* =============================================
-                OBSERVAÇÃO
-            ============================================= */}
+            {/* ===========================================
+                OBSERVAÇÕES
+               =========================================== */}
 
             {dados.observacoes && (
 
@@ -618,12 +605,56 @@ const PlanoGerado: React.FC = () => {
             )}
 
 
-            {/* =============================================
-                AÇÕES
-            ============================================= */}
+            {/* ===========================================
+                FEEDBACK
+               =========================================== */}
+
+            {mensagemSucesso && (
+
+              <div
+                className="mensagem-sucesso"
+                role="status"
+                aria-live="polite"
+              >
+
+                <span aria-hidden="true">
+                  ✓
+                </span>
+
+                <div>
+
+                  <strong>
+                    {mensagemSucesso}
+                  </strong>
+
+                  <p>
+                    Redirecionando para seus planejamentos...
+                  </p>
+
+                </div>
+
+              </div>
+
+            )}
+
+
+            {mensagemErro && (
+
+              <div
+                role="alert"
+                aria-live="assertive"
+              >
+                {mensagemErro}
+              </div>
+
+            )}
+
+
+            {/* ===========================================
+                BOTÕES
+               =========================================== */}
 
             <div className="acoes-plano">
-
 
               {!editando ? (
 
@@ -632,11 +663,10 @@ const PlanoGerado: React.FC = () => {
                   <button
                     type="button"
                     className="botao-editar"
-                    onClick={
-                      editarPlano
-                    }
+                    disabled={salvando}
+                    onClick={editarPlano}
                   >
-                    <span>
+                    <span aria-hidden="true">
                       ✎
                     </span>
 
@@ -647,15 +677,17 @@ const PlanoGerado: React.FC = () => {
                   <button
                     type="button"
                     className="botao-salvar"
-                    onClick={
-                      salvarPlano
-                    }
+                    disabled={salvando}
+                    aria-busy={salvando}
+                    onClick={salvarPlano}
                   >
-                    <span>
+                    <span aria-hidden="true">
                       ✓
                     </span>
 
-                    Salvar planejamento
+                    {salvando
+                      ? 'Salvando...'
+                      : 'Salvar planejamento'}
                   </button>
 
                 </>
@@ -665,15 +697,17 @@ const PlanoGerado: React.FC = () => {
                 <button
                   type="button"
                   className="botao-salvar botao-salvar-grande"
-                  onClick={
-                    salvarPlano
-                  }
+                  disabled={salvando}
+                  aria-busy={salvando}
+                  onClick={salvarPlano}
                 >
-                  <span>
+                  <span aria-hidden="true">
                     ✓
                   </span>
 
-                  Salvar alterações
+                  {salvando
+                    ? 'Salvando...'
+                    : 'Salvar alterações'}
                 </button>
 
               )}
@@ -692,45 +726,25 @@ const PlanoGerado: React.FC = () => {
 
 
 /* =========================================================
-   BLOCO DO PLANO
+   BLOCO DE CONTEÚDO
    ========================================================= */
 
 interface BlocoPlanoProps {
-  numero:
-    string;
-
-  titulo:
-    string;
-
-  campo:
-    keyof ConteudoPlano;
-
-  valor:
-    string;
-
-  editando:
-    boolean;
+  numero: string;
+  titulo: string;
+  campo: keyof ConteudoPlano;
+  valor: string;
+  editando: boolean;
 
   atualizar: (
-    campo:
-      keyof ConteudoPlano,
-
-    valor:
-      string
+    campo: keyof ConteudoPlano,
+    valor: string
   ) => void;
 }
 
 
 const BlocoPlano:
-React.FC<BlocoPlanoProps> = ({
-  numero,
-  titulo,
-  campo,
-  valor,
-  editando,
-  atualizar
-}) => {
-
+React.FC<BlocoPlanoProps> = ({numero,titulo,campo,valor,editando,atualizar}) => {
   return (
     <article className="bloco-plano">
 
@@ -743,31 +757,22 @@ React.FC<BlocoPlanoProps> = ({
         <h2>
           {titulo}
         </h2>
-
       </div>
-
-
       {editando ? (
 
         <textarea
           className="campo-edicao-plano"
-          value={
-            valor
-          }
-          onChange={(e) =>
-            atualizar(
-              campo,
-              e.target.value
-            )
+          aria-label={titulo}
+          value={valor}
+          onChange={(evento) =>
+            atualizar(campo,evento.target.value)
           }
         />
 
       ) : (
-
         <p>
           {valor}
         </p>
-
       )}
 
     </article>

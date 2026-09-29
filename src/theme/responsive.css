@@ -1,0 +1,966 @@
+/* =========================================================
+   RESPONSIVIDADE GLOBAL — AULA PRONTA
+   ========================================================= */
+
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+html,
+body,
+#root,
+ion-app {
+  width: 100%;
+  min-width: 0;
+}
+
+
+body {
+  margin: 0;
+
+  overflow-x: hidden;
+}
+
+
+/*
+  Evita que textos muito grandes,
+  e-mails ou títulos estourem a tela.
+*/
+
+.pagina-auth,
+.pagina-criar-plano,
+.pagina-planejamentos,
+.pagina-gerando,
+.pagina-plano-gerado,
+.admin-pagina,
+.pagina-404 {
+  overflow-x: hidden;
+
+  overflow-wrap: break-word;
+}
+
+
+/*
+  Elementos de formulário nunca podem
+  ultrapassar a largura disponível.
+*/
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+
+input,
+select,
+textarea {
+  min-width: 0;
+}
+
+
+/*
+  Containers principais podem encolher
+  corretamente dentro de grids e flexbox.
+*/
+
+.auth-container,
+.layout-principal,
+.planejamentos-container,
+.gerando-container,
+.plano-container,
+.admin-grid,
+.admin-cabecalho,
+.card-404 {
+  min-width: 0;
+}
+
+
+/* =========================================================
+   TABLET GRANDE
+   1024px ou menos
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+  /* ---------------- HOME ---------------- */
+
+  .layout-principal {
+    gap: 28px;
+  }
+
+
+  /* ---------------- PLANEJAMENTOS ---------------- */
+
+  .planejamentos-topo {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+
+  .planejamentos-container {
+    width: calc(100% - 36px);
+  }
+
+
+  /* ---------------- ADMIN ---------------- */
+
+  .admin-pagina {
+    padding:
+      32px
+      24px;
+  }
+
+
+  .admin-cabecalho {
+    gap: 24px;
+  }
+
+
+  /* ---------------- PLANO GERADO ---------------- */
+
+  .plano-container {
+    width:
+      min(
+        760px,
+        calc(100% - 36px)
+      );
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+   900px ou menos
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  /* ---------------- ADMIN ---------------- */
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .admin-cabecalho {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+
+  .admin-acoes-topo {
+    width: 100%;
+  }
+
+
+  /* ---------------- HOME ---------------- */
+
+  .layout-principal {
+    width: 100%;
+
+    max-width: 620px;
+
+    grid-template-columns: 1fr;
+  }
+
+
+  .pre-visualizacao {
+    position: static;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET PEQUENO
+   768px ou menos
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  /* =======================================================
+     LOGIN
+     ======================================================= */
+
+  .pagina-auth {
+    padding:
+      32px
+      18px;
+  }
+
+
+  .auth-container {
+    width:
+      min(
+        460px,
+        100%
+      );
+  }
+
+
+  /* =======================================================
+     HOME
+     ======================================================= */
+
+  .layout-principal {
+    padding:
+      20px
+      18px
+      55px;
+  }
+
+
+  .formulario-cabecalho {
+    margin-bottom: 22px;
+  }
+
+
+  /* =======================================================
+     PLANEJAMENTOS
+     ======================================================= */
+
+  .grade-planejamentos {
+    grid-template-columns: 1fr;
+  }
+
+
+  .planejamentos-container {
+    width:
+      calc(100% - 30px);
+  }
+
+
+  .planejamentos-cabecalho {
+    margin-bottom: 30px;
+  }
+
+
+  .planejamento-card {
+    min-height: auto;
+  }
+
+
+  /* =======================================================
+     PLANO GERADO
+     ======================================================= */
+
+  .plano-container {
+    width:
+      calc(100% - 30px);
+  }
+
+
+  /* =======================================================
+     GERANDO PLANO
+     ======================================================= */
+
+  .gerando-container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+
+  .gerando-cartao {
+    width:
+      min(
+        520px,
+        100%
+      );
+  }
+
+}
+
+
+/* =========================================================
+   CELULAR
+   600px ou menos
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  /* =======================================================
+     REGRA DE TOQUE
+
+     Mantém botões importantes confortáveis
+     para uso no celular.
+     ======================================================= */
+
+  .auth-botao-principal,
+  .botao-gerar,
+  .botao-novo-topo,
+  .botao-sair,
+  .botao-criar-primeiro,
+  .botao-editar,
+  .botao-salvar,
+  .botao-tentar-novamente,
+  .admin-botao-principal,
+  .admin-botao-secundario,
+  .admin-botao-sair,
+  .botao-voltar-404 {
+    min-height: 44px;
+  }
+
+
+  /* =======================================================
+     LOGIN
+     ======================================================= */
+
+  .pagina-auth {
+    align-items: flex-start;
+
+    padding:
+      25px
+      14px
+      40px;
+  }
+
+
+  .auth-marca {
+    margin-bottom: 22px;
+  }
+
+
+  .auth-card {
+    width: 100%;
+
+    padding:
+      38px
+      22px
+      28px;
+  }
+
+
+  .auth-cabecalho {
+    margin-bottom: 23px;
+  }
+
+
+  .auth-cabecalho h1 {
+    font-size: 1.85rem;
+  }
+
+
+  /* =======================================================
+     HOME / CRIAR PLANO
+     ======================================================= */
+
+  .cabecalho {
+    padding:
+      16px
+      15px
+      6px;
+  }
+
+
+  .layout-principal {
+    padding:
+      18px
+      15px
+      50px;
+  }
+
+
+  .campo-linha {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+  }
+
+
+  .grade-materias {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+
+  .materia-cartao {
+    min-width: 0;
+  }
+
+
+  .formulario-titulo {
+    font-size: 1.65rem;
+  }
+
+
+  /* =======================================================
+     MEUS PLANEJAMENTOS
+     ======================================================= */
+
+  .planejamentos-topo {
+    padding:
+      16px
+      14px;
+
+    gap: 12px;
+  }
+
+
+  .planejamentos-container {
+    width:
+      calc(100% - 28px);
+
+    padding:
+      18px
+      0
+      55px;
+  }
+
+
+  .planejamentos-cabecalho {
+    margin-bottom: 26px;
+  }
+
+
+  .planejamentos-cabecalho h1 {
+    font-size: 2rem;
+  }
+
+
+  .planejamento-card {
+    padding:
+      26px
+      20px
+      20px;
+  }
+
+
+  .planejamento-card h2 {
+    font-size: 1.25rem;
+  }
+
+
+  .planejamento-resumo {
+    font-size: 0.84rem;
+  }
+
+
+  /* =======================================================
+     FILTROS
+     ======================================================= */
+
+  .planejamentos-ferramentas {
+    padding: 15px;
+  }
+
+
+  .filtros-planejamentos-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .campo-filtro input,
+  .campo-filtro select {
+    width: 100%;
+
+    min-height: 46px;
+  }
+
+
+  /* =======================================================
+     ADMIN
+     ======================================================= */
+
+  .admin-pagina {
+    padding:
+      24px
+      14px
+      45px;
+  }
+
+
+  .admin-cabecalho {
+    margin-bottom: 22px;
+  }
+
+
+  .admin-cabecalho h1 {
+    font-size: 2rem;
+  }
+
+
+  .admin-acoes-topo {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      1fr
+      1fr;
+  }
+
+
+  .admin-card-cadastro,
+  .admin-card-lista {
+    padding:
+      22px
+      18px;
+  }
+
+
+  .admin-usuario-info {
+    min-width: 0;
+  }
+
+
+  .admin-usuario-info strong,
+  .admin-usuario-info > span {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+
+  /* =======================================================
+     GERANDO
+     ======================================================= */
+
+  .gerando-container {
+    min-height: auto;
+
+    align-items: flex-start;
+
+    padding:
+      25px
+      14px
+      55px;
+  }
+
+
+  .gerando-cartao {
+    padding:
+      42px
+      22px
+      30px;
+  }
+
+
+  /* =======================================================
+     PLANO GERADO
+     ======================================================= */
+
+  .plano-container {
+    width:
+      calc(100% - 28px);
+
+    padding:
+      24px
+      0
+      55px;
+  }
+
+
+  .folha-plano {
+    padding:
+      40px
+      21px
+      24px;
+  }
+
+
+  .acoes-plano {
+    flex-direction: column;
+  }
+
+
+  .botao-editar,
+  .botao-salvar {
+    width: 100%;
+  }
+
+
+  /* =======================================================
+     404
+     ======================================================= */
+
+  .pagina-404 {
+    padding:
+      24px
+      14px;
+  }
+
+
+  .card-404 {
+    width: 100%;
+
+    padding:
+      38px
+      22px
+      30px;
+  }
+
+
+  .botao-voltar-404 {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   CELULAR PEQUENO
+   480px ou menos
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  /* =======================================================
+     HOME
+     ======================================================= */
+
+  .cabecalho {
+    grid-template-columns:
+      auto
+      minmax(0, 1fr);
+  }
+
+
+  .marca {
+    font-size: 1.08rem;
+  }
+
+
+  .botao-meus-planejamentos {
+    font-size: 0.72rem;
+
+    padding:
+      7px
+      8px;
+
+    white-space: normal;
+
+    text-align: center;
+  }
+
+
+  /* =======================================================
+     PLANEJAMENTOS - CABEÇALHO
+
+     Em telas pequenas cada parte ganha
+     sua própria linha.
+     ======================================================= */
+
+  .planejamentos-topo {
+    grid-template-columns: 1fr;
+  }
+
+
+  .marca-planejamentos {
+    grid-column: 1;
+
+    grid-row: 1;
+
+    justify-self: center;
+  }
+
+
+  .planejamentos-usuario {
+    grid-column: 1;
+
+    grid-row: 2;
+
+    width: 100%;
+
+    justify-self: stretch;
+  }
+
+
+  .usuario-informacoes {
+    max-width: calc(100% - 50px);
+  }
+
+
+  .usuario-email {
+    display: block;
+
+    max-width: 100%;
+  }
+
+
+  .acoes-topo-planejamentos {
+    grid-column: 1;
+
+    grid-row: 3;
+
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      1fr
+      1fr;
+
+    gap: 8px;
+  }
+
+
+  .botao-novo-topo,
+  .botao-sair {
+    width: 100%;
+
+    min-height: 42px;
+  }
+
+
+  /* =======================================================
+     CARD DE PLANEJAMENTO
+     ======================================================= */
+
+  .planejamento-card {
+    padding:
+      25px
+      18px
+      18px;
+  }
+
+
+  .planejamento-rodape {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 13px;
+  }
+
+
+  .planejamento-card-acoes {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+      1fr
+      1fr;
+
+    gap: 8px;
+  }
+
+
+  .botao-duplicar-plano,
+  .botao-abrir-plano {
+    width: 100%;
+
+    min-height: 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+  }
+
+
+  /* =======================================================
+     ADMIN
+     ======================================================= */
+
+  .admin-acoes-topo {
+    grid-template-columns: 1fr;
+  }
+
+
+  .admin-acoes-topo button {
+    width: 100%;
+  }
+
+
+  .admin-usuario {
+    align-items: flex-start;
+
+    flex-wrap: wrap;
+  }
+
+
+  .admin-excluir {
+    width: 100%;
+  }
+
+
+  /* =======================================================
+     PLANO GERADO - TOPO
+     ======================================================= */
+
+  .plano-topo {
+    grid-template-columns:
+      1fr
+      auto;
+
+    gap: 12px;
+
+    padding:
+      17px
+      14px
+      5px;
+  }
+
+
+  .topo-espaco {
+    display: none;
+  }
+
+
+  .marca-plano {
+    justify-self: end;
+  }
+
+
+  .botao-voltar {
+    min-width: 0;
+  }
+
+
+  /* =======================================================
+     SUCESSO
+     ======================================================= */
+
+  .mensagem-sucesso {
+    align-items: flex-start;
+
+    padding:
+      14px
+      15px;
+  }
+
+}
+
+
+/* =========================================================
+   CELULAR MUITO PEQUENO
+   380px ou menos
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  /* LOGIN */
+
+  .pagina-auth {
+    padding-left: 10px;
+
+    padding-right: 10px;
+  }
+
+
+  .auth-card {
+    padding-left: 17px;
+
+    padding-right: 17px;
+  }
+
+
+  /* HOME */
+
+  .cabecalho {
+    padding-left: 11px;
+
+    padding-right: 11px;
+  }
+
+
+  .layout-principal {
+    padding-left: 12px;
+
+    padding-right: 12px;
+  }
+
+
+  .grade-materias {
+    gap: 7px;
+  }
+
+
+  /* PLANEJAMENTOS */
+
+  .planejamentos-container {
+    width:
+      calc(100% - 20px);
+  }
+
+
+  .planejamento-card {
+    padding-left: 15px;
+
+    padding-right: 15px;
+  }
+
+
+  .planejamento-card-acoes {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* PLANO */
+
+  .plano-container {
+    width:
+      calc(100% - 20px);
+  }
+
+
+  .folha-plano {
+    padding-left: 16px;
+
+    padding-right: 16px;
+  }
+
+
+  /* ADMIN */
+
+  .admin-pagina {
+    padding-left: 10px;
+
+    padding-right: 10px;
+  }
+
+
+  .admin-card-cadastro,
+  .admin-card-lista {
+    padding-left: 15px;
+
+    padding-right: 15px;
+  }
+
+
+  /* GERANDO */
+
+  .gerando-container {
+    padding-left: 10px;
+
+    padding-right: 10px;
+  }
+
+
+  .gerando-cartao {
+    padding-left: 17px;
+
+    padding-right: 17px;
+  }
+
+
+  /* 404 */
+
+  .pagina-404 {
+    padding-left: 10px;
+
+    padding-right: 10px;
+  }
+
+
+  .card-404 {
+    padding-left: 17px;
+
+    padding-right: 17px;
+  }
+
+}
