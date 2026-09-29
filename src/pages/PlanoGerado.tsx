@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, {
+  useState
+} from 'react';
 
 import {
   IonContent,
@@ -6,111 +8,159 @@ import {
   useIonRouter
 } from '@ionic/react';
 
+import {
+  obterUsuarioLogado
+} from '../utils/auth';
+
+import {
+  salvarPlanejamento
+} from '../services/planejamentoService';
+
+import {
+  ConteudoPlano,
+  DadosPlano,
+  PlanejamentoSalvo
+} from '../types/planejamento';
+
 import './PlanoGerado.css';
 
-interface DadosPlano {
-  materia: string;
-  materiaId: string | null;
-  turma: string;
-  duracao: string;
-  tema: string;
-  observacoes: string;
-}
-
-interface ConteudoPlano {
-  titulo: string;
-  objetivo: string;
-  introducao: string;
-  desenvolvimento: string;
-  atividade: string;
-  recursos: string;
-  avaliacao: string;
-}
-
-interface PlanejamentoSalvo {
-  id: string;
-
-  criadoEm: string;
-
-  atualizadoEm: string;
-
-  dados: DadosPlano;
-
-  conteudo: ConteudoPlano;
-}
 
 const PlanoGerado: React.FC = () => {
-  const router = useIonRouter();
+  const router =
+    useIonRouter();
 
-  /*
-    Verifica se estamos abrindo um planejamento
-    que já foi salvo anteriormente.
-  */
+  const usuario =
+    obterUsuarioLogado();
+
+
+  /* =======================================================
+     PLANO SALVO SELECIONADO
+     ======================================================= */
+
   const planoSelecionadoString =
     sessionStorage.getItem(
       'planoSelecionado'
     );
 
   let planoSelecionado:
-    PlanejamentoSalvo | null = null;
+    PlanejamentoSalvo | null =
+    null;
 
-  if (planoSelecionadoString) {
+
+  if (
+    planoSelecionadoString &&
+    usuario
+  ) {
+
     try {
-      planoSelecionado =
+
+      const planoTemporario:
+        PlanejamentoSalvo =
         JSON.parse(
           planoSelecionadoString
         );
+
+      /*
+        SEGURANÇA:
+
+        O plano só será carregado
+        se pertencer ao usuário logado.
+      */
+      if (
+        planoTemporario.usuarioId ===
+        usuario.id
+      ) {
+
+        planoSelecionado =
+          planoTemporario;
+
+      }
+
     } catch {
-      planoSelecionado = null;
+
+      planoSelecionado =
+        null;
+
     }
   }
 
-  /*
-    Dados vindos do formulário da HOME.
-  */
+
+  /* =======================================================
+     DADOS VINDOS DA HOME
+     ======================================================= */
+
   const dadosSalvos =
     sessionStorage.getItem(
       'planoEmCriacao'
     );
 
   let dadosFormulario:
-    DadosPlano | null = null;
+    DadosPlano | null =
+    null;
+
 
   if (dadosSalvos) {
+
     try {
+
       dadosFormulario =
-        JSON.parse(dadosSalvos);
+        JSON.parse(
+          dadosSalvos
+        );
+
     } catch {
-      dadosFormulario = null;
+
+      dadosFormulario =
+        null;
+
     }
   }
 
+
   /*
-    Se abriu um planejamento salvo,
+    Se estamos abrindo um plano salvo,
     usamos os dados dele.
 
-    Caso contrário, usamos o formulário.
+    Caso contrário usamos os dados
+    vindos da Home.
   */
-  const dados: DadosPlano =
+
+  const dados:
+    DadosPlano =
     planoSelecionado?.dados ||
     dadosFormulario || {
-      materia: 'Português',
-      materiaId: 'portugues',
-      turma: '6º ano',
-      duracao: '50',
-      tema: 'Plano de aula',
-      observacoes: ''
+      materia:
+        'Português',
+
+      materiaId:
+        'portugues',
+
+      turma:
+        '6º ano',
+
+      duracao:
+        '50',
+
+      tema:
+        'Plano de aula',
+
+      observacoes:
+        ''
     };
 
-  /*
-    MOCK DO CONTEÚDO.
 
-    Depois isso será substituído pela
-    resposta da IA.
-  */
+  /* =======================================================
+     CONTEÚDO
+
+     Por enquanto ainda é MOCK.
+
+     Depois será substituído pela IA.
+     ======================================================= */
+
   const conteudoInicial:
     ConteudoPlano =
     planoSelecionado?.conteudo || {
+
       titulo:
         dados.tema ||
         'Plano de aula',
@@ -134,6 +184,7 @@ const PlanoGerado: React.FC = () => {
         'A avaliação será realizada de maneira contínua, considerando a participação dos alunos, a realização da atividade proposta e a compreensão demonstrada durante a aula.'
     };
 
+
   const [
     conteudo,
     setConteudo
@@ -142,128 +193,145 @@ const PlanoGerado: React.FC = () => {
       conteudoInicial
     );
 
+
   const [
     editando,
     setEditando
   ] =
     useState(false);
 
+
+  /* =======================================================
+     ATUALIZAR CONTEÚDO
+     ======================================================= */
+
   const atualizarCampo = (
-    campo: keyof ConteudoPlano,
-    valor: string
+    campo:
+      keyof ConteudoPlano,
+
+    valor:
+      string
   ) => {
+
     setConteudo(
       (anterior) => ({
         ...anterior,
 
-        [campo]: valor
+        [campo]:
+          valor
       })
     );
   };
 
+
+  /* =======================================================
+     EDITAR
+     ======================================================= */
+
   const editarPlano = () => {
-    setEditando(true);
+    setEditando(
+      true
+    );
   };
 
+
+  /* =======================================================
+     GERAR ID
+     ======================================================= */
+
   const gerarId = () => {
+
     if (
-      typeof crypto !== 'undefined' &&
+      typeof crypto !==
+        'undefined' &&
       crypto.randomUUID
     ) {
+
       return crypto.randomUUID();
     }
 
-    return Date.now().toString();
+    return Date.now()
+      .toString();
   };
 
+
+  /* =======================================================
+     SALVAR
+     ======================================================= */
+
   const salvarPlano = () => {
+
     /*
-      Busca planejamentos existentes.
+      Sem usuário logado não salvamos nada.
     */
-    const salvosString =
-      localStorage.getItem(
-        'planejamentosSalvos'
+    if (!usuario) {
+
+      router.push(
+        '/login',
+        'root'
       );
 
-    let planejamentos:
-      PlanejamentoSalvo[] = [];
-
-    if (salvosString) {
-      try {
-        planejamentos =
-          JSON.parse(
-            salvosString
-          );
-      } catch {
-        planejamentos = [];
-      }
+      return;
     }
 
+
     const agora =
-      new Date().toISOString();
+      new Date()
+        .toISOString();
 
-    /*
-      Se abriu um plano já salvo,
-      mantém o ID.
 
-      Caso contrário,
-      cria um novo ID.
-    */
     const planejamento:
       PlanejamentoSalvo = {
+
+      /*
+        Se for edição:
+        mantém o ID existente.
+
+        Se for novo:
+        gera novo ID.
+      */
       id:
         planoSelecionado?.id ||
         gerarId(),
+
+
+      /*
+        AQUI ESTÁ A PRINCIPAL ALTERAÇÃO.
+
+        O plano pertence ao usuário
+        atualmente logado.
+      */
+      usuarioId:
+        usuario.id,
+
 
       criadoEm:
         planoSelecionado?.criadoEm ||
         agora,
 
-      atualizadoEm: agora,
+
+      atualizadoEm:
+        agora,
+
 
       dados,
+
 
       conteudo
     };
 
-    /*
-      Verifica se esse plano
-      já existe.
-    */
-    const indice =
-      planejamentos.findIndex(
-        (plano) =>
-          plano.id ===
-          planejamento.id
-      );
-
-    if (indice >= 0) {
-      /*
-        Atualização de plano existente
-      */
-      planejamentos[indice] =
-        planejamento;
-    } else {
-      /*
-        Novo planejamento
-      */
-      planejamentos.push(
-        planejamento
-      );
-    }
 
     /*
-      Salva todos os planos.
+      O service salva ou atualiza.
     */
-    localStorage.setItem(
-      'planejamentosSalvos',
-      JSON.stringify(
-        planejamentos
-      )
+    salvarPlanejamento(
+      planejamento
     );
 
+
     /*
-      Limpa os temporários.
+      Dados temporários não são
+      mais necessários.
     */
     sessionStorage.removeItem(
       'planoSelecionado'
@@ -273,10 +341,10 @@ const PlanoGerado: React.FC = () => {
       'planoEmCriacao'
     );
 
+
     /*
-      Depois de salvar,
-      vai para a página
-      dos planejamentos.
+      Retorna para a página
+      do usuário.
     */
     router.push(
       '/planejamentos',
@@ -284,12 +352,18 @@ const PlanoGerado: React.FC = () => {
     );
   };
 
+
   return (
     <IonPage>
 
       <IonContent fullscreen>
 
         <div className="pagina-plano-gerado">
+
+
+          {/* ===============================================
+              CABEÇALHO
+          =============================================== */}
 
           <header className="plano-topo">
 
@@ -303,6 +377,7 @@ const PlanoGerado: React.FC = () => {
               ← Voltar
             </button>
 
+
             <div className="marca-plano">
 
               <span className="marca-simbolo-plano" />
@@ -311,17 +386,25 @@ const PlanoGerado: React.FC = () => {
 
             </div>
 
+
             <div className="topo-espaco" />
 
           </header>
 
+
           <main className="plano-container">
+
+
+            {/* =============================================
+                TÍTULO
+            ============================================= */}
 
             <section className="plano-cabecalho">
 
               <span className="plano-etiqueta">
                 plano de aula
               </span>
+
 
               {editando ? (
 
@@ -346,6 +429,7 @@ const PlanoGerado: React.FC = () => {
 
               )}
 
+
               <p>
                 Seu planejamento está pronto.
                 Você pode revisar, editar e
@@ -354,7 +438,10 @@ const PlanoGerado: React.FC = () => {
 
             </section>
 
-            {/* RESUMO */}
+
+            {/* =============================================
+                RESUMO
+            ============================================= */}
 
             <section className="resumo-aula">
 
@@ -370,6 +457,7 @@ const PlanoGerado: React.FC = () => {
 
               </div>
 
+
               <div>
 
                 <span className="resumo-rotulo">
@@ -381,6 +469,7 @@ const PlanoGerado: React.FC = () => {
                 </strong>
 
               </div>
+
 
               <div>
 
@@ -400,29 +489,47 @@ const PlanoGerado: React.FC = () => {
 
             </section>
 
-            {/* CONTEÚDO */}
+
+            {/* =============================================
+                FOLHA
+            ============================================= */}
 
             <section className="folha-plano">
 
               <span className="fita-plano" />
 
+
               <BlocoPlano
                 numero="01"
                 titulo="Objetivo da aula"
                 campo="objetivo"
-                valor={conteudo.objetivo}
-                editando={editando}
-                atualizar={atualizarCampo}
+                valor={
+                  conteudo.objetivo
+                }
+                editando={
+                  editando
+                }
+                atualizar={
+                  atualizarCampo
+                }
               />
+
 
               <BlocoPlano
                 numero="02"
                 titulo="Introdução"
                 campo="introducao"
-                valor={conteudo.introducao}
-                editando={editando}
-                atualizar={atualizarCampo}
+                valor={
+                  conteudo.introducao
+                }
+                editando={
+                  editando
+                }
+                atualizar={
+                  atualizarCampo
+                }
               />
+
 
               <BlocoPlano
                 numero="03"
@@ -431,38 +538,68 @@ const PlanoGerado: React.FC = () => {
                 valor={
                   conteudo.desenvolvimento
                 }
-                editando={editando}
-                atualizar={atualizarCampo}
+                editando={
+                  editando
+                }
+                atualizar={
+                  atualizarCampo
+                }
               />
+
 
               <BlocoPlano
                 numero="04"
                 titulo="Atividade"
                 campo="atividade"
-                valor={conteudo.atividade}
-                editando={editando}
-                atualizar={atualizarCampo}
+                valor={
+                  conteudo.atividade
+                }
+                editando={
+                  editando
+                }
+                atualizar={
+                  atualizarCampo
+                }
               />
+
 
               <BlocoPlano
                 numero="05"
                 titulo="Recursos"
                 campo="recursos"
-                valor={conteudo.recursos}
-                editando={editando}
-                atualizar={atualizarCampo}
+                valor={
+                  conteudo.recursos
+                }
+                editando={
+                  editando
+                }
+                atualizar={
+                  atualizarCampo
+                }
               />
+
 
               <BlocoPlano
                 numero="06"
                 titulo="Avaliação"
                 campo="avaliacao"
-                valor={conteudo.avaliacao}
-                editando={editando}
-                atualizar={atualizarCampo}
+                valor={
+                  conteudo.avaliacao
+                }
+                editando={
+                  editando
+                }
+                atualizar={
+                  atualizarCampo
+                }
               />
 
             </section>
+
+
+            {/* =============================================
+                OBSERVAÇÃO
+            ============================================= */}
 
             {dados.observacoes && (
 
@@ -480,9 +617,13 @@ const PlanoGerado: React.FC = () => {
 
             )}
 
-            {/* BOTÕES */}
+
+            {/* =============================================
+                AÇÕES
+            ============================================= */}
 
             <div className="acoes-plano">
+
 
               {!editando ? (
 
@@ -501,6 +642,7 @@ const PlanoGerado: React.FC = () => {
 
                     Editar planejamento
                   </button>
+
 
                   <button
                     type="button"
@@ -548,25 +690,36 @@ const PlanoGerado: React.FC = () => {
   );
 };
 
-interface BlocoPlanoProps {
-  numero: string;
 
-  titulo: string;
+/* =========================================================
+   BLOCO DO PLANO
+   ========================================================= */
+
+interface BlocoPlanoProps {
+  numero:
+    string;
+
+  titulo:
+    string;
 
   campo:
     keyof ConteudoPlano;
 
-  valor: string;
+  valor:
+    string;
 
-  editando: boolean;
+  editando:
+    boolean;
 
   atualizar: (
     campo:
       keyof ConteudoPlano,
 
-    valor: string
+    valor:
+      string
   ) => void;
 }
+
 
 const BlocoPlano:
 React.FC<BlocoPlanoProps> = ({
@@ -577,6 +730,7 @@ React.FC<BlocoPlanoProps> = ({
   editando,
   atualizar
 }) => {
+
   return (
     <article className="bloco-plano">
 
@@ -592,11 +746,14 @@ React.FC<BlocoPlanoProps> = ({
 
       </div>
 
+
       {editando ? (
 
         <textarea
           className="campo-edicao-plano"
-          value={valor}
+          value={
+            valor
+          }
           onChange={(e) =>
             atualizar(
               campo,
@@ -616,5 +773,6 @@ React.FC<BlocoPlanoProps> = ({
     </article>
   );
 };
+
 
 export default PlanoGerado;

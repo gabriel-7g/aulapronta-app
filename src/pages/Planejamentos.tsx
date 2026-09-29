@@ -14,51 +14,21 @@ import {
   sair
 } from '../utils/auth';
 
+import {
+  excluirPlanejamentoDoUsuario,
+  listarPlanejamentosDoUsuario
+} from '../services/planejamentoService';
+
+import {
+  PlanejamentoSalvo
+} from '../types/planejamento';
+
 import './Planejamentos.css';
 
 
-/* =========================================================
-   TIPOS
-   ========================================================= */
-
-interface DadosPlano {
-  materia: string;
-  materiaId: string | null;
-  turma: string;
-  duracao: string;
-  tema: string;
-  observacoes: string;
-}
-
-interface ConteudoPlano {
-  titulo: string;
-  objetivo: string;
-  introducao: string;
-  desenvolvimento: string;
-  atividade: string;
-  recursos: string;
-  avaliacao: string;
-}
-
-export interface PlanejamentoSalvo {
-  id: string;
-
-  criadoEm: string;
-
-  atualizadoEm: string;
-
-  dados: DadosPlano;
-
-  conteudo: ConteudoPlano;
-}
-
-
-/* =========================================================
-   COMPONENTE
-   ========================================================= */
-
 const Planejamentos: React.FC = () => {
-  const router = useIonRouter();
+  const router =
+    useIonRouter();
 
   const usuario =
     obterUsuarioLogado();
@@ -71,66 +41,59 @@ const Planejamentos: React.FC = () => {
 
 
   /* =======================================================
-     CARREGAR PLANEJAMENTOS
+     CARREGAR OS PLANOS DO USUÁRIO LOGADO
      ======================================================= */
 
   useEffect(() => {
+
+    if (!usuario) {
+      return;
+    }
+
     carregarPlanejamentos();
+
   }, []);
 
 
   const carregarPlanejamentos = () => {
-    const salvos =
-      localStorage.getItem(
-        'planejamentosSalvos'
-      );
 
-    if (!salvos) {
+    if (!usuario) {
       setPlanejamentos([]);
 
       return;
     }
 
-    try {
-      const lista:
-        PlanejamentoSalvo[] =
-        JSON.parse(salvos);
-
-      /*
-        Mais recentes aparecem primeiro.
-      */
-      lista.sort(
-        (a, b) =>
-          new Date(
-            b.atualizadoEm
-          ).getTime() -
-          new Date(
-            a.atualizadoEm
-          ).getTime()
+    const lista =
+      listarPlanejamentosDoUsuario(
+        usuario.id
       );
 
-      setPlanejamentos(lista);
-
-    } catch (erro) {
-
-      console.error(
-        'Erro ao carregar planejamentos:',
-        erro
-      );
-
-      setPlanejamentos([]);
-    }
+    setPlanejamentos(
+      lista
+    );
   };
 
 
   /* =======================================================
-     ABRIR PLANEJAMENTO
+     ABRIR PLANO
      ======================================================= */
 
   const abrirPlanejamento = (
     planejamento:
       PlanejamentoSalvo
   ) => {
+
+    /*
+      Segurança extra:
+      nunca abre plano de outro usuário.
+    */
+    if (
+      !usuario ||
+      planejamento.usuarioId !==
+        usuario.id
+    ) {
+      return;
+    }
 
     sessionStorage.setItem(
       'planoSelecionado',
@@ -154,6 +117,10 @@ const Planejamentos: React.FC = () => {
     id: string
   ) => {
 
+    if (!usuario) {
+      return;
+    }
+
     const confirmar =
       window.confirm(
         'Deseja realmente excluir este planejamento?'
@@ -163,22 +130,16 @@ const Planejamentos: React.FC = () => {
       return;
     }
 
-    const novaLista =
-      planejamentos.filter(
-        (plano) =>
-          plano.id !== id
-      );
-
-    localStorage.setItem(
-      'planejamentosSalvos',
-      JSON.stringify(
-        novaLista
-      )
+    excluirPlanejamentoDoUsuario(
+      id,
+      usuario.id
     );
 
-    setPlanejamentos(
-      novaLista
-    );
+    /*
+      Recarrega somente os planos
+      do usuário atual.
+    */
+    carregarPlanejamentos();
   };
 
 
@@ -209,17 +170,8 @@ const Planejamentos: React.FC = () => {
 
   const fazerLogout = () => {
 
-    /*
-      Remove a sessão.
-    */
     sair();
 
-    /*
-      Volta para login.
-
-      "root" evita manter a tela
-      atual na pilha normal do Ionic.
-    */
     router.push(
       '/login',
       'root'
@@ -228,7 +180,7 @@ const Planejamentos: React.FC = () => {
 
 
   /* =======================================================
-     FORMATAR DATA
+     DATA
      ======================================================= */
 
   const formatarData = (
@@ -239,10 +191,13 @@ const Planejamentos: React.FC = () => {
       'pt-BR',
       {
         day: '2-digit',
+
         month: '2-digit',
+
         year: 'numeric',
 
         hour: '2-digit',
+
         minute: '2-digit'
       }
     ).format(
@@ -250,10 +205,6 @@ const Planejamentos: React.FC = () => {
     );
   };
 
-
-  /* =======================================================
-     INTERFACE
-     ======================================================= */
 
   return (
     <IonPage>
@@ -356,8 +307,6 @@ const Planejamentos: React.FC = () => {
           <main className="planejamentos-container">
 
 
-            {/* CABEÇALHO DA PÁGINA */}
-
             <section className="planejamentos-cabecalho">
 
               <span className="planejamentos-etiqueta">
@@ -414,8 +363,6 @@ const Planejamentos: React.FC = () => {
 
               <>
 
-                {/* QUANTIDADE */}
-
                 <div className="lista-cabecalho">
 
                   <span>
@@ -448,8 +395,6 @@ const Planejamentos: React.FC = () => {
                         <span className="planejamento-fita" />
 
 
-                        {/* TOPO CARD */}
-
                         <div className="planejamento-card-topo">
 
                           <span className="planejamento-materia">
@@ -480,8 +425,6 @@ const Planejamentos: React.FC = () => {
                         </div>
 
 
-                        {/* TÍTULO */}
-
                         <h2>
 
                           {
@@ -492,8 +435,6 @@ const Planejamentos: React.FC = () => {
 
                         </h2>
 
-
-                        {/* TAGS */}
 
                         <div className="planejamento-tags">
 
@@ -528,8 +469,6 @@ const Planejamentos: React.FC = () => {
                         </div>
 
 
-                        {/* OBJETIVO */}
-
                         <p className="planejamento-resumo">
 
                           {
@@ -540,8 +479,6 @@ const Planejamentos: React.FC = () => {
 
                         </p>
 
-
-                        {/* RODAPÉ */}
 
                         <div className="planejamento-rodape">
 

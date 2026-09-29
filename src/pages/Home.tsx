@@ -1,115 +1,259 @@
-import React, { useState } from 'react';
-import { IonContent, IonPage, useIonRouter } from '@ionic/react';
+import React, {
+  useState
+} from 'react';
+
+import {
+  IonContent,
+  IonPage,
+  useIonRouter
+} from '@ionic/react';
 
 import './Home.css';
+
 
 interface Materia {
   id: string;
   nome: string;
 }
 
+
 const MATERIAS: Materia[] = [
-  { id: 'portugues', nome: 'Português' },
-  { id: 'matematica', nome: 'Matemática' },
-  { id: 'ciencias', nome: 'Ciências' },
-  { id: 'historia', nome: 'História' },
-  { id: 'geografia', nome: 'Geografia' },
-  { id: 'ingles', nome: 'Inglês' },
-  { id: 'artes', nome: 'Artes' },
-  { id: 'educacao-fisica', nome: 'Educação Física' },
+  {
+    id: 'portugues',
+    nome: 'Português'
+  },
+
+  {
+    id: 'matematica',
+    nome: 'Matemática'
+  },
+
+  {
+    id: 'ciencias',
+    nome: 'Ciências'
+  },
+
+  {
+    id: 'historia',
+    nome: 'História'
+  },
+
+  {
+    id: 'geografia',
+    nome: 'Geografia'
+  },
+
+  {
+    id: 'ingles',
+    nome: 'Inglês'
+  },
+
+  {
+    id: 'artes',
+    nome: 'Artes'
+  },
+
+  {
+    id: 'educacao-fisica',
+    nome: 'Educação Física'
+  }
 ];
 
+
 const Home: React.FC = () => {
-  const router = useIonRouter();
+  const router =
+    useIonRouter();
 
-  const [materiaSelecionada, setMateriaSelecionada] = useState<string | null>(
-    null
-  );
 
-  const [turma, setTurma] = useState('');
-  const [duracao, setDuracao] = useState('');
-  const [tema, setTema] = useState('');
-  const [observacoes, setObservacoes] = useState('');
+  const [
+    materiaSelecionada,
+    setMateriaSelecionada
+  ] =
+    useState<string | null>(
+      null
+    );
 
-  const materiaAtual = MATERIAS.find(
-    (materia) => materia.id === materiaSelecionada
-  );
 
-  const podeGerar = Boolean(
-    materiaSelecionada &&
+  const [
+    turma,
+    setTurma
+  ] =
+    useState('');
+
+
+  const [
+    duracao,
+    setDuracao
+  ] =
+    useState('');
+
+
+  const [
+    tema,
+    setTema
+  ] =
+    useState('');
+
+
+  const [
+    observacoes,
+    setObservacoes
+  ] =
+    useState('');
+
+
+  const materiaAtual =
+    MATERIAS.find(
+      (materia) =>
+        materia.id ===
+        materiaSelecionada
+    );
+
+
+  const podeGerar =
+    Boolean(
+      materiaSelecionada &&
       turma &&
       duracao &&
       tema.trim()
-  );
+    );
+
+
+  /* =======================================================
+     GERAR PLANO
+     ======================================================= */
 
   const gerarPlano = () => {
-    if (!podeGerar) return;
+
+    if (!podeGerar) {
+      return;
+    }
+
 
     const dadosPlano = {
-      materia: materiaAtual?.nome || '',
-      materiaId: materiaSelecionada,
+
+      materia:
+        materiaAtual?.nome ||
+        '',
+
+      materiaId:
+        materiaSelecionada,
+
       turma,
+
       duracao,
+
       tema,
-      observacoes,
+
+      observacoes
+
     };
 
-    /*
-      TEMPORÁRIO:
-      guarda os dados no navegador.
 
-      Depois você poderá trocar isso por uma requisição
-      para o backend.
+    /*
+      TEMPORÁRIO.
+
+      Depois esses dados serão enviados
+      para o backend/IA.
     */
     sessionStorage.setItem(
       'planoEmCriacao',
-      JSON.stringify(dadosPlano)
+      JSON.stringify(
+        dadosPlano
+      )
     );
 
+
     /*
-      Abre a página do planejamento gerado.
+      AGORA NÃO VAMOS DIRETAMENTE
+      PARA O PLANO.
+
+      Primeiro mostramos o carregamento.
     */
-    router.push('/plano-gerado', 'forward');
+    router.push(
+      '/gerando-plano',
+      'forward'
+    );
+
   };
 
+
+  /* =======================================================
+     MEUS PLANEJAMENTOS
+     ======================================================= */
+
   const abrirPlanejamentos = () => {
-    router.push('/planejamentos', 'forward');
+
+    router.push(
+      '/planejamentos',
+      'forward'
+    );
+
   };
+
 
   return (
     <IonPage>
-      <IonContent fullscreen className="conteudo-lousa">
+
+      <IonContent
+        fullscreen
+        className="conteudo-lousa"
+      >
+
         <div className="pagina-criar-plano">
 
-          {/* CABEÇALHO */}
+
+          {/* ===============================================
+              CABEÇALHO
+          =============================================== */}
+
           <header className="cabecalho">
+
             <div className="cabecalho-espaco" />
 
+
             <div className="marca">
+
               <span className="marca-simbolo" />
+
               Lousa
+
             </div>
+
 
             <button
               type="button"
               className="botao-meus-planejamentos"
-              onClick={abrirPlanejamentos}
+              onClick={
+                abrirPlanejamentos
+              }
             >
               Meus planejamentos
             </button>
+
           </header>
 
-          {/* CONTEÚDO PRINCIPAL */}
+
+          {/* ===============================================
+              CONTEÚDO PRINCIPAL
+          =============================================== */}
+
           <div className="layout-principal">
 
+
             {/* FORMULÁRIO */}
+
             <section className="secao-formulario">
 
+
               <div className="formulario-cabecalho">
+
                 <h1 className="formulario-titulo">
+
                   Vamos montar sua{' '}
 
                   <span className="destaque">
+
                     próxima aula
 
                     <svg
@@ -117,49 +261,85 @@ const Home: React.FC = () => {
                       viewBox="0 0 220 20"
                       preserveAspectRatio="none"
                     >
-                      <path d="M4 14 C 60 4, 160 4, 216 12" />
+
+                      <path
+                        d="M4 14 C 60 4, 160 4, 216 12"
+                      />
+
                     </svg>
+
                   </span>
+
                   .
+
                 </h1>
 
+
                 <p className="formulario-descricao">
-                  Escolha a matéria, conte o contexto da turma e a
-                  Lousa monta uma proposta completa.
+
+                  Escolha a matéria, conte o
+                  contexto da turma e a Lousa
+                  monta uma proposta completa.
+
                 </p>
+
               </div>
 
+
               {/* MATÉRIA */}
+
               <div className="campo-grupo">
+
                 <span className="campo-rotulo">
                   Matéria
                 </span>
 
+
                 <div className="grade-materias">
 
-                  {MATERIAS.map((materia) => (
-                    <button
-                      key={materia.id}
-                      type="button"
-                      className={`materia-cartao ${
-                        materiaSelecionada === materia.id
-                          ? 'selecionada'
-                          : ''
-                      }`}
-                      onClick={() =>
-                        setMateriaSelecionada(materia.id)
-                      }
-                    >
-                      <span className="materia-nome">
-                        {materia.nome}
-                      </span>
-                    </button>
-                  ))}
+                  {MATERIAS.map(
+                    (materia) => (
+
+                      <button
+                        key={
+                          materia.id
+                        }
+                        type="button"
+                        className={
+                          `materia-cartao ${
+                            materiaSelecionada ===
+                            materia.id
+                              ? 'selecionada'
+                              : ''
+                          }`
+                        }
+                        onClick={() =>
+                          setMateriaSelecionada(
+                            materia.id
+                          )
+                        }
+                      >
+
+                        <span className="materia-nome">
+
+                          {
+                            materia.nome
+                          }
+
+                        </span>
+
+                      </button>
+
+                    )
+                  )}
 
                 </div>
+
               </div>
 
+
               {/* TURMA + DURAÇÃO */}
+
               <div className="campo-linha">
 
                 <div className="campo-grupo">
@@ -171,19 +351,27 @@ const Home: React.FC = () => {
                     Turma / ano
                   </label>
 
+
                   <select
                     id="turma"
                     className="campo-select"
-                    value={turma}
+                    value={
+                      turma
+                    }
                     onChange={(e) =>
-                      setTurma(e.target.value)
+                      setTurma(
+                        e.target.value
+                      )
                     }
                   >
+
                     <option value="">
                       Selecione
                     </option>
 
+
                     <optgroup label="Ensino Fundamental I">
+
                       <option value="1º ano">
                         1º ano
                       </option>
@@ -203,9 +391,12 @@ const Home: React.FC = () => {
                       <option value="5º ano">
                         5º ano
                       </option>
+
                     </optgroup>
 
+
                     <optgroup label="Ensino Fundamental II">
+
                       <option value="6º ano">
                         6º ano
                       </option>
@@ -221,9 +412,12 @@ const Home: React.FC = () => {
                       <option value="9º ano">
                         9º ano
                       </option>
+
                     </optgroup>
 
+
                     <optgroup label="Ensino Médio">
+
                       <option value="1ª série do Ensino Médio">
                         1ª série
                       </option>
@@ -235,10 +429,13 @@ const Home: React.FC = () => {
                       <option value="3ª série do Ensino Médio">
                         3ª série
                       </option>
+
                     </optgroup>
 
                   </select>
+
                 </div>
+
 
                 <div className="campo-grupo">
 
@@ -249,22 +446,30 @@ const Home: React.FC = () => {
                     Duração da aula (em minutos)
                   </label>
 
+
                   <input
                     id="duracao"
                     className="campo-texto"
                     type="number"
                     min={1}
                     placeholder="Ex: 50"
-                    value={duracao}
+                    value={
+                      duracao
+                    }
                     onChange={(e) =>
-                      setDuracao(e.target.value)
+                      setDuracao(
+                        e.target.value
+                      )
                     }
                   />
 
                 </div>
+
               </div>
 
+
               {/* TEMA */}
+
               <div className="campo-grupo">
 
                 <label
@@ -274,111 +479,168 @@ const Home: React.FC = () => {
                   Tema da aula
                 </label>
 
+
                 <input
                   id="tema"
                   className="campo-texto"
                   type="text"
                   placeholder="Ex: Frações — introdução"
-                  value={tema}
+                  value={
+                    tema
+                  }
                   onChange={(e) =>
-                    setTema(e.target.value)
+                    setTema(
+                      e.target.value
+                    )
                   }
                 />
 
               </div>
 
+
               {/* OBSERVAÇÕES */}
+
               <div className="campo-grupo">
 
                 <label
                   className="campo-rotulo"
                   htmlFor="observacoes"
                 >
-                  Algo que a Lousa deveria saber? (opcional)
+                  Algo que a Lousa deveria
+                  saber? (opcional)
                 </label>
+
 
                 <textarea
                   id="observacoes"
                   className="campo-textarea"
                   rows={3}
                   placeholder="Ex: a turma já viu isso de forma teórica, precisa de algo mais prático"
-                  value={observacoes}
+                  value={
+                    observacoes
+                  }
                   onChange={(e) =>
-                    setObservacoes(e.target.value)
+                    setObservacoes(
+                      e.target.value
+                    )
                   }
                 />
 
               </div>
 
-              {/* BOTÃO GERAR */}
+
+              {/* GERAR */}
+
               <button
                 type="button"
                 className="botao-gerar"
-                disabled={!podeGerar}
-                onClick={gerarPlano}
+                disabled={
+                  !podeGerar
+                }
+                onClick={
+                  gerarPlano
+                }
               >
                 Gerar plano de aula
               </button>
 
+
               {!podeGerar && (
+
                 <p className="dica-preenchimento">
-                  Escolha matéria, turma, duração e tema
-                  para liberar o botão.
+
+                  Escolha matéria, turma,
+                  duração e tema para liberar
+                  o botão.
+
                 </p>
+
               )}
 
             </section>
 
-            {/* PRÉ-VISUALIZAÇÃO */}
+
+            {/* =============================================
+                RASCUNHO
+            ============================================= */}
+
             <aside className="pre-visualizacao">
 
               <div className="rascunho-cartao">
 
                 <span className="rascunho-fita" />
 
+
                 <span className="rascunho-etiqueta">
+
                   rascunho ao vivo
+
                 </span>
+
 
                 <div className="rascunho-linha">
 
                   <span className="rascunho-materia">
+
                     {materiaAtual
                       ? materiaAtual.nome
                       : 'Escolha uma matéria'}
+
                   </span>
 
                 </div>
+
 
                 <div className="rascunho-tags">
 
                   <span
-                    className={`rascunho-tag ${
-                      turma ? 'preenchida' : ''
-                    }`}
+                    className={
+                      `rascunho-tag ${
+                        turma
+                          ? 'preenchida'
+                          : ''
+                      }`
+                    }
                   >
-                    {turma || 'turma'}
+
+                    {turma ||
+                      'turma'}
+
                   </span>
 
+
                   <span
-                    className={`rascunho-tag ${
-                      duracao ? 'preenchida' : ''
-                    }`}
+                    className={
+                      `rascunho-tag ${
+                        duracao
+                          ? 'preenchida'
+                          : ''
+                      }`
+                    }
                   >
+
                     {duracao
                       ? `${duracao} min`
                       : 'duração'}
+
                   </span>
 
                 </div>
 
+
                 <p
-                  className={`rascunho-tema ${
-                    tema ? 'preenchida' : ''
-                  }`}
+                  className={
+                    `rascunho-tema ${
+                      tema
+                        ? 'preenchida'
+                        : ''
+                    }`
+                  }
                 >
+
                   {tema ||
                     'o tema da aula aparece aqui...'}
+
                 </p>
 
               </div>
@@ -386,10 +648,14 @@ const Home: React.FC = () => {
             </aside>
 
           </div>
+
         </div>
+
       </IonContent>
+
     </IonPage>
   );
 };
+
 
 export default Home;

@@ -16,27 +16,41 @@ import {
 } from '@ionic/react-router';
 
 
-/* PÁGINAS */
+/* =========================================================
+   PÁGINAS
+   ========================================================= */
 
-import Login from './pages/login';
+import Login
+  from './pages/login';
 
-import CriarConta from './pages/CriarConta';
+import CriarConta
+  from './pages/CriarConta';
 
-import Home from './pages/Home';
+import Planejamentos
+  from './pages/Planejamentos';
 
-import PlanoGerado from './pages/PlanoGerado';
+import Home
+  from './pages/Home';
 
-import Planejamentos from './pages/Planejamentos';
+import GerandoPlano
+  from './pages/GerandoPlano';
+
+import PlanoGerado
+  from './pages/PlanoGerado';
 
 
-/* AUTENTICAÇÃO */
+/* =========================================================
+   AUTENTICAÇÃO
+   ========================================================= */
 
 import {
   estaAutenticado
 } from './utils/auth';
 
 
-/* IONIC */
+/* =========================================================
+   IONIC CSS
+   ========================================================= */
 
 import '@ionic/react/css/core.css';
 
@@ -72,38 +86,51 @@ import './theme/variables.css';
 setupIonicReact();
 
 
-/*
-  Componente usado para impedir acesso
-  às páginas privadas sem login.
-*/
+/* =========================================================
+   ROTA PROTEGIDA
+   ========================================================= */
 
 interface RotaProtegidaProps {
-  children: React.ReactNode;
+  children:
+    React.ReactNode;
 }
+
 
 const RotaProtegida:
 React.FC<RotaProtegidaProps> = ({
   children
 }) => {
 
-  if (!estaAutenticado()) {
+  if (
+    !estaAutenticado()
+  ) {
+
     return (
       <Navigate
         to="/login"
         replace
       />
     );
+
   }
+
 
   return (
     <>
       {children}
     </>
   );
+
 };
 
 
-const App: React.FC = () => (
+/* =========================================================
+   APP
+   ========================================================= */
+
+const App:
+React.FC = () => (
+
   <IonApp>
 
     <IonReactRouter>
@@ -111,9 +138,7 @@ const App: React.FC = () => (
       <IonRouterOutlet>
 
 
-        {/* =========================
-            LOGIN
-        ========================= */}
+        {/* LOGIN */}
 
         <Route
           path="/login"
@@ -123,9 +148,7 @@ const App: React.FC = () => (
         />
 
 
-        {/* =========================
-            CRIAR CONTA
-        ========================= */}
+        {/* CRIAR CONTA */}
 
         <Route
           path="/criar-conta"
@@ -135,81 +158,99 @@ const App: React.FC = () => (
         />
 
 
-        {/* =========================
-            MEUS PLANEJAMENTOS
-        ========================= */}
+        {/* PLANEJAMENTOS */}
 
         <Route
           path="/planejamentos"
           element={
+
             <RotaProtegida>
 
               <Planejamentos />
 
             </RotaProtegida>
+
           }
         />
 
 
-        {/* =========================
-            CRIAR PLANO
-        ========================= */}
+        {/* CRIAR PLANO */}
 
         <Route
           path="/home"
           element={
+
             <RotaProtegida>
 
               <Home />
 
             </RotaProtegida>
+
           }
         />
 
 
-        {/* =========================
-            PLANO GERADO
-        ========================= */}
+        {/* GERANDO PLANO */}
+
+        <Route
+          path="/gerando-plano"
+          element={
+
+            <RotaProtegida>
+
+              <GerandoPlano />
+
+            </RotaProtegida>
+
+          }
+        />
+
+
+        {/* PLANO GERADO */}
 
         <Route
           path="/plano-gerado"
           element={
+
             <RotaProtegida>
 
               <PlanoGerado />
 
             </RotaProtegida>
+
           }
         />
 
 
-        {/* =========================
-            PÁGINA INICIAL
-        ========================= */}
+        {/* PÁGINA INICIAL */}
 
         <Route
           path="/"
           element={
+
             estaAutenticado()
               ? (
+
                 <Navigate
                   to="/planejamentos"
                   replace
                 />
+
               )
               : (
+
                 <Navigate
                   to="/login"
                   replace
                 />
+
               )
+
           }
         />
 
 
-        {/* =========================
-            URL INVÁLIDA
-        ========================= */}
+        {/* URL INVÁLIDA */}
 
         <Route
           path="*"
@@ -227,6 +268,8 @@ const App: React.FC = () => (
     </IonReactRouter>
 
   </IonApp>
+
 );
+
 
 export default App;
