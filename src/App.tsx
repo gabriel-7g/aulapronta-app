@@ -23,9 +23,6 @@ import {
 import Login
   from './pages/login';
 
-import CriarConta
-  from './pages/CriarConta';
-
 import Planejamentos
   from './pages/Planejamentos';
 
@@ -38,12 +35,16 @@ import GerandoPlano
 import PlanoGerado
   from './pages/PlanoGerado';
 
+import AdminUsuarios
+  from './pages/AdminUsuarios';
+
 
 /* =========================================================
    AUTENTICAÇÃO
    ========================================================= */
 
 import {
+  ehAdministrador,
   estaAutenticado
 } from './utils/auth';
 
@@ -91,13 +92,17 @@ setupIonicReact();
    ========================================================= */
 
 interface RotaProtegidaProps {
+
   children:
     React.ReactNode;
+
 }
 
 
 const RotaProtegida:
-React.FC<RotaProtegidaProps> = ({
+React.FC<
+  RotaProtegidaProps
+> = ({
   children
 }) => {
 
@@ -106,10 +111,81 @@ React.FC<RotaProtegidaProps> = ({
   ) {
 
     return (
+
       <Navigate
         to="/login"
         replace
       />
+
+    );
+
+  }
+
+  return (
+    <>
+      {children}
+    </>
+  );
+
+};
+
+
+/* =========================================================
+   ROTA DE ADMINISTRADOR
+   ========================================================= */
+
+interface RotaAdminProps {
+
+  children:
+    React.ReactNode;
+
+}
+
+
+const RotaAdmin:
+React.FC<
+  RotaAdminProps
+> = ({
+  children
+}) => {
+
+  /*
+    Primeiro verificamos se
+    existe uma sessão válida.
+  */
+
+  if (
+    !estaAutenticado()
+  ) {
+
+    return (
+
+      <Navigate
+        to="/login"
+        replace
+      />
+
+    );
+
+  }
+
+
+  /*
+    Depois verificamos se
+    realmente é administrador.
+  */
+
+  if (
+    !ehAdministrador()
+  ) {
+
+    return (
+
+      <Navigate
+        to="/planejamentos"
+        replace
+      />
+
     );
 
   }
@@ -142,26 +218,39 @@ React.FC = () => (
 
         <Route
           path="/login"
+
           element={
             <Login />
           }
         />
 
 
-        {/* CRIAR CONTA */}
+        {/* ===============================================
+            ADMINISTRADOR
+           =============================================== */}
 
         <Route
-          path="/criar-conta"
+          path="/admin/usuarios"
+
           element={
-            <CriarConta />
+
+            <RotaAdmin>
+
+              <AdminUsuarios />
+
+            </RotaAdmin>
+
           }
         />
 
 
-        {/* PLANEJAMENTOS */}
+        {/* ===============================================
+            PLANEJAMENTOS
+           =============================================== */}
 
         <Route
           path="/planejamentos"
+
           element={
 
             <RotaProtegida>
@@ -174,10 +263,13 @@ React.FC = () => (
         />
 
 
-        {/* CRIAR PLANO */}
+        {/* ===============================================
+            CRIAR PLANO
+           =============================================== */}
 
         <Route
           path="/home"
+
           element={
 
             <RotaProtegida>
@@ -190,10 +282,13 @@ React.FC = () => (
         />
 
 
-        {/* GERANDO PLANO */}
+        {/* ===============================================
+            GERANDO PLANO
+           =============================================== */}
 
         <Route
           path="/gerando-plano"
+
           element={
 
             <RotaProtegida>
@@ -206,10 +301,13 @@ React.FC = () => (
         />
 
 
-        {/* PLANO GERADO */}
+        {/* ===============================================
+            PLANO GERADO
+           =============================================== */}
 
         <Route
           path="/plano-gerado"
+
           element={
 
             <RotaProtegida>
@@ -222,21 +320,45 @@ React.FC = () => (
         />
 
 
-        {/* PÁGINA INICIAL */}
+        {/* ===============================================
+            PÁGINA INICIAL
+           =============================================== */}
 
         <Route
           path="/"
+
           element={
 
             estaAutenticado()
+
               ? (
 
-                <Navigate
-                  to="/planejamentos"
-                  replace
-                />
+                ehAdministrador()
+
+                  ? (
+
+                    <Navigate
+                      to=
+                        "/admin/usuarios"
+
+                      replace
+                    />
+
+                  )
+
+                  : (
+
+                    <Navigate
+                      to=
+                        "/planejamentos"
+
+                      replace
+                    />
+
+                  )
 
               )
+
               : (
 
                 <Navigate
@@ -250,15 +372,20 @@ React.FC = () => (
         />
 
 
-        {/* URL INVÁLIDA */}
+        {/* ===============================================
+            URL INVÁLIDA
+           =============================================== */}
 
         <Route
           path="*"
+
           element={
+
             <Navigate
               to="/"
               replace
             />
+
           }
         />
 
