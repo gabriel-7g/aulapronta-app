@@ -1,0 +1,85 @@
+/* =========================================================
+   AÇÕES DO CARD
+   ========================================================= */
+
+.planejamento-card-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+/* =========================================================
+   DUPLICAR
+   ========================================================= */
+
+.botao-duplicar-plano {
+  flex: none;
+
+  padding: 6px 9px;
+
+  border:
+    1px solid
+    rgba(32, 64, 47, 0.22);
+
+  border-radius: 6px;
+
+  background:
+    rgba(32, 64, 47, 0.05);
+
+  color:
+    var(--verde-lousa-700);
+
+  font-family:
+    var(--fonte-texto);
+
+  font-size: 0.73rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+
+.botao-duplicar-plano:hover {
+  border-color:
+    var(--verde-lousa-700);
+
+  background:
+    rgba(32, 64, 47, 0.1);
+}
+
+
+/* =========================================================
+   ACESSIBILIDADE
+   ========================================================= */
+
+.botao-duplicar-plano:focus-visible {
+  outline:
+    2px solid
+    var(--amarelo-giz);
+
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 470px) {
+
+  .planejamento-card-acoes {
+    width: 100%;
+
+    justify-content:
+      space-between;
+
+    margin-top: 5px;
+  }
+
+}

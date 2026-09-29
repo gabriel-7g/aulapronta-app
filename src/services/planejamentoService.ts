@@ -1,225 +1,253 @@
-import {
-  PlanejamentoSalvo
-} from '../types/planejamento';
+import { PlanejamentoSalvo } from '../types/planejamento';
 
 
-const PLANEJAMENTOS_KEY =
-  'planejamentosSalvos';
+const PLANEJAMENTOS_KEY = 'planejamentosSalvos';
 
 
 /* =========================================================
-   BUSCAR TODOS OS PLANOS DO NAVEGADOR
-
-   Essa função é interna.
-   As páginas não precisam usá-la diretamente.
+   FUNÇÕES INTERNAS
    ========================================================= */
 
-const obterTodosPlanejamentos =
-  (): PlanejamentoSalvo[] => {
+const gerarId = (): string => {
+  if (
+    typeof crypto !== 'undefined' &&
+    crypto.randomUUID
+  ) {
+    return crypto.randomUUID();
+  }
 
-    const dados =
-      localStorage.getItem(
-        PLANEJAMENTOS_KEY
-      );
-
-    if (!dados) {
-      return [];
-    }
-
-    try {
-      const lista =
-        JSON.parse(dados);
-
-      if (!Array.isArray(lista)) {
-        return [];
-      }
-
-      return lista;
-
-    } catch {
-      return [];
-    }
-  };
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
+};
 
 
-/* =========================================================
-   SALVAR LISTA COMPLETA
+const obterTodosPlanejamentos = (): PlanejamentoSalvo[] => {
+  const dados = localStorage.getItem(PLANEJAMENTOS_KEY);
 
-   Também é uma função interna.
-   ========================================================= */
+  if (!dados) {
+    return [];
+  }
+
+  try {
+    const lista = JSON.parse(dados);
+
+    return Array.isArray(lista)
+      ? lista
+      : [];
+  } catch {
+    return [];
+  }
+};
+
 
 const salvarTodosPlanejamentos = (
-  planejamentos:
-    PlanejamentoSalvo[]
+  planejamentos: PlanejamentoSalvo[]
 ) => {
-
   localStorage.setItem(
     PLANEJAMENTOS_KEY,
-    JSON.stringify(
-      planejamentos
-    )
+    JSON.stringify(planejamentos)
   );
 };
 
 
+const criarTituloDaCopia = (
+  tituloOriginal: string,
+  usuarioId: string
+): string => {
+  /*
+    Se duplicarmos uma cópia, removemos:
+    "(cópia)"
+    "(cópia 2)"
+    "(cópia 3)"
+    etc.
+  */
+
+  const tituloBase = tituloOriginal
+    .replace(/\s+\(cópia(?:\s+\d+)?\)$/i, '')
+    .trim();
+
+  const titulosExistentes = new Set(
+    listarPlanejamentosDoUsuario(usuarioId)
+      .map((plano) =>
+        plano.conteudo.titulo.toLocaleLowerCase('pt-BR')
+      )
+  );
+
+  let novoTitulo = `${tituloBase} (cópia)`;
+
+  if (
+    !titulosExistentes.has(
+      novoTitulo.toLocaleLowerCase('pt-BR')
+    )
+  ) {
+    return novoTitulo;
+  }
+
+  let numero = 2;
+
+  while (
+    titulosExistentes.has(
+      `${tituloBase} (cópia ${numero})`
+        .toLocaleLowerCase('pt-BR')
+    )
+  ) {
+    numero++;
+  }
+
+  return `${tituloBase} (cópia ${numero})`;
+};
+
+
 /* =========================================================
-   LISTAR SOMENTE OS PLANOS DE UM USUÁRIO
+   LISTAR PLANEJAMENTOS
    ========================================================= */
 
 export const listarPlanejamentosDoUsuario = (
   usuarioId: string
 ): PlanejamentoSalvo[] => {
-
-  const todos =
-    obterTodosPlanejamentos();
-
-  const planejamentosDoUsuario =
-    todos.filter(
+  return obterTodosPlanejamentos()
+    .filter(
       (plano) =>
-        plano.usuarioId ===
-        usuarioId
+        plano.usuarioId === usuarioId
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.atualizadoEm).getTime() -
+        new Date(a.atualizadoEm).getTime()
     );
-
-  /*
-    Mais recentes primeiro.
-  */
-  planejamentosDoUsuario.sort(
-    (a, b) =>
-      new Date(
-        b.atualizadoEm
-      ).getTime() -
-      new Date(
-        a.atualizadoEm
-      ).getTime()
-  );
-
-  return planejamentosDoUsuario;
 };
 
 
 /* =========================================================
-   BUSCAR UM PLANO ESPECÍFICO
-
-   Repare que também verificamos usuarioId.
-
-   Portanto:
-   usuário A não consegue carregar plano do usuário B.
+   BUSCAR PLANEJAMENTO
    ========================================================= */
 
 export const buscarPlanejamentoPorId = (
   id: string,
   usuarioId: string
 ): PlanejamentoSalvo | null => {
-
-  const todos =
-    obterTodosPlanejamentos();
-
-  const planejamento =
-    todos.find(
+  const planejamento = obterTodosPlanejamentos()
+    .find(
       (plano) =>
         plano.id === id &&
         plano.usuarioId === usuarioId
     );
 
-  return planejamento || null;
+  return planejamento ?? null;
 };
 
 
 /* =========================================================
-   SALVAR NOVO PLANO OU ATUALIZAR EXISTENTE
+   SALVAR / ATUALIZAR
    ========================================================= */
 
 export const salvarPlanejamento = (
-  planejamento:
-    PlanejamentoSalvo
+  planejamento: PlanejamentoSalvo
 ): PlanejamentoSalvo => {
+  const planejamentos = obterTodosPlanejamentos();
 
-  const todos =
-    obterTodosPlanejamentos();
-
-  /*
-    Só considera o mesmo plano se:
-    - ID for igual
-    - usuário também for igual
-  */
-  const indice =
-    todos.findIndex(
-      (plano) =>
-        plano.id ===
-          planejamento.id &&
-        plano.usuarioId ===
-          planejamento.usuarioId
-    );
+  const indice = planejamentos.findIndex(
+    (plano) =>
+      plano.id === planejamento.id &&
+      plano.usuarioId === planejamento.usuarioId
+  );
 
   if (indice >= 0) {
-
-    /*
-      Atualiza plano existente.
-    */
-    todos[indice] =
-      planejamento;
-
+    planejamentos[indice] = planejamento;
   } else {
-
-    /*
-      Cria novo plano.
-    */
-    todos.push(
-      planejamento
-    );
+    planejamentos.push(planejamento);
   }
 
-  salvarTodosPlanejamentos(
-    todos
-  );
+  salvarTodosPlanejamentos(planejamentos);
 
   return planejamento;
 };
 
 
 /* =========================================================
-   EXCLUIR PLANO
+   DUPLICAR PLANEJAMENTO
+   ========================================================= */
 
-   O usuarioId também é obrigatório.
+export const duplicarPlanejamentoDoUsuario = (
+  planejamentoId: string,
+  usuarioId: string
+): PlanejamentoSalvo | null => {
+  const original = buscarPlanejamentoPorId(
+    planejamentoId,
+    usuarioId
+  );
+
+  /*
+    Impede duplicar um planejamento inexistente
+    ou pertencente a outro usuário.
+  */
+
+  if (!original) {
+    return null;
+  }
+
+  const agora = new Date().toISOString();
+
+  const copia: PlanejamentoSalvo = {
+    ...original,
+
+    id: gerarId(),
+
+    usuarioId,
+
+    criadoEm: agora,
+
+    atualizadoEm: agora,
+
+    dados: {
+      ...original.dados
+    },
+
+    conteudo: {
+      ...original.conteudo,
+
+      titulo: criarTituloDaCopia(
+        original.conteudo.titulo,
+        usuarioId
+      )
+    }
+  };
+
+  return salvarPlanejamento(copia);
+};
+
+
+/* =========================================================
+   EXCLUIR PLANEJAMENTO
    ========================================================= */
 
 export const excluirPlanejamentoDoUsuario = (
   planejamentoId: string,
   usuarioId: string
 ): boolean => {
+  const planejamentos = obterTodosPlanejamentos();
 
-  const todos =
-    obterTodosPlanejamentos();
-
-  const quantidadeAntes =
-    todos.length;
+  const novaLista = planejamentos.filter(
+    (plano) =>
+      !(
+        plano.id === planejamentoId &&
+        plano.usuarioId === usuarioId
+      )
+  );
 
   /*
-    Remove somente se:
-    - ID for igual
-    - usuário for o dono
+    Nenhum plano foi removido.
   */
-  const novaLista =
-    todos.filter(
-      (plano) =>
-        !(
-          plano.id ===
-            planejamentoId &&
-          plano.usuarioId ===
-            usuarioId
-        )
-    );
 
   if (
     novaLista.length ===
-    quantidadeAntes
+    planejamentos.length
   ) {
     return false;
   }
 
-  salvarTodosPlanejamentos(
-    novaLista
-  );
+  salvarTodosPlanejamentos(novaLista);
 
   return true;
 };

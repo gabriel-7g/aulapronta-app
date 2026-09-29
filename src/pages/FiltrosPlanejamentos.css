@@ -1,0 +1,532 @@
+/* =========================================================
+   ÁREA DE BUSCA, FILTROS E ORDENAÇÃO
+   ========================================================= */
+
+.planejamentos-ferramentas {
+  width: 100%;
+
+  margin-bottom: 22px;
+
+  padding: 20px;
+
+  border: 1px solid
+    rgba(34, 31, 25, 0.1);
+
+  border-radius: 10px;
+
+  background: #fffdf7;
+
+  box-shadow:
+    0 6px 20px
+    rgba(34, 31, 25, 0.05);
+}
+
+
+/* =========================================================
+   CAMPOS
+   ========================================================= */
+
+.campo-filtro {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+
+  min-width: 0;
+}
+
+
+.campo-filtro label {
+  color: #5a5548;
+
+  font-size: 0.73rem;
+
+  font-weight: 700;
+
+  letter-spacing: 0.01em;
+}
+
+
+.campo-filtro input,
+.campo-filtro select {
+  width: 100%;
+
+  min-height: 44px;
+
+  border: 1.5px solid
+    rgba(34, 31, 25, 0.14);
+
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #221f19;
+
+  font-family:
+    'Work Sans',
+    sans-serif;
+
+  font-size: 0.82rem;
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+
+.campo-filtro input {
+  padding:
+    0 44px
+    0 42px;
+}
+
+
+.campo-filtro select {
+  padding:
+    0 36px
+    0 12px;
+
+  cursor: pointer;
+}
+
+
+.campo-filtro input:hover,
+.campo-filtro select:hover {
+  border-color:
+    rgba(32, 64, 47, 0.35);
+}
+
+
+.campo-filtro input:focus,
+.campo-filtro select:focus {
+  border-color:
+    #20402f;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(32, 64, 47, 0.08);
+}
+
+
+/* =========================================================
+   BUSCA
+   ========================================================= */
+
+.campo-busca {
+  margin-bottom: 16px;
+}
+
+
+.busca-input-wrapper {
+  position: relative;
+
+  width: 100%;
+}
+
+
+.icone-busca {
+  position: absolute;
+
+  top: 50%;
+
+  left: 14px;
+
+  transform:
+    translateY(-50%);
+
+  color: #5a5548;
+
+  font-size: 1.15rem;
+
+  pointer-events: none;
+}
+
+
+.botao-limpar-busca {
+  position: absolute;
+
+  top: 50%;
+
+  right: 10px;
+
+  transform:
+    translateY(-50%);
+
+  width: 28px;
+
+  height: 28px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background:
+    rgba(34, 31, 25, 0.06);
+
+  color: #5a5548;
+
+  font-size: 1.1rem;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+
+.botao-limpar-busca:hover {
+  background:
+    rgba(176, 74, 58, 0.1);
+
+  color: #b04a3a;
+}
+
+
+/*
+  Remove o X padrão de alguns navegadores
+  para usarmos o nosso botão.
+*/
+
+.campo-busca
+input[type="search"]::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+
+/* =========================================================
+   GRID DOS FILTROS
+   ========================================================= */
+
+.filtros-planejamentos-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 14px;
+}
+
+
+/* =========================================================
+   LIMPAR FILTROS
+   ========================================================= */
+
+.area-limpar-filtros {
+  margin-top: 15px;
+
+  padding-top: 14px;
+
+  border-top:
+    1px dashed
+    rgba(34, 31, 25, 0.12);
+}
+
+
+.botao-limpar-filtros {
+  border: none;
+
+  background: transparent;
+
+  padding: 4px 0;
+
+  color: #b04a3a;
+
+  font-family:
+    'Work Sans',
+    sans-serif;
+
+  font-size: 0.75rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+.botao-limpar-filtros:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   CONTADOR
+   ========================================================= */
+
+.lista-cabecalho-filtros {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+
+.indicador-filtro-ativo {
+  padding:
+    5px 9px;
+
+  border-radius: 50px;
+
+  background:
+    rgba(32, 64, 47, 0.08);
+
+  color: #20402f;
+
+  font-size: 0.65rem;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.04em;
+}
+
+
+/* =========================================================
+   SEM RESULTADOS
+   ========================================================= */
+
+.estado-sem-resultados {
+  min-height: 280px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 40px 20px;
+
+  border:
+    1.5px dashed
+    rgba(34, 31, 25, 0.16);
+
+  border-radius: 10px;
+
+  background:
+    rgba(255, 253, 247, 0.55);
+
+  text-align: center;
+}
+
+
+.estado-sem-resultados-icone {
+  width: 54px;
+
+  height: 54px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-bottom: 17px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(32, 64, 47, 0.08);
+
+  color: #20402f;
+
+  font-size: 1.5rem;
+}
+
+
+.estado-sem-resultados h2 {
+  margin:
+    0 0 8px;
+
+  color: #221f19;
+
+  font-family:
+    'Fraunces',
+    serif;
+
+  font-size: 1.4rem;
+
+  font-weight: 600;
+}
+
+
+.estado-sem-resultados p {
+  max-width: 420px;
+
+  margin:
+    0 0 20px;
+
+  color: #5a5548;
+
+  font-size: 0.85rem;
+
+  line-height: 1.6;
+}
+
+
+.botao-limpar-resultados {
+  min-height: 42px;
+
+  padding:
+    9px 16px;
+
+  border:
+    1.5px solid
+    #20402f;
+
+  border-radius: 8px;
+
+  background:
+    transparent;
+
+  color: #20402f;
+
+  font-family:
+    'Work Sans',
+    sans-serif;
+
+  font-size: 0.78rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+
+.botao-limpar-resultados:hover {
+  background: #20402f;
+
+  color: #f1efe0;
+}
+
+
+/* =========================================================
+   ACESSIBILIDADE
+   ========================================================= */
+
+.botao-limpar-busca:focus-visible,
+.botao-limpar-filtros:focus-visible,
+.botao-limpar-resultados:focus-visible {
+  outline:
+    3px solid
+    rgba(229, 195, 93, 0.75);
+
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (
+  max-width: 800px
+) {
+
+  .filtros-planejamentos-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+
+  .filtros-planejamentos-grid
+  .campo-filtro:last-child {
+    grid-column:
+      1 / -1;
+  }
+
+}
+
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (
+  max-width: 560px
+) {
+
+  .planejamentos-ferramentas {
+    padding: 16px;
+  }
+
+
+  .filtros-planejamentos-grid {
+    grid-template-columns:
+      1fr;
+
+    gap: 12px;
+  }
+
+
+  .filtros-planejamentos-grid
+  .campo-filtro:last-child {
+    grid-column: auto;
+  }
+
+
+  .lista-cabecalho-filtros {
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+
+    gap: 8px;
+  }
+
+
+  .campo-filtro input,
+  .campo-filtro select {
+    min-height: 46px;
+
+    font-size: 0.85rem;
+  }
+
+}
+
+
+/* =========================================================
+   REDUZIR ANIMAÇÕES
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .campo-filtro input,
+  .campo-filtro select,
+  .botao-limpar-busca,
+  .botao-limpar-resultados {
+    transition: none;
+  }
+
+}

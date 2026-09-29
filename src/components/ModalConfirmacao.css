@@ -1,0 +1,439 @@
+/* =========================================================
+   FUNDO DO MODAL
+   ========================================================= */
+
+.modal-confirmacao-overlay {
+  position: fixed;
+
+  z-index: 9999;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    rgba(
+      19,
+      39,
+      32,
+      0.62
+    );
+
+  backdrop-filter:
+    blur(4px);
+
+  animation:
+    aparecer-overlay
+    0.18s ease;
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal-confirmacao {
+  width:
+    min(
+      430px,
+      100%
+    );
+
+  padding:
+    32px;
+
+  border:
+    1px solid
+    rgba(
+      34,
+      31,
+      25,
+      0.08
+    );
+
+  border-radius:
+    14px;
+
+  background:
+    #fffdf7;
+
+  color:
+    #221f19;
+
+  box-shadow:
+    0 28px 80px
+    rgba(
+      0,
+      0,
+      0,
+      0.28
+    );
+
+  font-family:
+    'Work Sans',
+    sans-serif;
+
+  text-align:
+    center;
+
+  animation:
+    aparecer-modal
+    0.2s ease;
+}
+
+
+/* =========================================================
+   ÍCONE
+   ========================================================= */
+
+.modal-confirmacao-icone {
+  width:
+    52px;
+
+  height:
+    52px;
+
+  margin:
+    0 auto
+    18px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  border-radius:
+    50%;
+
+  background:
+    rgba(
+      32,
+      64,
+      47,
+      0.1
+    );
+
+  color:
+    #20402f;
+
+  font-size:
+    1.3rem;
+
+  font-weight:
+    800;
+}
+
+
+.modal-confirmacao-icone-perigo {
+  background:
+    rgba(
+      176,
+      74,
+      58,
+      0.1
+    );
+
+  color:
+    #b04a3a;
+}
+
+
+/* =========================================================
+   TEXTO
+   ========================================================= */
+
+.modal-confirmacao h2 {
+  margin:
+    0 0 10px;
+
+  color:
+    #221f19;
+
+  font-family:
+    'Fraunces',
+    serif;
+
+  font-size:
+    1.55rem;
+
+  font-weight:
+    600;
+}
+
+
+.modal-confirmacao p {
+  margin:
+    0;
+
+  color:
+    #625d50;
+
+  font-size:
+    0.88rem;
+
+  line-height:
+    1.6;
+}
+
+
+/* =========================================================
+   AÇÕES
+   ========================================================= */
+
+.modal-confirmacao-acoes {
+  margin-top:
+    26px;
+
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:
+    11px;
+}
+
+
+.modal-confirmacao-acoes button {
+  min-height:
+    46px;
+
+  padding:
+    10px 16px;
+
+  border-radius:
+    8px;
+
+  font-family:
+    'Work Sans',
+    sans-serif;
+
+  font-size:
+    0.82rem;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+
+/* =========================================================
+   CANCELAR
+   ========================================================= */
+
+.modal-confirmacao-cancelar {
+  border:
+    1.5px solid
+    rgba(
+      34,
+      31,
+      25,
+      0.16
+    );
+
+  background:
+    transparent;
+
+  color:
+    #625d50;
+}
+
+
+.modal-confirmacao-cancelar:hover {
+  border-color:
+    rgba(
+      34,
+      31,
+      25,
+      0.3
+    );
+
+  background:
+    rgba(
+      34,
+      31,
+      25,
+      0.04
+    );
+}
+
+
+/* =========================================================
+   CONFIRMAR
+   ========================================================= */
+
+.modal-confirmacao-confirmar {
+  border:
+    none;
+
+  background:
+    #20402f;
+
+  color:
+    #f1efe0;
+}
+
+
+.modal-confirmacao-confirmar:hover {
+  background:
+    #193227;
+}
+
+
+/* =========================================================
+   PERIGO
+   ========================================================= */
+
+.modal-confirmacao-confirmar-perigo {
+  background:
+    #b04a3a;
+}
+
+
+.modal-confirmacao-confirmar-perigo:hover {
+  background:
+    #953c30;
+}
+
+
+/* =========================================================
+   CLIQUE
+   ========================================================= */
+
+.modal-confirmacao-acoes
+button:active {
+  transform:
+    translateY(1px);
+}
+
+
+/* =========================================================
+   ACESSIBILIDADE
+   ========================================================= */
+
+.modal-confirmacao-acoes
+button:focus-visible {
+  outline:
+    3px solid
+    rgba(
+      229,
+      195,
+      93,
+      0.75
+    );
+
+  outline-offset:
+    3px;
+}
+
+
+/* =========================================================
+   ANIMAÇÕES
+   ========================================================= */
+
+@keyframes aparecer-overlay {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+
+}
+
+
+@keyframes aparecer-modal {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(8px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (
+  max-width: 500px
+) {
+
+  .modal-confirmacao {
+    padding:
+      27px 20px;
+  }
+
+
+  .modal-confirmacao h2 {
+    font-size:
+      1.4rem;
+  }
+
+
+  .modal-confirmacao-acoes {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .modal-confirmacao-cancelar {
+    order: 2;
+  }
+
+
+  .modal-confirmacao-confirmar {
+    order: 1;
+  }
+
+}
+
+
+/* =========================================================
+   REDUZIR ANIMAÇÕES
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .modal-confirmacao-overlay,
+  .modal-confirmacao {
+    animation:
+      none;
+  }
+
+}
