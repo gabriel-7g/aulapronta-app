@@ -4,12 +4,12 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
-    "Post": {
-      "model": "Post",
+    "planejamentos": {
+      "model": "Planejamento",
       "namespace": "public"
     },
-    "User": {
-      "model": "User",
+    "usuarios": {
+      "model": "Usuario",
       "namespace": "public"
     }
   },
@@ -17,97 +17,224 @@
     "namespaces": {
       "public": {
         "models": {
-          "Post": {
+          "Planejamento": {
             "fields": {
-              "authorId": {
+              "atividade": {
                 "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
-              "content": {
-                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
-              "createdAt": {
+              "atualizadoEm": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "avaliacao": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "criadoEm": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "desenvolvimento": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "duracao": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
               "id": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/uuid@1",
                   "kind": "scalar"
                 }
               },
-              "title": {
+              "introducao": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
-              "updatedAt": {
+              "materia": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/timestamptz-string@1",
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "materiaId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "nivelEnsino": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "objetivo": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "observacoes": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "recursos": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "tema": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "titulo": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "turma": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "usuarioId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
                   "kind": "scalar"
                 }
               }
             },
             "relations": {
-              "author": {
+              "usuario": {
                 "cardinality": "N:1",
                 "nullable": false,
                 "on": {
                   "localFields": [
-                    "authorId"
+                    "usuarioId"
                   ],
                   "targetFields": [
                     "id"
                   ]
                 },
                 "to": {
-                  "model": "User",
+                  "model": "Usuario",
                   "namespace": "public"
                 }
               }
             },
             "storage": {
               "fields": {
-                "authorId": {
-                  "column": "authorId"
+                "atividade": {
+                  "column": "atividade"
                 },
-                "content": {
-                  "column": "content"
+                "atualizadoEm": {
+                  "column": "atualizadoEm"
                 },
-                "createdAt": {
-                  "column": "createdAt"
+                "avaliacao": {
+                  "column": "avaliacao"
+                },
+                "criadoEm": {
+                  "column": "criadoEm"
+                },
+                "desenvolvimento": {
+                  "column": "desenvolvimento"
+                },
+                "duracao": {
+                  "column": "duracao"
                 },
                 "id": {
                   "column": "id"
                 },
-                "title": {
-                  "column": "title"
+                "introducao": {
+                  "column": "introducao"
                 },
-                "updatedAt": {
-                  "column": "updatedAt"
+                "materia": {
+                  "column": "materia"
+                },
+                "materiaId": {
+                  "column": "materiaId"
+                },
+                "nivelEnsino": {
+                  "column": "nivelEnsino"
+                },
+                "objetivo": {
+                  "column": "objetivo"
+                },
+                "observacoes": {
+                  "column": "observacoes"
+                },
+                "recursos": {
+                  "column": "recursos"
+                },
+                "tema": {
+                  "column": "tema"
+                },
+                "titulo": {
+                  "column": "titulo"
+                },
+                "turma": {
+                  "column": "turma"
+                },
+                "usuarioId": {
+                  "column": "usuarioId"
                 }
               },
               "namespaceId": "public",
-              "table": "Post"
+              "table": "planejamentos"
             }
           },
-          "User": {
+          "Usuario": {
             "fields": {
-              "createdAt": {
+              "atualizadoEm": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "criadoEm": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-string@1",
@@ -124,26 +251,26 @@
               "id": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/uuid@1",
                   "kind": "scalar"
                 }
               },
-              "name": {
-                "nullable": true,
+              "nome": {
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
-              "updatedAt": {
+              "senha": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/timestamptz-string@1",
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
-              "username": {
-                "nullable": true,
+              "tipo": {
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -151,26 +278,29 @@
               }
             },
             "relations": {
-              "posts": {
+              "planejamentos": {
                 "cardinality": "1:N",
                 "on": {
                   "localFields": [
                     "id"
                   ],
                   "targetFields": [
-                    "authorId"
+                    "usuarioId"
                   ]
                 },
                 "to": {
-                  "model": "Post",
+                  "model": "Planejamento",
                   "namespace": "public"
                 }
               }
             },
             "storage": {
               "fields": {
-                "createdAt": {
-                  "column": "createdAt"
+                "atualizadoEm": {
+                  "column": "atualizadoEm"
+                },
+                "criadoEm": {
+                  "column": "criadoEm"
                 },
                 "email": {
                   "column": "email"
@@ -178,18 +308,18 @@
                 "id": {
                   "column": "id"
                 },
-                "name": {
-                  "column": "name"
+                "nome": {
+                  "column": "nome"
                 },
-                "updatedAt": {
-                  "column": "updatedAt"
+                "senha": {
+                  "column": "senha"
                 },
-                "username": {
-                  "column": "username"
+                "tipo": {
+                  "column": "tipo"
                 }
               },
               "namespaceId": "public",
-              "table": "User"
+              "table": "usuarios"
             }
           }
         }
@@ -201,19 +331,24 @@
       "public": {
         "entries": {
           "table": {
-            "Post": {
+            "planejamentos": {
               "columns": {
-                "authorId": {
-                  "codecId": "pg/int4@1",
-                  "dataType": "pg/int4",
-                  "nullable": false
-                },
-                "content": {
+                "atividade": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
-                  "nullable": true
+                  "nullable": false
                 },
-                "createdAt": {
+                "atualizadoEm": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": false
+                },
+                "avaliacao": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "criadoEm": {
                   "codecId": "pg/timestamptz-string@1",
                   "dataType": "pg/timestamptz",
                   "default": {
@@ -222,54 +357,106 @@
                   },
                   "nullable": false
                 },
-                "id": {
-                  "codecId": "pg/int4@1",
-                  "dataType": "pg/int4",
-                  "default": {
-                    "expression": "autoincrement()",
-                    "kind": "function"
-                  },
-                  "nullable": false
-                },
-                "title": {
+                "desenvolvimento": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
                   "nullable": false
                 },
-                "updatedAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "dataType": "pg/timestamptz",
+                "duracao": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "introducao": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "materia": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "materiaId": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "nivelEnsino": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "objetivo": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "observacoes": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "recursos": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "tema": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "titulo": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "turma": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "usuarioId": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
                   "nullable": false
                 }
               },
               "foreignKeys": [
                 {
                   "index": {
-                    "name": "Post_authorId_idx_e47547ed"
+                    "name": "planejamentos_usuarioId_idx_5f01c7d6"
                   },
+                  "onDelete": "cascade",
                   "source": {
                     "columns": [
-                      "authorId"
+                      "usuarioId"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Post"
+                    "tableName": "planejamentos"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "User"
+                    "tableName": "usuarios"
                   }
                 }
               ],
               "indexes": [
                 {
                   "columns": [
-                    "authorId"
+                    "usuarioId"
                   ],
-                  "name": "Post_authorId_idx_e47547ed",
-                  "prefix": "Post_authorId_idx",
+                  "name": "planejamentos_usuarioId_idx_5f01c7d6",
+                  "prefix": "planejamentos_usuarioId_idx",
                   "unique": false
                 }
               ],
@@ -280,9 +467,14 @@
               },
               "uniques": []
             },
-            "User": {
+            "usuarios": {
               "columns": {
-                "createdAt": {
+                "atualizadoEm": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": false
+                },
+                "criadoEm": {
                   "codecId": "pg/timestamptz-string@1",
                   "dataType": "pg/timestamptz",
                   "default": {
@@ -297,28 +489,28 @@
                   "nullable": false
                 },
                 "id": {
-                  "codecId": "pg/int4@1",
-                  "dataType": "pg/int4",
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "nome": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "senha": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "tipo": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
                   "default": {
-                    "expression": "autoincrement()",
-                    "kind": "function"
+                    "kind": "literal",
+                    "value": "usuario"
                   },
                   "nullable": false
-                },
-                "name": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": true
-                },
-                "updatedAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "dataType": "pg/timestamptz",
-                  "nullable": false
-                },
-                "username": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": true
                 }
               },
               "foreignKeys": [],
@@ -342,10 +534,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a51b4833fdaffe730572670ccc27dd89af7e0726ab3de7f428d21702d687cc15"
+    "storageHash": "0a305fb9247158e699406a8730806d17e82a8241dbf5ba4bfdc2e970d7cb1de6"
   },
   "execution": {
-    "executionHash": "4e88564095b5e0ba7904ffdba3c563ef916d87688c8c483c67055f71a9194f0f",
+    "executionHash": "142957f57a2a12f38f1859f48ffd73972ace5fbbeb335a4844de31ba4240a45e",
     "mutations": {
       "defaults": [
         {
@@ -358,8 +550,19 @@
             "kind": "generator"
           },
           "ref": {
-            "entry": "Post",
-            "field": "updatedAt",
+            "entry": "planejamentos",
+            "field": "atualizadoEm",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "planejamentos",
+            "field": "id",
             "namespace": "public"
           }
         },
@@ -373,8 +576,19 @@
             "kind": "generator"
           },
           "ref": {
-            "entry": "User",
-            "field": "updatedAt",
+            "entry": "usuarios",
+            "field": "atualizadoEm",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "usuarios",
+            "field": "id",
             "namespace": "public"
           }
         }

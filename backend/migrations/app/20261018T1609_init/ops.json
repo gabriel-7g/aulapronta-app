@@ -1,0 +1,220 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.planejamentos",
+    "label": "Create table \"planejamentos\"",
+    "summary": "Creates table \"planejamentos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "planejamentos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"planejamentos\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"planejamentos\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"planejamentos\"",
+        "sql": "CREATE TABLE \"public\".\"planejamentos\" (\n  \"atividade\" text NOT NULL,\n  \"atualizadoEm\" timestamptz NOT NULL,\n  \"avaliacao\" text NOT NULL,\n  \"criadoEm\" timestamptz DEFAULT (now()) NOT NULL,\n  \"desenvolvimento\" text NOT NULL,\n  \"duracao\" text NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"introducao\" text NOT NULL,\n  \"materia\" text NOT NULL,\n  \"materiaId\" text,\n  \"nivelEnsino\" text,\n  \"objetivo\" text NOT NULL,\n  \"observacoes\" text,\n  \"recursos\" text NOT NULL,\n  \"tema\" text NOT NULL,\n  \"titulo\" text NOT NULL,\n  \"turma\" text NOT NULL,\n  \"usuarioId\" uuid NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"planejamentos\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"planejamentos\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.usuarios",
+    "label": "Create table \"usuarios\"",
+    "summary": "Creates table \"usuarios\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "usuarios"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"usuarios\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"usuarios\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"usuarios\"",
+        "sql": "CREATE TABLE \"public\".\"usuarios\" (\n  \"atualizadoEm\" timestamptz NOT NULL,\n  \"criadoEm\" timestamptz DEFAULT (now()) NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"nome\" text NOT NULL,\n  \"senha\" text NOT NULL,\n  \"tipo\" text DEFAULT 'usuario' NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"usuarios\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"usuarios\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.usuarios.usuarios_email_key",
+    "label": "Add unique constraint on \"usuarios\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "usuarios_email_key",
+        "table": "usuarios"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"usuarios_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "usuarios_email_key",
+          "public",
+          "\"public\".\"usuarios\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"usuarios_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"usuarios\" ADD CONSTRAINT \"usuarios_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"usuarios_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "usuarios_email_key",
+          "public",
+          "\"public\".\"usuarios\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.planejamentos.planejamentos_usuarioId_idx_5f01c7d6",
+    "label": "Create index \"planejamentos_usuarioId_idx_5f01c7d6\" on \"planejamentos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "planejamentos_usuarioId_idx_5f01c7d6",
+        "table": "planejamentos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"planejamentos_usuarioId_idx_5f01c7d6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"planejamentos_usuarioId_idx_5f01c7d6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"planejamentos_usuarioId_idx_5f01c7d6\"",
+        "sql": "CREATE INDEX \"planejamentos_usuarioId_idx_5f01c7d6\" ON \"public\".\"planejamentos\" (\"usuarioId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"planejamentos_usuarioId_idx_5f01c7d6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"planejamentos_usuarioId_idx_5f01c7d6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.planejamentos.planejamentos_usuarioId_fkey",
+    "label": "Add foreign key \"planejamentos_usuarioId_fkey\" on \"planejamentos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "planejamentos_usuarioId_fkey",
+        "table": "planejamentos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"planejamentos_usuarioId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "planejamentos_usuarioId_fkey",
+          "public",
+          "\"public\".\"planejamentos\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"planejamentos_usuarioId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"planejamentos\"\nADD CONSTRAINT \"planejamentos_usuarioId_fkey\"\nFOREIGN KEY (\"usuarioId\")\nREFERENCES \"public\".\"usuarios\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"planejamentos_usuarioId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "planejamentos_usuarioId_fkey",
+          "public",
+          "\"public\".\"planejamentos\""
+        ]
+      }
+    ]
+  }
+]

@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'a51b4833fdaffe730572670ccc27dd89af7e0726ab3de7f428d21702d687cc15'>;
+  StorageHashBase<'0a305fb9247158e699406a8730806d17e82a8241dbf5ba4bfdc2e970d7cb1de6'>;
 export type ExecutionHash =
-  ExecutionHashBase<'4e88564095b5e0ba7904ffdba3c563ef916d87688c8c483c67055f71a9194f0f'>;
+  ExecutionHashBase<'142957f57a2a12f38f1859f48ffd73972ace5fbbeb335a4844de31ba4240a45e'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -234,112 +234,177 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
-    readonly Post: {
-      readonly authorId: CodecTypes['pg/int4@1']['output'];
-      readonly content: CodecTypes['pg/text@1']['output'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly title: CodecTypes['pg/text@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly Planejamento: {
+      readonly atividade: CodecTypes['pg/text@1']['output'];
+      readonly atualizadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly avaliacao: CodecTypes['pg/text@1']['output'];
+      readonly criadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly desenvolvimento: CodecTypes['pg/text@1']['output'];
+      readonly duracao: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly introducao: CodecTypes['pg/text@1']['output'];
+      readonly materia: CodecTypes['pg/text@1']['output'];
+      readonly materiaId: CodecTypes['pg/text@1']['output'] | null;
+      readonly nivelEnsino: CodecTypes['pg/text@1']['output'] | null;
+      readonly objetivo: CodecTypes['pg/text@1']['output'];
+      readonly observacoes: CodecTypes['pg/text@1']['output'] | null;
+      readonly recursos: CodecTypes['pg/text@1']['output'];
+      readonly tema: CodecTypes['pg/text@1']['output'];
+      readonly titulo: CodecTypes['pg/text@1']['output'];
+      readonly turma: CodecTypes['pg/text@1']['output'];
+      readonly usuarioId: CodecTypes['pg/uuid@1']['output'];
     };
-    readonly User: {
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly Usuario: {
+      readonly atualizadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly criadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'];
-      readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly name: CodecTypes['pg/text@1']['output'] | null;
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly username: CodecTypes['pg/text@1']['output'] | null;
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly nome: CodecTypes['pg/text@1']['output'];
+      readonly senha: CodecTypes['pg/text@1']['output'];
+      readonly tipo: CodecTypes['pg/text@1']['output'];
     };
   };
 };
 export type FieldInputTypes = {
   readonly public: {
-    readonly Post: {
-      readonly authorId: CodecTypes['pg/int4@1']['input'];
-      readonly content: CodecTypes['pg/text@1']['input'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly title: CodecTypes['pg/text@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    readonly Planejamento: {
+      readonly atividade: CodecTypes['pg/text@1']['input'];
+      readonly atualizadoEm: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly avaliacao: CodecTypes['pg/text@1']['input'];
+      readonly criadoEm: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly desenvolvimento: CodecTypes['pg/text@1']['input'];
+      readonly duracao: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly introducao: CodecTypes['pg/text@1']['input'];
+      readonly materia: CodecTypes['pg/text@1']['input'];
+      readonly materiaId: CodecTypes['pg/text@1']['input'] | null;
+      readonly nivelEnsino: CodecTypes['pg/text@1']['input'] | null;
+      readonly objetivo: CodecTypes['pg/text@1']['input'];
+      readonly observacoes: CodecTypes['pg/text@1']['input'] | null;
+      readonly recursos: CodecTypes['pg/text@1']['input'];
+      readonly tema: CodecTypes['pg/text@1']['input'];
+      readonly titulo: CodecTypes['pg/text@1']['input'];
+      readonly turma: CodecTypes['pg/text@1']['input'];
+      readonly usuarioId: CodecTypes['pg/uuid@1']['input'];
     };
-    readonly User: {
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    readonly Usuario: {
+      readonly atualizadoEm: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly criadoEm: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
-      readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly name: CodecTypes['pg/text@1']['input'] | null;
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly username: CodecTypes['pg/text@1']['input'] | null;
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly nome: CodecTypes['pg/text@1']['input'];
+      readonly senha: CodecTypes['pg/text@1']['input'];
+      readonly tipo: CodecTypes['pg/text@1']['input'];
     };
   };
 };
 export type StorageColumnTypes = {
   readonly public: {
-    readonly Post: {
-      readonly authorId: CodecTypes['pg/int4@1']['output'];
-      readonly content: CodecTypes['pg/text@1']['output'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly title: CodecTypes['pg/text@1']['output'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly planejamentos: {
+      readonly atividade: CodecTypes['pg/text@1']['output'];
+      readonly atualizadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly avaliacao: CodecTypes['pg/text@1']['output'];
+      readonly criadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly desenvolvimento: CodecTypes['pg/text@1']['output'];
+      readonly duracao: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly introducao: CodecTypes['pg/text@1']['output'];
+      readonly materia: CodecTypes['pg/text@1']['output'];
+      readonly materiaId: CodecTypes['pg/text@1']['output'] | null;
+      readonly nivelEnsino: CodecTypes['pg/text@1']['output'] | null;
+      readonly objetivo: CodecTypes['pg/text@1']['output'];
+      readonly observacoes: CodecTypes['pg/text@1']['output'] | null;
+      readonly recursos: CodecTypes['pg/text@1']['output'];
+      readonly tema: CodecTypes['pg/text@1']['output'];
+      readonly titulo: CodecTypes['pg/text@1']['output'];
+      readonly turma: CodecTypes['pg/text@1']['output'];
+      readonly usuarioId: CodecTypes['pg/uuid@1']['output'];
     };
-    readonly User: {
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly usuarios: {
+      readonly atualizadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly criadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'];
-      readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly name: CodecTypes['pg/text@1']['output'] | null;
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly username: CodecTypes['pg/text@1']['output'] | null;
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly nome: CodecTypes['pg/text@1']['output'];
+      readonly senha: CodecTypes['pg/text@1']['output'];
+      readonly tipo: CodecTypes['pg/text@1']['output'];
     };
   };
 };
 export type StorageColumnInputTypes = {
   readonly public: {
-    readonly Post: {
-      readonly authorId: CodecTypes['pg/int4@1']['input'];
-      readonly content: CodecTypes['pg/text@1']['input'] | null;
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly title: CodecTypes['pg/text@1']['input'];
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    readonly planejamentos: {
+      readonly atividade: CodecTypes['pg/text@1']['input'];
+      readonly atualizadoEm: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly avaliacao: CodecTypes['pg/text@1']['input'];
+      readonly criadoEm: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly desenvolvimento: CodecTypes['pg/text@1']['input'];
+      readonly duracao: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly introducao: CodecTypes['pg/text@1']['input'];
+      readonly materia: CodecTypes['pg/text@1']['input'];
+      readonly materiaId: CodecTypes['pg/text@1']['input'] | null;
+      readonly nivelEnsino: CodecTypes['pg/text@1']['input'] | null;
+      readonly objetivo: CodecTypes['pg/text@1']['input'];
+      readonly observacoes: CodecTypes['pg/text@1']['input'] | null;
+      readonly recursos: CodecTypes['pg/text@1']['input'];
+      readonly tema: CodecTypes['pg/text@1']['input'];
+      readonly titulo: CodecTypes['pg/text@1']['input'];
+      readonly turma: CodecTypes['pg/text@1']['input'];
+      readonly usuarioId: CodecTypes['pg/uuid@1']['input'];
     };
-    readonly User: {
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    readonly usuarios: {
+      readonly atualizadoEm: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly criadoEm: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
-      readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly name: CodecTypes['pg/text@1']['input'] | null;
-      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly username: CodecTypes['pg/text@1']['input'] | null;
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly nome: CodecTypes['pg/text@1']['input'];
+      readonly senha: CodecTypes['pg/text@1']['input'];
+      readonly tipo: CodecTypes['pg/text@1']['input'];
     };
   };
 };
 
 export namespace Models {
-  export type public_Post = {
-    authorId: CodecTypes['pg/int4@1']['output'];
-    content: CodecTypes['pg/text@1']['output'] | null;
-    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    id: CodecTypes['pg/int4@1']['output'];
-    title: CodecTypes['pg/text@1']['output'];
-    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    author: public_User;
-    readonly [RelationKeys]?: 'author';
+  export type public_Planejamento = {
+    atividade: CodecTypes['pg/text@1']['output'];
+    atualizadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+    avaliacao: CodecTypes['pg/text@1']['output'];
+    criadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+    desenvolvimento: CodecTypes['pg/text@1']['output'];
+    duracao: CodecTypes['pg/text@1']['output'];
+    id: CodecTypes['pg/uuid@1']['output'];
+    introducao: CodecTypes['pg/text@1']['output'];
+    materia: CodecTypes['pg/text@1']['output'];
+    materiaId: CodecTypes['pg/text@1']['output'] | null;
+    nivelEnsino: CodecTypes['pg/text@1']['output'] | null;
+    objetivo: CodecTypes['pg/text@1']['output'];
+    observacoes: CodecTypes['pg/text@1']['output'] | null;
+    recursos: CodecTypes['pg/text@1']['output'];
+    tema: CodecTypes['pg/text@1']['output'];
+    titulo: CodecTypes['pg/text@1']['output'];
+    turma: CodecTypes['pg/text@1']['output'];
+    usuarioId: CodecTypes['pg/uuid@1']['output'];
+    usuario: public_Usuario;
+    readonly [RelationKeys]?: 'usuario';
   };
-  export type public_User = {
-    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+  export type public_Usuario = {
+    atualizadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
+    criadoEm: CodecTypes['pg/timestamptz-string@1']['output'];
     email: CodecTypes['pg/text@1']['output'];
-    id: CodecTypes['pg/int4@1']['output'];
-    name: CodecTypes['pg/text@1']['output'] | null;
-    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    username: CodecTypes['pg/text@1']['output'] | null;
-    posts: public_Post[];
-    readonly [RelationKeys]?: 'posts';
+    id: CodecTypes['pg/uuid@1']['output'];
+    nome: CodecTypes['pg/text@1']['output'];
+    senha: CodecTypes['pg/text@1']['output'];
+    tipo: CodecTypes['pg/text@1']['output'];
+    planejamentos: public_Planejamento[];
+    readonly [RelationKeys]?: 'planejamentos';
   };
 }
 
 export declare const models: {
   public: {
-    Post: Models.public_Post;
-    User: Models.public_User;
+    Planejamento: Models.public_Planejamento;
+    Usuario: Models.public_Usuario;
   };
 };
 
@@ -361,46 +426,114 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
-            readonly Post: {
+            readonly planejamentos: {
               columns: {
-                readonly authorId: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
+                readonly atividade: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                   readonly many: false;
                 };
-                readonly content: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
+                readonly atualizadoEm: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
                   readonly many: false;
                 };
-                readonly createdAt: {
+                readonly avaliacao: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly criadoEm: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-string@1';
                   readonly nullable: false;
                   readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                   readonly many: false;
                 };
-                readonly id: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'function';
-                    readonly expression: 'autoincrement()';
-                  };
-                  readonly many: false;
-                };
-                readonly title: {
+                readonly desenvolvimento: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                   readonly many: false;
                 };
-                readonly updatedAt: {
-                  readonly dataType: 'pg/timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
+                readonly duracao: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly introducao: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly materia: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly materiaId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly nivelEnsino: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly objetivo: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly observacoes: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly recursos: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly tema: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly titulo: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly turma: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly usuarioId: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
                   readonly nullable: false;
                   readonly many: false;
                 };
@@ -409,9 +542,9 @@ type ContractBase = Omit<
               uniques: readonly [];
               indexes: readonly [
                 {
-                  readonly name: 'Post_authorId_idx_e47547ed';
-                  readonly prefix: 'Post_authorId_idx';
-                  readonly columns: readonly ['authorId'];
+                  readonly name: 'planejamentos_usuarioId_idx_5f01c7d6';
+                  readonly prefix: 'planejamentos_usuarioId_idx';
+                  readonly columns: readonly ['usuarioId'];
                   readonly unique: false;
                 },
               ];
@@ -419,20 +552,26 @@ type ContractBase = Omit<
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'Post';
-                    readonly columns: readonly ['authorId'];
+                    readonly tableName: 'planejamentos';
+                    readonly columns: readonly ['usuarioId'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'User';
+                    readonly tableName: 'usuarios';
                     readonly columns: readonly ['id'];
                   };
                 },
               ];
             };
-            readonly User: {
+            readonly usuarios: {
               columns: {
-                readonly createdAt: {
+                readonly atualizadoEm: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly criadoEm: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-string@1';
                   readonly nullable: false;
@@ -446,31 +585,31 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly id: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly nome: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly senha: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly tipo: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                   readonly default: {
-                    readonly kind: 'function';
-                    readonly expression: 'autoincrement()';
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'usuario'>;
                   };
-                  readonly many: false;
-                };
-                readonly name: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                  readonly many: false;
-                };
-                readonly updatedAt: {
-                  readonly dataType: 'pg/timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly username: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
                   readonly many: false;
                 };
               };
@@ -490,73 +629,146 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
-    readonly Post: { readonly namespace: 'public' & NamespaceId; readonly model: 'Post' };
-    readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+    readonly planejamentos: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'Planejamento';
+    };
+    readonly usuarios: { readonly namespace: 'public' & NamespaceId; readonly model: 'Usuario' };
   };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
         readonly models: {
-          readonly Post: {
+          readonly Planejamento: {
             readonly fields: {
-              readonly authorId: {
+              readonly atividade: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
-              };
-              readonly content: {
-                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly createdAt: {
+              readonly atualizadoEm: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/timestamptz-string@1';
                 };
+              };
+              readonly avaliacao: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly criadoEm: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly desenvolvimento: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly duracao: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly id: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
-              readonly title: {
+              readonly introducao: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly updatedAt: {
+              readonly materia: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly materiaId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly nivelEnsino: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly objetivo: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly observacoes: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly recursos: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly tema: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly titulo: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly turma: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly usuarioId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
             };
             readonly relations: {
-              readonly author: {
-                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+              readonly usuario: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Usuario';
+                };
                 readonly cardinality: 'N:1';
                 readonly nullable: false;
                 readonly on: {
-                  readonly localFields: readonly ['authorId'];
+                  readonly localFields: readonly ['usuarioId'];
                   readonly targetFields: readonly ['id'];
                 };
               };
             };
             readonly storage: {
-              readonly table: 'Post';
+              readonly table: 'planejamentos';
               readonly namespaceId: 'public';
               readonly fields: {
-                readonly authorId: { readonly column: 'authorId' };
-                readonly content: { readonly column: 'content' };
-                readonly createdAt: { readonly column: 'createdAt' };
+                readonly atividade: { readonly column: 'atividade' };
+                readonly atualizadoEm: { readonly column: 'atualizadoEm' };
+                readonly avaliacao: { readonly column: 'avaliacao' };
+                readonly criadoEm: { readonly column: 'criadoEm' };
+                readonly desenvolvimento: { readonly column: 'desenvolvimento' };
+                readonly duracao: { readonly column: 'duracao' };
                 readonly id: { readonly column: 'id' };
-                readonly title: { readonly column: 'title' };
-                readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly introducao: { readonly column: 'introducao' };
+                readonly materia: { readonly column: 'materia' };
+                readonly materiaId: { readonly column: 'materiaId' };
+                readonly nivelEnsino: { readonly column: 'nivelEnsino' };
+                readonly objetivo: { readonly column: 'objetivo' };
+                readonly observacoes: { readonly column: 'observacoes' };
+                readonly recursos: { readonly column: 'recursos' };
+                readonly tema: { readonly column: 'tema' };
+                readonly titulo: { readonly column: 'titulo' };
+                readonly turma: { readonly column: 'turma' };
+                readonly usuarioId: { readonly column: 'usuarioId' };
               };
             };
           };
-          readonly User: {
+          readonly Usuario: {
             readonly fields: {
-              readonly createdAt: {
+              readonly atualizadoEm: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly criadoEm: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
@@ -569,44 +781,45 @@ type ContractBase = Omit<
               };
               readonly id: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
-              readonly name: {
-                readonly nullable: true;
+              readonly nome: {
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly updatedAt: {
+              readonly senha: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly username: {
-                readonly nullable: true;
+              readonly tipo: {
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
             readonly relations: {
-              readonly posts: {
-                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Post' };
+              readonly planejamentos: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Planejamento';
+                };
                 readonly cardinality: '1:N';
                 readonly on: {
                   readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['authorId'];
+                  readonly targetFields: readonly ['usuarioId'];
                 };
               };
             };
             readonly storage: {
-              readonly table: 'User';
+              readonly table: 'usuarios';
               readonly namespaceId: 'public';
               readonly fields: {
-                readonly createdAt: { readonly column: 'createdAt' };
+                readonly atualizadoEm: { readonly column: 'atualizadoEm' };
+                readonly criadoEm: { readonly column: 'criadoEm' };
                 readonly email: { readonly column: 'email' };
                 readonly id: { readonly column: 'id' };
-                readonly name: { readonly column: 'name' };
-                readonly updatedAt: { readonly column: 'updatedAt' };
-                readonly username: { readonly column: 'username' };
+                readonly nome: { readonly column: 'nome' };
+                readonly senha: { readonly column: 'senha' };
+                readonly tipo: { readonly column: 'tipo' };
               };
             };
           };
@@ -650,8 +863,16 @@ type ContractBase = Omit<
           readonly onCreate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
           readonly onUpdate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
           readonly ref: {
-            readonly entry: 'Post';
-            readonly field: 'updatedAt';
+            readonly entry: 'planejamentos';
+            readonly field: 'atualizadoEm';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'planejamentos';
+            readonly field: 'id';
             readonly namespace: 'public';
           };
         },
@@ -659,8 +880,16 @@ type ContractBase = Omit<
           readonly onCreate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
           readonly onUpdate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
           readonly ref: {
-            readonly entry: 'User';
-            readonly field: 'updatedAt';
+            readonly entry: 'usuarios';
+            readonly field: 'atualizadoEm';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'usuarios';
+            readonly field: 'id';
             readonly namespace: 'public';
           };
         },
