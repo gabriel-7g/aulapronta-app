@@ -235,11 +235,7 @@ React.FC<FiltrosPlanejamentosProps> = ({
 
         <div className="area-limpar-filtros">
 
-          <button
-            type="button"
-            className="botao-limpar-filtros"
-            onClick={onLimpar}
-          >
+          <button type="button"className="botao-limpar-filtros"onClick={onLimpar}>
             × Limpar busca e filtros
           </button>
 

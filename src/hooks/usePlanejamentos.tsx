@@ -182,6 +182,7 @@ export const usePlanejamentos = (
                     plano.dados.tema,
                     plano.dados.materia,
                     plano.dados.turma,
+                    plano.conteudo.objetivo,
                     plano.conteudo.objetivo
                   ].join(' ')
                 );

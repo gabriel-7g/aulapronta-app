@@ -1,20 +1,9 @@
-import {
-  DadosPlano,
-  PlanejamentoSalvo
-} from '../types/planejamento';
-
-import {
-  buscarPlanejamentoPorId
-} from '../services/planejamentoService';
-
+import { DadosPlano, PlanejamentoSalvo } from '../types/planejamento';
+import { buscarPlanejamentoPorId } from '../services/planejamentoService';
 
 const CHAVE_PLANO_SELECIONADO = 'planoSelecionado';
 const CHAVE_PLANO_EM_CRIACAO = 'planoEmCriacao';
 
-
-/* =========================================================
-   TIPOS
-   ========================================================= */
 
 export interface ContextoPlano {
   dados: DadosPlano;
@@ -22,13 +11,7 @@ export interface ContextoPlano {
 }
 
 
-/* =========================================================
-   FUNÇÕES AUXILIARES
-   ========================================================= */
-
-const tentarConverterJson = (
-  valor: string
-): unknown => {
+const tentarConverterJson = (valor: string): unknown => {
   try {
     return JSON.parse(valor);
   } catch {
@@ -40,27 +23,25 @@ const tentarConverterJson = (
 const ehObjeto = (
   valor: unknown
 ): valor is Record<string, unknown> => {
-  return (
-    typeof valor === 'object' &&
-    valor !== null
-  );
+  return typeof valor === 'object' && valor !== null;
 };
 
-
-/* =========================================================
-   VALIDAR DADOS DE UM NOVO PLANO
-   ========================================================= */
 
 const dadosPlanoSaoValidos = (
   valor: unknown
 ): valor is DadosPlano => {
-  if (!ehObjeto(valor)) {
-    return false;
-  }
+  if (!ehObjeto(valor)) return false;
 
   const materiaIdValida =
     valor.materiaId === null ||
     typeof valor.materiaId === 'string';
+
+  const nivelEnsinoValido =
+    valor.nivelEnsino === undefined ||
+    (
+      typeof valor.nivelEnsino === 'string' &&
+      valor.nivelEnsino.trim().length > 0
+    );
 
   const camposSaoStrings =
     typeof valor.materia === 'string' &&
@@ -71,46 +52,31 @@ const dadosPlanoSaoValidos = (
 
   if (
     !materiaIdValida ||
+    !nivelEnsinoValido ||
     !camposSaoStrings
   ) {
     return false;
   }
 
-  /*
-    Estes dados são obrigatórios
-    para existir um planejamento.
-  */
-
   return (
     valor.materia.trim().length > 0 &&
     valor.turma.trim().length > 0 &&
+    valor.duracao.trim().length > 0 &&
     valor.tema.trim().length > 0
   );
 };
 
 
-/* =========================================================
-   OBTER PLANO SELECIONADO
-   ========================================================= */
-
 const obterPlanoSelecionado = (
   usuarioId: string
 ): PlanejamentoSalvo | null => {
-  const valor =
-    sessionStorage.getItem(
-      CHAVE_PLANO_SELECIONADO
-    );
+  const valor = sessionStorage.getItem(
+    CHAVE_PLANO_SELECIONADO
+  );
 
-  if (!valor) {
-    return null;
-  }
+  if (!valor) return null;
 
   const dados = tentarConverterJson(valor);
-
-  /*
-    Para buscar o planejamento real,
-    precisamos apenas de um ID válido.
-  */
 
   if (
     !ehObjeto(dados) ||
@@ -124,22 +90,10 @@ const obterPlanoSelecionado = (
     return null;
   }
 
-  /*
-    Não confiamos no objeto completo salvo
-    na sessão.
-
-    Buscamos novamente o plano no service,
-    usando também o ID do usuário logado.
-
-    Assim, um usuário não consegue abrir
-    um plano pertencente a outra conta.
-  */
-
-  const planejamento =
-    buscarPlanejamentoPorId(
-      dados.id,
-      usuarioId
-    );
+  const planejamento = buscarPlanejamentoPorId(
+    dados.id,
+    usuarioId
+  );
 
   if (!planejamento) {
     sessionStorage.removeItem(
@@ -153,100 +107,68 @@ const obterPlanoSelecionado = (
 };
 
 
-/* =========================================================
-   OBTER DADOS DE UM NOVO PLANO
-   ========================================================= */
+const obterPlanoEmCriacao = (): DadosPlano | null => {
+  const valor = sessionStorage.getItem(
+    CHAVE_PLANO_EM_CRIACAO
+  );
 
-const obterPlanoEmCriacao =
-  (): DadosPlano | null => {
-    const valor =
-      sessionStorage.getItem(
-        CHAVE_PLANO_EM_CRIACAO
-      );
+  if (!valor) return null;
 
-    if (!valor) {
-      return null;
-    }
+  const dados = tentarConverterJson(valor);
 
-    const dados =
-      tentarConverterJson(valor);
+  if (!dadosPlanoSaoValidos(dados)) {
+    sessionStorage.removeItem(
+      CHAVE_PLANO_EM_CRIACAO
+    );
 
-    if (!dadosPlanoSaoValidos(dados)) {
-      sessionStorage.removeItem(
-        CHAVE_PLANO_EM_CRIACAO
-      );
+    return null;
+  }
 
-      return null;
-    }
+  return dados;
+};
 
-    return dados;
-  };
-
-
-/* =========================================================
-   OBTER CONTEXTO DA PÁGINA
-   ========================================================= */
 
 export const obterContextoPlano = (
   usuarioId?: string
 ): ContextoPlano | null => {
-  if (!usuarioId) {
-    return null;
-  }
+  if (!usuarioId) return null;
 
   /*
-    Se existe um plano selecionado,
-    ele obrigatoriamente precisa ser válido.
+    Novo planejamento tem prioridade.
 
-    Não fazemos fallback para um plano em
-    criação caso o plano selecionado esteja
-    corrompido ou pertença a outra pessoa.
+    Isso evita que um plano selecionado antigo
+    interfira na geração de um novo plano.
   */
+  const planoEmCriacao = obterPlanoEmCriacao();
 
-  const existePlanoSelecionado =
-    sessionStorage.getItem(
+  if (planoEmCriacao) {
+    sessionStorage.removeItem(
       CHAVE_PLANO_SELECIONADO
-    ) !== null;
-
-  if (existePlanoSelecionado) {
-    const plano =
-      obterPlanoSelecionado(
-        usuarioId
-      );
-
-    if (!plano) {
-      return null;
-    }
+    );
 
     return {
-      dados: plano.dados,
-      planoSelecionado: plano
+      dados: planoEmCriacao,
+      planoSelecionado: null
     };
   }
 
-
   /*
-    Caso contrário, verificamos se existe
-    um novo planejamento sendo criado.
+    Se não existe novo plano em criação,
+    verificamos se o usuário abriu um plano salvo.
   */
+  const planoSelecionado =
+    obterPlanoSelecionado(usuarioId);
 
-  const dados =
-    obterPlanoEmCriacao();
-
-  if (!dados) {
+  if (!planoSelecionado) {
     return null;
   }
 
   return {
-    dados,
-    planoSelecionado: null
+    dados: planoSelecionado.dados,
+    planoSelecionado
   };
 };
 
-
-/* =========================================================
-   LIMPAR DADOS TEMPORÁRIOS
-   ========================================================= */
 
 export const limparContextoPlano = () => {
   sessionStorage.removeItem(

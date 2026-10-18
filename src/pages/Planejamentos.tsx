@@ -1,269 +1,125 @@
-import React, {
-  useState
-} from 'react';
+import React, { useState } from 'react';
 
-import {
-  IonContent,
-  IonPage,
-  IonToast,
-  useIonRouter
-} from '@ionic/react';
+import { IonContent, IonPage, IonToast, useIonRouter, useIonViewWillEnter} from '@ionic/react';
 
-import {
-  obterUsuarioLogado,
-  sair
-} from '../utils/auth';
+import { obterUsuarioLogado, sair } from '../utils/auth';
+import { PlanejamentoSalvo } from '../types/planejamento';
+import { usePlanejamentos } from '../hooks/usePlanejamentos';
 
-import {
-  PlanejamentoSalvo
-} from '../types/planejamento';
-
-import {
-  usePlanejamentos
-} from '../hooks/usePlanejamentos';
-
-import ModalConfirmacao
-  from '../components/ModalConfirmacao';
-
-import PlanejamentoCard
-  from '../components/PlanejamentoCard';
-
-import FiltrosPlanejamentos
-  from '../components/FiltrosPlanejamentos';
+import ModalConfirmacao from '../components/ModalConfirmacao';
+import PlanejamentoCard from '../components/PlanejamentoCard';
+import FiltrosPlanejamentos from '../components/FiltrosPlanejamentos';
 
 import './Planejamentos.css';
 import './FiltrosPlanejamentos.css';
 
 
-const Planejamentos:
-React.FC = () => {
-
-  const router =
-    useIonRouter();
-
-  const usuario =
-    obterUsuarioLogado();
-
-
-  /* =======================================================
-     DADOS E FILTROS
-     ======================================================= */
+const Planejamentos: React.FC = () => {
+  const router = useIonRouter();
+  const usuario = obterUsuarioLogado();
 
   const {
     planejamentos,
     planejamentosFiltrados,
-
     busca,
     setBusca,
-
     filtroMateria,
     setFiltroMateria,
-
     filtroTurma,
     setFiltroTurma,
-
     ordenacao,
     setOrdenacao,
-
     materiasDisponiveis,
     turmasDisponiveis,
-
     filtrosAtivos,
-
     limparFiltros,
+    carregarPlanejamentos,
     duplicarPlanejamento,
     excluirPlanejamento
-  } =
-    usePlanejamentos(
-      usuario?.id
-    );
+  } = usePlanejamentos(usuario?.id);
+
+  const [planoParaExcluir, setPlanoParaExcluir] =
+    useState<PlanejamentoSalvo | null>(null);
+
+  const [mensagem, setMensagem] = useState('');
 
 
-  /* =======================================================
-     ESTADOS DA PÁGINA
-     ======================================================= */
-
-  const [
-    planejamentoParaExcluir,
-    setPlanejamentoParaExcluir
-  ] =
-    useState<PlanejamentoSalvo | null>(
-      null
-    );
+  // Atualiza a lista sempre que a página voltar a ser exibida
+  useIonViewWillEnter(() => {
+    carregarPlanejamentos();
+  });
 
 
-  const [
-    mensagem,
-    setMensagem
-  ] =
-    useState('');
-
-
-  /* =======================================================
-     ABRIR PLANO
-     ======================================================= */
-
-  const abrirPlanejamento = (
-    plano: PlanejamentoSalvo
-  ) => {
-
-    if (
-      !usuario ||
-      plano.usuarioId !==
-        usuario.id
-    ) {
-      return;
-    }
-
+  // Abrir planejamento
+  const abrirPlano = (plano: PlanejamentoSalvo) => {
+    if (!usuario || plano.usuarioId !== usuario.id) return;
 
     sessionStorage.setItem(
       'planoSelecionado',
       JSON.stringify(plano)
     );
 
-
-    router.push(
-      '/plano-gerado',
-      'forward'
-    );
-
+    router.push('/plano-gerado', 'forward');
   };
 
 
-  /* =======================================================
-     DUPLICAR
-     ======================================================= */
+  // Duplicar planejamento
+  const duplicarPlano = (plano: PlanejamentoSalvo) => {
+    const copia = duplicarPlanejamento(plano.id);
 
-  const duplicar = (
-    plano: PlanejamentoSalvo
-  ) => {
-
-    const copia =
-      duplicarPlanejamento(
-        plano.id
+    if (copia) {
+      setMensagem(
+        `"${copia.conteudo.titulo}" criado com sucesso.`
       );
-
-
-    if (!copia) {
-      return;
     }
-
-
-    setMensagem(
-      `"${copia.conteudo.titulo}" criado com sucesso.`
-    );
-
   };
 
 
-  /* =======================================================
-     EXCLUSÃO
-     ======================================================= */
-
-  const solicitarExclusao = (
-    plano: PlanejamentoSalvo
-  ) => {
-    setPlanejamentoParaExcluir(
-      plano
-    );
-  };
-
-
-  const cancelarExclusao = () => {
-    setPlanejamentoParaExcluir(
-      null
-    );
-  };
-
-
+  // Excluir planejamento
   const confirmarExclusao = () => {
+    if (!planoParaExcluir) return;
 
-    if (!planejamentoParaExcluir) {
-      return;
-    }
-
-
-    const excluido =
-      excluirPlanejamento(
-        planejamentoParaExcluir.id
-      );
-
-
-    setPlanejamentoParaExcluir(
-      null
+    const excluido = excluirPlanejamento(
+      planoParaExcluir.id
     );
 
+    setPlanoParaExcluir(null);
 
     if (excluido) {
       setMensagem(
         'Planejamento excluído com sucesso.'
       );
     }
-
   };
 
 
-  /* =======================================================
-     NOVO PLANO
-     ======================================================= */
-
+  // Criar novo planejamento
   const criarNovoPlano = () => {
+    sessionStorage.removeItem('planoSelecionado');
+    sessionStorage.removeItem('planoEmCriacao');
 
-    sessionStorage.removeItem(
-      'planoSelecionado'
-    );
-
-    sessionStorage.removeItem(
-      'planoEmCriacao'
-    );
-
-
-    router.push(
-      '/home',
-      'forward'
-    );
-
+    router.push('/home', 'forward');
   };
 
 
-  /* =======================================================
-     LOGOUT
-     ======================================================= */
-
+  // Logout
   const fazerLogout = () => {
-
     sair();
-
-    router.push(
-      '/login',
-      'root'
-    );
-
+    router.push('/login', 'root');
   };
 
 
-  /* =======================================================
-     CONTADOR
-     ======================================================= */
-
-  const total =
-    planejamentos.length;
-
-  const totalExibido =
-    planejamentosFiltrados.length;
-
+  // Contador
+  const total = planejamentos.length;
+  const exibidos = planejamentosFiltrados.length;
 
   const textoContador =
-    totalExibido !== total
-      ? `${totalExibido} de ${total} planejamentos`
+    exibidos !== total
+      ? `${exibidos} de ${total} planejamentos`
       : total === 1
         ? '1 planejamento salvo'
         : `${total} planejamentos salvos`;
 
-
-  /* =======================================================
-     INTERFACE
-     ======================================================= */
 
   return (
     <IonPage>
@@ -275,23 +131,16 @@ React.FC = () => {
 
         <div className="pagina-planejamentos">
 
-
-          {/* =============================================
-              TOPO
-             ============================================= */}
-
+          {/* CABEÇALHO */}
           <header className="planejamentos-topo">
 
             <div className="planejamentos-usuario">
 
               <div className="usuario-avatar">
                 {usuario?.nome
-                  ? usuario.nome
-                      .charAt(0)
-                      .toUpperCase()
-                  : 'U'}
+                  ?.charAt(0)
+                  .toUpperCase() || 'U'}
               </div>
-
 
               <div className="usuario-informacoes">
 
@@ -309,11 +158,8 @@ React.FC = () => {
 
 
             <div className="marca-planejamentos">
-
               <span className="marca-simbolo-planejamentos" />
-
               Lousa
-
             </div>
 
 
@@ -326,7 +172,6 @@ React.FC = () => {
               >
                 + Novo plano
               </button>
-
 
               <button
                 type="button"
@@ -341,12 +186,9 @@ React.FC = () => {
           </header>
 
 
-          {/* =============================================
-              CONTEÚDO
-             ============================================= */}
-
           <main className="planejamentos-container">
 
+            {/* TÍTULO */}
             <section className="planejamentos-cabecalho">
 
               <span className="planejamentos-etiqueta">
@@ -364,10 +206,7 @@ React.FC = () => {
             </section>
 
 
-            {/* ===========================================
-                SEM PLANOS
-               =========================================== */}
-
+            {/* SEM PLANEJAMENTOS */}
             {total === 0 ? (
 
               <section className="estado-vazio">
@@ -379,16 +218,13 @@ React.FC = () => {
                   ✎
                 </div>
 
-
                 <h2>
                   Você ainda não possui planejamentos
                 </h2>
 
-
                 <p>
                   Crie seu primeiro plano de aula e ele aparecerá aqui.
                 </p>
-
 
                 <button
                   type="button"
@@ -405,29 +241,23 @@ React.FC = () => {
               <>
 
                 {/* FILTROS */}
-
                 <FiltrosPlanejamentos
                   busca={busca}
                   materia={filtroMateria}
                   turma={filtroTurma}
                   ordenacao={ordenacao}
-
                   materias={materiasDisponiveis}
                   turmas={turmasDisponiveis}
-
                   filtrosAtivos={filtrosAtivos}
-
                   onBusca={setBusca}
                   onMateria={setFiltroMateria}
                   onTurma={setFiltroTurma}
                   onOrdenacao={setOrdenacao}
-
                   onLimpar={limparFiltros}
                 />
 
 
                 {/* CONTADOR */}
-
                 <div
                   className="lista-cabecalho lista-cabecalho-filtros"
                   aria-live="polite"
@@ -436,7 +266,6 @@ React.FC = () => {
                   <span>
                     {textoContador}
                   </span>
-
 
                   {filtrosAtivos && (
                     <span className="indicador-filtro-ativo">
@@ -447,9 +276,8 @@ React.FC = () => {
                 </div>
 
 
-                {/* SEM RESULTADOS */}
-
-                {totalExibido === 0 ? (
+                {/* RESULTADOS */}
+                {exibidos === 0 ? (
 
                   <section className="estado-sem-resultados">
 
@@ -460,16 +288,13 @@ React.FC = () => {
                       ⌕
                     </div>
 
-
                     <h2>
                       Nenhum planejamento encontrado
                     </h2>
 
-
                     <p>
                       Não encontramos planejamentos com os filtros selecionados.
                     </p>
-
 
                     <button
                       type="button"
@@ -483,29 +308,17 @@ React.FC = () => {
 
                 ) : (
 
-                  /* CARDS */
-
                   <section className="grade-planejamentos">
 
-                    {planejamentosFiltrados.map(
-                      (plano) => (
-
-                        <PlanejamentoCard
-                          key={plano.id}
-                          plano={plano}
-                          onAbrir={
-                            abrirPlanejamento
-                          }
-                          onDuplicar={
-                            duplicar
-                          }
-                          onExcluir={
-                            solicitarExclusao
-                          }
-                        />
-
-                      )
-                    )}
+                    {planejamentosFiltrados.map((plano) => (
+                      <PlanejamentoCard
+                        key={plano.id}
+                        plano={plano}
+                        onAbrir={abrirPlano}
+                        onDuplicar={duplicarPlano}
+                        onExcluir={setPlanoParaExcluir}
+                      />
+                    ))}
 
                   </section>
 
@@ -518,59 +331,30 @@ React.FC = () => {
           </main>
 
 
-          {/* =============================================
-              MODAL
-             ============================================= */}
-
+          {/* MODAL DE EXCLUSÃO */}
           <ModalConfirmacao
-            aberto={
-              Boolean(
-                planejamentoParaExcluir
-              )
-            }
-
+            aberto={Boolean(planoParaExcluir)}
             titulo="Excluir planejamento?"
-
             descricao={
-              planejamentoParaExcluir
-                ? `Tem certeza de que deseja excluir "${planejamentoParaExcluir.conteudo.titulo}"? Essa ação não poderá ser desfeita.`
+              planoParaExcluir
+                ? `Tem certeza de que deseja excluir "${planoParaExcluir.conteudo.titulo}"? Essa ação não poderá ser desfeita.`
                 : ''
             }
-
             textoCancelar="Cancelar"
-
             textoConfirmar="Excluir planejamento"
-
             perigo
-
-            onCancelar={
-              cancelarExclusao
-            }
-
-            onConfirmar={
-              confirmarExclusao
-            }
+            onCancelar={() => setPlanoParaExcluir(null)}
+            onConfirmar={confirmarExclusao}
           />
 
 
-          {/* =============================================
-              FEEDBACK
-             ============================================= */}
-
+          {/* FEEDBACK */}
           <IonToast
-            isOpen={
-              Boolean(mensagem)
-            }
-
+            isOpen={Boolean(mensagem)}
             message={mensagem}
-
             duration={1800}
-
             position="top"
-
-            onDidDismiss={() =>
-              setMensagem('')
-            }
+            onDidDismiss={() => setMensagem('')}
           />
 
         </div>
@@ -579,7 +363,6 @@ React.FC = () => {
 
     </IonPage>
   );
-
 };
 
 

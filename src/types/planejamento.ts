@@ -1,4 +1,5 @@
 export interface DadosPlano {
+  nivelEnsino?: string;
   materia: string;
   materiaId: string | null;
   turma: string;

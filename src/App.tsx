@@ -63,7 +63,7 @@ import '@ionic/react/css/palettes/dark.system.css';
 
 import './theme/variables.css';
 import './theme/responsive.css';
-import './theme/accessibility.css';
+import './theme/acessibility.css';
 
 
 setupIonicReact();
