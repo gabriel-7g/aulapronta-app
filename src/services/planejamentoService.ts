@@ -1,93 +1,110 @@
-import { PlanejamentoSalvo } from '../types/planejamento';
+import type {
+  ConteudoPlano,
+  DadosPlano,
+  PlanejamentoSalvo
+} from '../types/planejamento';
+
+import {
+  obterToken,
+  sair
+} from '../utils/auth';
+
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:3000';
 
 
-const PLANEJAMENTOS_KEY = 'planejamentosSalvos';
+class ErroApi extends Error {
+  status: number;
+
+  constructor(mensagem: string, status: number) {
+    super(mensagem);
+    this.status = status;
+  }
+}
 
 
-/* =========================================================
-   FUNÇÕES INTERNAS
-   ========================================================= */
+const requisicao = async <T>(
+  rota: string,
+  opcoes: RequestInit = {}
+): Promise<T> => {
+  const token = obterToken();
 
-const gerarId = (): string => {
-  if (
-    typeof crypto !== 'undefined' &&
-    crypto.randomUUID
-  ) {
-    return crypto.randomUUID();
+  if (!token) {
+    sair();
+
+    throw new ErroApi(
+      'Sessão expirada. Faça login novamente.',
+      401
+    );
   }
 
-  return `${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}`;
-};
+  const resposta = await fetch(
+    `${API_URL}${rota}`,
+    {
+      ...opcoes,
 
-
-const obterTodosPlanejamentos = (): PlanejamentoSalvo[] => {
-  const dados = localStorage.getItem(PLANEJAMENTOS_KEY);
-
-  if (!dados) {
-    return [];
-  }
-
-  try {
-    const lista = JSON.parse(dados);
-
-    return Array.isArray(lista)
-      ? lista
-      : [];
-  } catch {
-    return [];
-  }
-};
-
-
-const salvarTodosPlanejamentos = (
-  planejamentos: PlanejamentoSalvo[]
-) => {
-  localStorage.setItem(
-    PLANEJAMENTOS_KEY,
-    JSON.stringify(planejamentos)
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...(opcoes.headers as Record<string, string> | undefined)
+      }
+    }
   );
+
+  const dados = await resposta
+    .json()
+    .catch(() => ({}));
+
+  if (!resposta.ok) {
+    if (resposta.status === 401) {
+      sair();
+    }
+
+    throw new ErroApi(
+      dados?.erro ||
+      'Não foi possível concluir a operação.',
+      resposta.status
+    );
+  }
+
+  return dados as T;
 };
 
 
 const criarTituloDaCopia = (
   tituloOriginal: string,
-  usuarioId: string
+  planejamentos: PlanejamentoSalvo[]
 ): string => {
-  /*
-    Se duplicarmos uma cópia, removemos:
-    "(cópia)"
-    "(cópia 2)"
-    "(cópia 3)"
-    etc.
-  */
-
   const tituloBase = tituloOriginal
-    .replace(/\s+\(cópia(?:\s+\d+)?\)$/i, '')
+    .replace(
+      /\s+\(cópia(?:\s+\d+)?\)$/i,
+      ''
+    )
     .trim();
 
-  const titulosExistentes = new Set(
-    listarPlanejamentosDoUsuario(usuarioId)
-      .map((plano) =>
-        plano.conteudo.titulo.toLocaleLowerCase('pt-BR')
-      )
+  const existentes = new Set(
+    planejamentos.map((plano) =>
+      plano.conteudo.titulo
+        .toLocaleLowerCase('pt-BR')
+    )
   );
 
-  let novoTitulo = `${tituloBase} (cópia)`;
+  const primeiraCopia =
+    `${tituloBase} (cópia)`;
 
   if (
-    !titulosExistentes.has(
-      novoTitulo.toLocaleLowerCase('pt-BR')
+    !existentes.has(
+      primeiraCopia.toLocaleLowerCase('pt-BR')
     )
   ) {
-    return novoTitulo;
+    return primeiraCopia;
   }
 
   let numero = 2;
 
   while (
-    titulosExistentes.has(
+    existentes.has(
       `${tituloBase} (cópia ${numero})`
         .toLocaleLowerCase('pt-BR')
     )
@@ -99,155 +116,133 @@ const criarTituloDaCopia = (
 };
 
 
-/* =========================================================
-   LISTAR PLANEJAMENTOS
-   ========================================================= */
+export const listarPlanejamentosDoUsuario =
+  async (): Promise<PlanejamentoSalvo[]> => {
+    const resposta = await requisicao<{
+      planejamentos: PlanejamentoSalvo[];
+    }>('/api/planejamentos');
 
-export const listarPlanejamentosDoUsuario = (
-  usuarioId: string
-): PlanejamentoSalvo[] => {
-  return obterTodosPlanejamentos()
-    .filter(
-      (plano) =>
-        plano.usuarioId === usuarioId
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.atualizadoEm).getTime() -
-        new Date(a.atualizadoEm).getTime()
-    );
-};
+    return resposta.planejamentos;
+  };
 
 
-/* =========================================================
-   BUSCAR PLANEJAMENTO
-   ========================================================= */
+export const buscarPlanejamentoPorId =
+  async (
+    id: string
+  ): Promise<PlanejamentoSalvo | null> => {
+    try {
+      const resposta = await requisicao<{
+        planejamento: PlanejamentoSalvo;
+      }>(
+        `/api/planejamentos/${id}`
+      );
 
-export const buscarPlanejamentoPorId = (
-  id: string,
-  usuarioId: string
-): PlanejamentoSalvo | null => {
-  const planejamento = obterTodosPlanejamentos()
-    .find(
-      (plano) =>
-        plano.id === id &&
-        plano.usuarioId === usuarioId
-    );
+      return resposta.planejamento;
 
-  return planejamento ?? null;
-};
+    } catch (erro) {
+      if (
+        erro instanceof ErroApi &&
+        erro.status === 404
+      ) {
+        return null;
+      }
 
-
-/* =========================================================
-   SALVAR / ATUALIZAR
-   ========================================================= */
-
-export const salvarPlanejamento = (
-  planejamento: PlanejamentoSalvo
-): PlanejamentoSalvo => {
-  const planejamentos = obterTodosPlanejamentos();
-
-  const indice = planejamentos.findIndex(
-    (plano) =>
-      plano.id === planejamento.id &&
-      plano.usuarioId === planejamento.usuarioId
-  );
-
-  if (indice >= 0) {
-    planejamentos[indice] = planejamento;
-  } else {
-    planejamentos.push(planejamento);
-  }
-
-  salvarTodosPlanejamentos(planejamentos);
-
-  return planejamento;
-};
-
-
-/* =========================================================
-   DUPLICAR PLANEJAMENTO
-   ========================================================= */
-
-export const duplicarPlanejamentoDoUsuario = (
-  planejamentoId: string,
-  usuarioId: string
-): PlanejamentoSalvo | null => {
-  const original = buscarPlanejamentoPorId(
-    planejamentoId,
-    usuarioId
-  );
-
-  /*
-    Impede duplicar um planejamento inexistente
-    ou pertencente a outro usuário.
-  */
-
-  if (!original) {
-    return null;
-  }
-
-  const agora = new Date().toISOString();
-
-  const copia: PlanejamentoSalvo = {
-    ...original,
-
-    id: gerarId(),
-
-    usuarioId,
-
-    criadoEm: agora,
-
-    atualizadoEm: agora,
-
-    dados: {
-      ...original.dados
-    },
-
-    conteudo: {
-      ...original.conteudo,
-
-      titulo: criarTituloDaCopia(
-        original.conteudo.titulo,
-        usuarioId
-      )
+      throw erro;
     }
   };
 
-  return salvarPlanejamento(copia);
-};
 
+export const salvarPlanejamento = async (
+  dados: DadosPlano,
+  conteudo: ConteudoPlano,
+  planejamentoId?: string
+): Promise<PlanejamentoSalvo> => {
+  const editando =
+    Boolean(planejamentoId);
 
-/* =========================================================
-   EXCLUIR PLANEJAMENTO
-   ========================================================= */
+  const rota =
+    editando
+      ? `/api/planejamentos/${planejamentoId}`
+      : '/api/planejamentos';
 
-export const excluirPlanejamentoDoUsuario = (
-  planejamentoId: string,
-  usuarioId: string
-): boolean => {
-  const planejamentos = obterTodosPlanejamentos();
+  const resposta = await requisicao<{
+    planejamento: PlanejamentoSalvo;
+  }>(
+    rota,
+    {
+      method:
+        editando
+          ? 'PUT'
+          : 'POST',
 
-  const novaLista = planejamentos.filter(
-    (plano) =>
-      !(
-        plano.id === planejamentoId &&
-        plano.usuarioId === usuarioId
-      )
+      body: JSON.stringify({
+        dados,
+        conteudo
+      })
+    }
   );
 
-  /*
-    Nenhum plano foi removido.
-  */
-
-  if (
-    novaLista.length ===
-    planejamentos.length
-  ) {
-    return false;
-  }
-
-  salvarTodosPlanejamentos(novaLista);
-
-  return true;
+  return resposta.planejamento;
 };
+
+
+export const duplicarPlanejamentoDoUsuario =
+  async (
+    planejamentoId: string
+  ): Promise<PlanejamentoSalvo | null> => {
+    const planejamentos =
+      await listarPlanejamentosDoUsuario();
+
+    const original =
+      planejamentos.find(
+        (plano) =>
+          plano.id === planejamentoId
+      );
+
+    if (!original) {
+      return null;
+    }
+
+    const titulo =
+      criarTituloDaCopia(
+        original.conteudo.titulo,
+        planejamentos
+      );
+
+    return salvarPlanejamento(
+      {
+        ...original.dados
+      },
+      {
+        ...original.conteudo,
+        titulo
+      }
+    );
+  };
+
+
+export const excluirPlanejamentoDoUsuario =
+  async (
+    planejamentoId: string
+  ): Promise<boolean> => {
+    try {
+      await requisicao(
+        `/api/planejamentos/${planejamentoId}`,
+        {
+          method: 'DELETE'
+        }
+      );
+
+      return true;
+
+    } catch (erro) {
+      if (
+        erro instanceof ErroApi &&
+        erro.status === 404
+      ) {
+        return false;
+      }
+
+      throw erro;
+    }
+  };

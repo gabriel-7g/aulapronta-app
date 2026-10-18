@@ -1,17 +1,18 @@
-import { DadosPlano, PlanejamentoSalvo } from '../types/planejamento';
-import { buscarPlanejamentoPorId } from '../services/planejamentoService';
+import {
+  ConteudoPlano,
+  DadosPlano,
+  PlanejamentoSalvo
+} from '../types/planejamento';
 
-const CHAVE_PLANO_SELECIONADO = 'planoSelecionado';
-const CHAVE_PLANO_EM_CRIACAO = 'planoEmCriacao';
-
+const CHAVE_SELECIONADO = 'planoSelecionado';
+const CHAVE_CRIACAO = 'planoEmCriacao';
 
 export interface ContextoPlano {
   dados: DadosPlano;
   planoSelecionado: PlanejamentoSalvo | null;
 }
 
-
-const tentarConverterJson = (valor: string): unknown => {
+const json = (valor: string): unknown => {
   try {
     return JSON.parse(valor);
   } catch {
@@ -19,163 +20,127 @@ const tentarConverterJson = (valor: string): unknown => {
   }
 };
 
-
-const ehObjeto = (
+const objeto = (
   valor: unknown
-): valor is Record<string, unknown> => {
-  return typeof valor === 'object' && valor !== null;
-};
+): valor is Record<string, unknown> =>
+  typeof valor === 'object' && valor !== null;
 
-
-const dadosPlanoSaoValidos = (
+const dadosValidos = (
   valor: unknown
 ): valor is DadosPlano => {
-  if (!ehObjeto(valor)) return false;
-
-  const materiaIdValida =
-    valor.materiaId === null ||
-    typeof valor.materiaId === 'string';
-
-  const nivelEnsinoValido =
-    valor.nivelEnsino === undefined ||
-    (
-      typeof valor.nivelEnsino === 'string' &&
-      valor.nivelEnsino.trim().length > 0
-    );
-
-  const camposSaoStrings =
-    typeof valor.materia === 'string' &&
-    typeof valor.turma === 'string' &&
-    typeof valor.duracao === 'string' &&
-    typeof valor.tema === 'string' &&
-    typeof valor.observacoes === 'string';
-
-  if (
-    !materiaIdValida ||
-    !nivelEnsinoValido ||
-    !camposSaoStrings
-  ) {
-    return false;
-  }
+  if (!objeto(valor)) return false;
 
   return (
+    typeof valor.materia === 'string' &&
     valor.materia.trim().length > 0 &&
+    (
+      valor.materiaId === null ||
+      typeof valor.materiaId === 'string'
+    ) &&
+    typeof valor.turma === 'string' &&
     valor.turma.trim().length > 0 &&
+    typeof valor.duracao === 'string' &&
     valor.duracao.trim().length > 0 &&
-    valor.tema.trim().length > 0
+    typeof valor.tema === 'string' &&
+    valor.tema.trim().length > 0 &&
+    typeof valor.observacoes === 'string' &&
+    (
+      valor.nivelEnsino === undefined ||
+      typeof valor.nivelEnsino === 'string'
+    )
   );
 };
 
+const conteudoValido = (
+  valor: unknown
+): valor is ConteudoPlano => {
+  if (!objeto(valor)) return false;
+
+  return [
+    'titulo',
+    'objetivo',
+    'introducao',
+    'desenvolvimento',
+    'atividade',
+    'recursos',
+    'avaliacao'
+  ].every(
+    (campo) =>
+      typeof valor[campo] === 'string'
+  );
+};
 
 const obterPlanoSelecionado = (
   usuarioId: string
 ): PlanejamentoSalvo | null => {
-  const valor = sessionStorage.getItem(
-    CHAVE_PLANO_SELECIONADO
-  );
+  const valor =
+    sessionStorage.getItem(CHAVE_SELECIONADO);
 
   if (!valor) return null;
 
-  const dados = tentarConverterJson(valor);
+  const plano = json(valor);
 
   if (
-    !ehObjeto(dados) ||
-    typeof dados.id !== 'string' ||
-    !dados.id.trim()
+    !objeto(plano) ||
+    typeof plano.id !== 'string' ||
+    typeof plano.usuarioId !== 'string' ||
+    plano.usuarioId !== usuarioId ||
+    typeof plano.criadoEm !== 'string' ||
+    typeof plano.atualizadoEm !== 'string' ||
+    !dadosValidos(plano.dados) ||
+    !conteudoValido(plano.conteudo)
   ) {
-    sessionStorage.removeItem(
-      CHAVE_PLANO_SELECIONADO
-    );
-
+    sessionStorage.removeItem(CHAVE_SELECIONADO);
     return null;
   }
 
-  const planejamento = buscarPlanejamentoPorId(
-    dados.id,
-    usuarioId
-  );
-
-  if (!planejamento) {
-    sessionStorage.removeItem(
-      CHAVE_PLANO_SELECIONADO
-    );
-
-    return null;
-  }
-
-  return planejamento;
+  return plano as unknown as PlanejamentoSalvo;
 };
 
-
 const obterPlanoEmCriacao = (): DadosPlano | null => {
-  const valor = sessionStorage.getItem(
-    CHAVE_PLANO_EM_CRIACAO
-  );
+  const valor =
+    sessionStorage.getItem(CHAVE_CRIACAO);
 
   if (!valor) return null;
 
-  const dados = tentarConverterJson(valor);
+  const dados = json(valor);
 
-  if (!dadosPlanoSaoValidos(dados)) {
-    sessionStorage.removeItem(
-      CHAVE_PLANO_EM_CRIACAO
-    );
-
+  if (!dadosValidos(dados)) {
+    sessionStorage.removeItem(CHAVE_CRIACAO);
     return null;
   }
 
   return dados;
 };
 
-
 export const obterContextoPlano = (
   usuarioId?: string
 ): ContextoPlano | null => {
   if (!usuarioId) return null;
 
-  /*
-    Novo planejamento tem prioridade.
+  const novoPlano = obterPlanoEmCriacao();
 
-    Isso evita que um plano selecionado antigo
-    interfira na geração de um novo plano.
-  */
-  const planoEmCriacao = obterPlanoEmCriacao();
-
-  if (planoEmCriacao) {
-    sessionStorage.removeItem(
-      CHAVE_PLANO_SELECIONADO
-    );
+  if (novoPlano) {
+    sessionStorage.removeItem(CHAVE_SELECIONADO);
 
     return {
-      dados: planoEmCriacao,
+      dados: novoPlano,
       planoSelecionado: null
     };
   }
 
-  /*
-    Se não existe novo plano em criação,
-    verificamos se o usuário abriu um plano salvo.
-  */
-  const planoSelecionado =
+  const selecionado =
     obterPlanoSelecionado(usuarioId);
 
-  if (!planoSelecionado) {
-    return null;
-  }
+  if (!selecionado) return null;
 
   return {
-    dados: planoSelecionado.dados,
-    planoSelecionado
+    dados: selecionado.dados,
+    planoSelecionado: selecionado
   };
 };
 
-
 export const limparContextoPlano = () => {
-  sessionStorage.removeItem(
-    CHAVE_PLANO_SELECIONADO
-  );
-
-  sessionStorage.removeItem(
-    CHAVE_PLANO_EM_CRIACAO
-  );
+  sessionStorage.removeItem(CHAVE_SELECIONADO);
+  sessionStorage.removeItem(CHAVE_CRIACAO);
 };

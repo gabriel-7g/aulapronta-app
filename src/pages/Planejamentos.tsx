@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
 
-import { IonContent, IonPage, IonToast, useIonRouter, useIonViewWillEnter} from '@ionic/react';
+import {
+  IonContent,
+  IonPage,
+  IonToast,
+  useIonRouter,
+  useIonViewWillEnter
+} from '@ionic/react';
 
-import { obterUsuarioLogado, sair } from '../utils/auth';
+import {
+  obterUsuarioLogado,
+  sair
+} from '../utils/auth';
+
 import { PlanejamentoSalvo } from '../types/planejamento';
 import { usePlanejamentos } from '../hooks/usePlanejamentos';
 
@@ -13,7 +23,6 @@ import FiltrosPlanejamentos from '../components/FiltrosPlanejamentos';
 import './Planejamentos.css';
 import './FiltrosPlanejamentos.css';
 
-
 const Planejamentos: React.FC = () => {
   const router = useIonRouter();
   const usuario = obterUsuarioLogado();
@@ -21,6 +30,10 @@ const Planejamentos: React.FC = () => {
   const {
     planejamentos,
     planejamentosFiltrados,
+    carregando,
+    erro,
+    limparErro,
+
     busca,
     setBusca,
     filtroMateria,
@@ -29,30 +42,39 @@ const Planejamentos: React.FC = () => {
     setFiltroTurma,
     ordenacao,
     setOrdenacao,
+
     materiasDisponiveis,
     turmasDisponiveis,
     filtrosAtivos,
+
     limparFiltros,
     carregarPlanejamentos,
     duplicarPlanejamento,
     excluirPlanejamento
   } = usePlanejamentos(usuario?.id);
 
-  const [planoParaExcluir, setPlanoParaExcluir] =
-    useState<PlanejamentoSalvo | null>(null);
+  const [
+    planoParaExcluir,
+    setPlanoParaExcluir
+  ] = useState<PlanejamentoSalvo | null>(null);
 
   const [mensagem, setMensagem] = useState('');
 
-
-  // Atualiza a lista sempre que a página voltar a ser exibida
   useIonViewWillEnter(() => {
-    carregarPlanejamentos();
+    void carregarPlanejamentos();
   });
 
+  const abrirPlano = (
+    plano: PlanejamentoSalvo
+  ) => {
+    if (
+      !usuario ||
+      plano.usuarioId !== usuario.id
+    ) {
+      return;
+    }
 
-  // Abrir planejamento
-  const abrirPlano = (plano: PlanejamentoSalvo) => {
-    if (!usuario || plano.usuarioId !== usuario.id) return;
+    sessionStorage.removeItem('planoEmCriacao');
 
     sessionStorage.setItem(
       'planoSelecionado',
@@ -62,10 +84,11 @@ const Planejamentos: React.FC = () => {
     router.push('/plano-gerado', 'forward');
   };
 
-
-  // Duplicar planejamento
-  const duplicarPlano = (plano: PlanejamentoSalvo) => {
-    const copia = duplicarPlanejamento(plano.id);
+  const duplicarPlano = async (
+    plano: PlanejamentoSalvo
+  ) => {
+    const copia =
+      await duplicarPlanejamento(plano.id);
 
     if (copia) {
       setMensagem(
@@ -74,16 +97,14 @@ const Planejamentos: React.FC = () => {
     }
   };
 
-
-  // Excluir planejamento
-  const confirmarExclusao = () => {
+  const confirmarExclusao = async () => {
     if (!planoParaExcluir) return;
 
-    const excluido = excluirPlanejamento(
-      planoParaExcluir.id
-    );
-
+    const id = planoParaExcluir.id;
     setPlanoParaExcluir(null);
+
+    const excluido =
+      await excluirPlanejamento(id);
 
     if (excluido) {
       setMensagem(
@@ -92,8 +113,6 @@ const Planejamentos: React.FC = () => {
     }
   };
 
-
-  // Criar novo planejamento
   const criarNovoPlano = () => {
     sessionStorage.removeItem('planoSelecionado');
     sessionStorage.removeItem('planoEmCriacao');
@@ -101,15 +120,11 @@ const Planejamentos: React.FC = () => {
     router.push('/home', 'forward');
   };
 
-
-  // Logout
   const fazerLogout = () => {
     sair();
-    router.push('/login', 'root');
+    router.push('/login', 'root', 'replace');
   };
 
-
-  // Contador
   const total = planejamentos.length;
   const exibidos = planejamentosFiltrados.length;
 
@@ -120,22 +135,17 @@ const Planejamentos: React.FC = () => {
         ? '1 planejamento salvo'
         : `${total} planejamentos salvos`;
 
-
   return (
     <IonPage>
-
       <IonContent
         fullscreen
         className="conteudo-planejamentos"
       >
-
         <div className="pagina-planejamentos">
 
-          {/* CABEÇALHO */}
           <header className="planejamentos-topo">
 
             <div className="planejamentos-usuario">
-
               <div className="usuario-avatar">
                 {usuario?.nome
                   ?.charAt(0)
@@ -143,7 +153,6 @@ const Planejamentos: React.FC = () => {
               </div>
 
               <div className="usuario-informacoes">
-
                 <span className="usuario-nome">
                   {usuario?.nome || 'Usuário'}
                 </span>
@@ -151,9 +160,7 @@ const Planejamentos: React.FC = () => {
                 <span className="usuario-email">
                   {usuario?.email || ''}
                 </span>
-
               </div>
-
             </div>
 
 
@@ -164,7 +171,6 @@ const Planejamentos: React.FC = () => {
 
 
             <div className="acoes-topo-planejamentos">
-
               <button
                 type="button"
                 className="botao-novo-topo"
@@ -180,7 +186,6 @@ const Planejamentos: React.FC = () => {
               >
                 Sair
               </button>
-
             </div>
 
           </header>
@@ -188,29 +193,31 @@ const Planejamentos: React.FC = () => {
 
           <main className="planejamentos-container">
 
-            {/* TÍTULO */}
             <section className="planejamentos-cabecalho">
-
               <span className="planejamentos-etiqueta">
                 sua estante
               </span>
 
-              <h1>
-                Meus planejamentos
-              </h1>
+              <h1>Meus planejamentos</h1>
 
               <p>
                 Seus planos de aula salvos ficam organizados aqui.
               </p>
-
             </section>
 
 
-            {/* SEM PLANEJAMENTOS */}
-            {total === 0 ? (
+            {carregando && total === 0 ? (
 
               <section className="estado-vazio">
+                <h2>Carregando planejamentos...</h2>
+                <p>
+                  Buscando seus dados no servidor.
+                </p>
+              </section>
 
+            ) : total === 0 ? (
+
+              <section className="estado-vazio">
                 <div
                   className="estado-vazio-icone"
                   aria-hidden="true"
@@ -223,7 +230,7 @@ const Planejamentos: React.FC = () => {
                 </h2>
 
                 <p>
-                  Crie seu primeiro plano de aula e ele aparecerá aqui.
+                  Crie seu primeiro planejamento e ele aparecerá aqui.
                 </p>
 
                 <button
@@ -233,14 +240,11 @@ const Planejamentos: React.FC = () => {
                 >
                   Criar planejamento
                 </button>
-
               </section>
 
             ) : (
 
               <>
-
-                {/* FILTROS */}
                 <FiltrosPlanejamentos
                   busca={busca}
                   materia={filtroMateria}
@@ -257,30 +261,23 @@ const Planejamentos: React.FC = () => {
                 />
 
 
-                {/* CONTADOR */}
                 <div
                   className="lista-cabecalho lista-cabecalho-filtros"
                   aria-live="polite"
                 >
-
-                  <span>
-                    {textoContador}
-                  </span>
+                  <span>{textoContador}</span>
 
                   {filtrosAtivos && (
                     <span className="indicador-filtro-ativo">
                       Filtros ativos
                     </span>
                   )}
-
                 </div>
 
 
-                {/* RESULTADOS */}
                 {exibidos === 0 ? (
 
                   <section className="estado-sem-resultados">
-
                     <div
                       className="estado-sem-resultados-icone"
                       aria-hidden="true"
@@ -303,27 +300,25 @@ const Planejamentos: React.FC = () => {
                     >
                       Limpar filtros
                     </button>
-
                   </section>
 
                 ) : (
 
                   <section className="grade-planejamentos">
-
-                    {planejamentosFiltrados.map((plano) => (
-                      <PlanejamentoCard
-                        key={plano.id}
-                        plano={plano}
-                        onAbrir={abrirPlano}
-                        onDuplicar={duplicarPlano}
-                        onExcluir={setPlanoParaExcluir}
-                      />
-                    ))}
-
+                    {planejamentosFiltrados.map(
+                      (plano) => (
+                        <PlanejamentoCard
+                          key={plano.id}
+                          plano={plano}
+                          onAbrir={abrirPlano}
+                          onDuplicar={duplicarPlano}
+                          onExcluir={setPlanoParaExcluir}
+                        />
+                      )
+                    )}
                   </section>
 
                 )}
-
               </>
 
             )}
@@ -331,7 +326,6 @@ const Planejamentos: React.FC = () => {
           </main>
 
 
-          {/* MODAL DE EXCLUSÃO */}
           <ModalConfirmacao
             aberto={Boolean(planoParaExcluir)}
             titulo="Excluir planejamento?"
@@ -343,27 +337,39 @@ const Planejamentos: React.FC = () => {
             textoCancelar="Cancelar"
             textoConfirmar="Excluir planejamento"
             perigo
-            onCancelar={() => setPlanoParaExcluir(null)}
-            onConfirmar={confirmarExclusao}
+            onCancelar={() =>
+              setPlanoParaExcluir(null)
+            }
+            onConfirmar={() => {
+              void confirmarExclusao();
+            }}
           />
 
 
-          {/* FEEDBACK */}
           <IonToast
             isOpen={Boolean(mensagem)}
             message={mensagem}
             duration={1800}
             position="top"
-            onDidDismiss={() => setMensagem('')}
+            onDidDismiss={() =>
+              setMensagem('')
+            }
+          />
+
+
+          <IonToast
+            isOpen={Boolean(erro)}
+            message={erro}
+            duration={2500}
+            position="top"
+            color="danger"
+            onDidDismiss={limparErro}
           />
 
         </div>
-
       </IonContent>
-
     </IonPage>
   );
 };
-
 
 export default Planejamentos;

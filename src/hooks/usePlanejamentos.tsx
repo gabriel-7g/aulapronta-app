@@ -11,302 +11,163 @@ import {
   listarPlanejamentosDoUsuario
 } from '../services/planejamentoService';
 
-import {
-  PlanejamentoSalvo
-} from '../types/planejamento';
+import { PlanejamentoSalvo } from '../types/planejamento';
+import { TipoOrdenacao } from '../types/filtrosPlanejamento';
 
-import {
-  TipoOrdenacao
-} from '../types/filtrosPlanejamento';
-
-
-/* =========================================================
-   FUNÇÕES AUXILIARES
-   ========================================================= */
-
-const normalizarTexto = (texto: string) => {
-  return texto
+const normalizar = (texto: string) =>
+  texto
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .trim();
-};
 
-
-/* =========================================================
-   HOOK
-   ========================================================= */
+const obterMensagemErro = (erro: unknown) =>
+  erro instanceof Error
+    ? erro.message
+    : 'Ocorreu um erro inesperado.';
 
 export const usePlanejamentos = (
   usuarioId?: string
 ) => {
-
-  /* -------------------------------------------------------
-     DADOS
-     ------------------------------------------------------- */
-
   const [planejamentos, setPlanejamentos] =
     useState<PlanejamentoSalvo[]>([]);
 
-
-  /* -------------------------------------------------------
-     FILTROS
-     ------------------------------------------------------- */
-
-  const [busca, setBusca] =
-    useState('');
-
-  const [filtroMateria, setFiltroMateria] =
-    useState('todas');
-
-  const [filtroTurma, setFiltroTurma] =
-    useState('todas');
-
+  const [busca, setBusca] = useState('');
+  const [filtroMateria, setFiltroMateria] = useState('todas');
+  const [filtroTurma, setFiltroTurma] = useState('todas');
   const [ordenacao, setOrdenacao] =
     useState<TipoOrdenacao>('recentes');
 
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
 
-  /* -------------------------------------------------------
-     CARREGAR
-     ------------------------------------------------------- */
+  const carregarPlanejamentos = useCallback(async () => {
+    if (!usuarioId) {
+      setPlanejamentos([]);
+      setCarregando(false);
+      return;
+    }
 
-  const carregarPlanejamentos =
-    useCallback(() => {
+    setCarregando(true);
+    setErro('');
 
-      if (!usuarioId) {
-        setPlanejamentos([]);
-        return;
-      }
-
+    try {
       const lista =
-        listarPlanejamentosDoUsuario(
-          usuarioId
-        );
+        await listarPlanejamentosDoUsuario(usuarioId);
 
       setPlanejamentos(lista);
-
-    }, [usuarioId]);
-
+    } catch (erro) {
+      setErro(obterMensagemErro(erro));
+    } finally {
+      setCarregando(false);
+    }
+  }, [usuarioId]);
 
   useEffect(() => {
-    carregarPlanejamentos();
+    void carregarPlanejamentos();
   }, [carregarPlanejamentos]);
 
-
-  /* -------------------------------------------------------
-     MATÉRIAS
-     ------------------------------------------------------- */
-
-  const materiasDisponiveis =
-    useMemo(() => {
-
-      const materias = planejamentos
-        .map(
-          (plano) =>
-            plano.dados.materia.trim()
+  const materiasDisponiveis = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          planejamentos
+            .map((plano) => plano.dados.materia.trim())
+            .filter(Boolean)
         )
-        .filter(Boolean);
+      ).sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    [planejamentos]
+  );
 
+  const turmasDisponiveis = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          planejamentos
+            .map((plano) => plano.dados.turma.trim())
+            .filter(Boolean)
+        )
+      ).sort((a, b) =>
+        a.localeCompare(b, 'pt-BR', { numeric: true })
+      ),
+    [planejamentos]
+  );
 
-      return Array
-        .from(new Set(materias))
-        .sort(
-          (a, b) =>
-            a.localeCompare(
-              b,
-              'pt-BR'
-            )
+  const planejamentosFiltrados = useMemo(() => {
+    let resultado = [...planejamentos];
+    const termo = normalizar(busca);
+
+    if (termo) {
+      resultado = resultado.filter((plano) => {
+        const texto = normalizar(
+          [
+            plano.conteudo.titulo,
+            plano.dados.tema,
+            plano.dados.materia,
+            plano.dados.turma,
+            plano.dados.nivelEnsino || '',
+            plano.conteudo.objetivo
+          ].join(' ')
         );
 
-    }, [planejamentos]);
+        return texto.includes(termo);
+      });
+    }
 
-
-  /* -------------------------------------------------------
-     TURMAS
-     ------------------------------------------------------- */
-
-  const turmasDisponiveis =
-    useMemo(() => {
-
-      const turmas = planejamentos
-        .map(
-          (plano) =>
-            plano.dados.turma.trim()
-        )
-        .filter(Boolean);
-
-
-      return Array
-        .from(new Set(turmas))
-        .sort(
-          (a, b) =>
-            a.localeCompare(
-              b,
-              'pt-BR',
-              {
-                numeric: true
-              }
-            )
-        );
-
-    }, [planejamentos]);
-
-
-  /* -------------------------------------------------------
-     FILTRAGEM
-     ------------------------------------------------------- */
-
-  const planejamentosFiltrados =
-    useMemo(() => {
-
-      let resultado = [
-        ...planejamentos
-      ];
-
-
-      /* BUSCA */
-
-      const termo =
-        normalizarTexto(busca);
-
-
-      if (termo) {
-        resultado =
-          resultado.filter(
-            (plano) => {
-
-              const texto =
-                normalizarTexto(
-                  [
-                    plano.conteudo.titulo,
-                    plano.dados.tema,
-                    plano.dados.materia,
-                    plano.dados.turma,
-                    plano.conteudo.objetivo,
-                    plano.conteudo.objetivo
-                  ].join(' ')
-                );
-
-
-              return texto.includes(
-                termo
-              );
-
-            }
-          );
-      }
-
-
-      /* MATÉRIA */
-
-      if (
-        filtroMateria !==
-        'todas'
-      ) {
-        resultado =
-          resultado.filter(
-            (plano) =>
-              plano.dados.materia ===
-              filtroMateria
-          );
-      }
-
-
-      /* TURMA */
-
-      if (
-        filtroTurma !==
-        'todas'
-      ) {
-        resultado =
-          resultado.filter(
-            (plano) =>
-              plano.dados.turma ===
-              filtroTurma
-          );
-      }
-
-
-      /* ORDENAÇÃO */
-
-      resultado.sort(
-        (a, b) => {
-
-          switch (ordenacao) {
-
-            case 'antigos':
-              return (
-                new Date(
-                  a.atualizadoEm
-                ).getTime() -
-                new Date(
-                  b.atualizadoEm
-                ).getTime()
-              );
-
-
-            case 'titulo-az':
-              return (
-                a.conteudo.titulo
-                  .localeCompare(
-                    b.conteudo.titulo,
-                    'pt-BR'
-                  )
-              );
-
-
-            case 'titulo-za':
-              return (
-                b.conteudo.titulo
-                  .localeCompare(
-                    a.conteudo.titulo,
-                    'pt-BR'
-                  )
-              );
-
-
-            case 'recentes':
-            default:
-              return (
-                new Date(
-                  b.atualizadoEm
-                ).getTime() -
-                new Date(
-                  a.atualizadoEm
-                ).getTime()
-              );
-
-          }
-
-        }
+    if (filtroMateria !== 'todas') {
+      resultado = resultado.filter(
+        (plano) => plano.dados.materia === filtroMateria
       );
+    }
 
+    if (filtroTurma !== 'todas') {
+      resultado = resultado.filter(
+        (plano) => plano.dados.turma === filtroTurma
+      );
+    }
 
-      return resultado;
+    resultado.sort((a, b) => {
+      switch (ordenacao) {
+        case 'antigos':
+          return (
+            new Date(a.atualizadoEm).getTime() -
+            new Date(b.atualizadoEm).getTime()
+          );
 
-    }, [
-      planejamentos,
-      busca,
-      filtroMateria,
-      filtroTurma,
-      ordenacao
-    ]);
+        case 'titulo-az':
+          return a.conteudo.titulo.localeCompare(
+            b.conteudo.titulo,
+            'pt-BR'
+          );
 
+        case 'titulo-za':
+          return b.conteudo.titulo.localeCompare(
+            a.conteudo.titulo,
+            'pt-BR'
+          );
 
-  /* -------------------------------------------------------
-     FILTROS ATIVOS
-     ------------------------------------------------------- */
+        default:
+          return (
+            new Date(b.atualizadoEm).getTime() -
+            new Date(a.atualizadoEm).getTime()
+          );
+      }
+    });
+
+    return resultado;
+  }, [
+    planejamentos,
+    busca,
+    filtroMateria,
+    filtroTurma,
+    ordenacao
+  ]);
 
   const filtrosAtivos =
-    busca.trim() !== '' ||
+    Boolean(busca.trim()) ||
     filtroMateria !== 'todas' ||
     filtroTurma !== 'todas' ||
     ordenacao !== 'recentes';
-
-
-  /* -------------------------------------------------------
-     LIMPAR FILTROS
-     ------------------------------------------------------- */
 
   const limparFiltros = () => {
     setBusca('');
@@ -315,100 +176,72 @@ export const usePlanejamentos = (
     setOrdenacao('recentes');
   };
 
+  const duplicarPlanejamento = useCallback(
+    async (id: string) => {
+      if (!usuarioId) return null;
 
-  /* -------------------------------------------------------
-     DUPLICAR
-     ------------------------------------------------------- */
+      setErro('');
 
-  const duplicarPlanejamento =
-    useCallback(
-      (planejamentoId: string) => {
-
-        if (!usuarioId) {
-          return null;
-        }
-
-
+      try {
         const copia =
-          duplicarPlanejamentoDoUsuario(
-            planejamentoId,
+          await duplicarPlanejamentoDoUsuario(
+            id,
             usuarioId
           );
 
-
-        if (copia) {
-          carregarPlanejamentos();
-        }
-
+        if (copia) await carregarPlanejamentos();
 
         return copia;
+      } catch (erro) {
+        setErro(obterMensagemErro(erro));
+        return null;
+      }
+    },
+    [usuarioId, carregarPlanejamentos]
+  );
 
-      },
-      [
-        usuarioId,
-        carregarPlanejamentos
-      ]
-    );
+  const excluirPlanejamento = useCallback(
+    async (id: string) => {
+      if (!usuarioId) return false;
 
+      setErro('');
 
-  /* -------------------------------------------------------
-     EXCLUIR
-     ------------------------------------------------------- */
-
-  const excluirPlanejamento =
-    useCallback(
-      (planejamentoId: string) => {
-
-        if (!usuarioId) {
-          return false;
-        }
-
-
+      try {
         const excluido =
-          excluirPlanejamentoDoUsuario(
-            planejamentoId,
+          await excluirPlanejamentoDoUsuario(
+            id,
             usuarioId
           );
 
-
-        if (excluido) {
-          carregarPlanejamentos();
-        }
-
+        if (excluido) await carregarPlanejamentos();
 
         return excluido;
-
-      },
-      [
-        usuarioId,
-        carregarPlanejamentos
-      ]
-    );
-
-
-  /* -------------------------------------------------------
-     RETORNO
-     ------------------------------------------------------- */
+      } catch (erro) {
+        setErro(obterMensagemErro(erro));
+        return false;
+      }
+    },
+    [usuarioId, carregarPlanejamentos]
+  );
 
   return {
     planejamentos,
     planejamentosFiltrados,
+    carregando,
+    erro,
+    limparErro: () => setErro(''),
 
     busca,
     setBusca,
-
     filtroMateria,
     setFiltroMateria,
-
     filtroTurma,
     setFiltroTurma,
-
     ordenacao,
     setOrdenacao,
 
     materiasDisponiveis,
     turmasDisponiveis,
-
     filtrosAtivos,
 
     limparFiltros,
@@ -416,5 +249,4 @@ export const usePlanejamentos = (
     duplicarPlanejamento,
     excluirPlanejamento
   };
-
 };

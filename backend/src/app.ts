@@ -3,9 +3,11 @@ import cors from 'cors';
 
 import { env } from './config/env';
 
-import healthRoutes from './routes/healthRoutes';
 import authRoutes from './routes/authRoutes';
+import healthRoutes from './routes/healthRoutes';
+import planejamentoRoutes from './routes/planejamentoRoutes';
 import usuarioRoutes from './routes/usuarioRoutes';
+
 
 const app = express();
 
@@ -32,6 +34,12 @@ app.use(
   usuarioRoutes
 );
 
+app.use(
+  '/api/planejamentos',
+  planejamentoRoutes
+);
+
+
 app.get('/', (_req, res) => {
   res.json({
     name: 'AulaPronta API',
@@ -39,10 +47,12 @@ app.get('/', (_req, res) => {
   });
 });
 
+
 app.use((_req, res) => {
   res.status(404).json({
     erro: 'Rota não encontrada.'
   });
 });
+
 
 export default app;

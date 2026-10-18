@@ -20,64 +20,27 @@ import './Auth.css';
 
 
 const Login: React.FC = () => {
+  const router = useIonRouter();
 
-  const router =
-    useIonRouter();
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
-  const [
-    email,
-    setEmail
-  ] =
-    useState('');
-
-  const [
-    senha,
-    setSenha
-  ] =
-    useState('');
-
-  const [
-    mostrarSenha,
-    setMostrarSenha
-  ] =
-    useState(false);
-
-  const [
-    erro,
-    setErro
-  ] =
-    useState('');
-
-  const [
-    carregando,
-    setCarregando
-  ] =
-    useState(false);
-
-
-  /* =====================================================
-     SE JÁ ESTIVER LOGADO
-     ===================================================== */
 
   useEffect(() => {
-
-    if (
-      !estaAutenticado()
-    ) {
+    if (!estaAutenticado()) {
       return;
     }
 
-    const usuario =
-      obterUsuarioLogado();
+    const usuario = obterUsuarioLogado();
 
-    if (
-      usuario?.tipo ===
-      'admin'
-    ) {
-
+    if (usuario?.tipo === 'admin') {
       router.push(
         '/admin/usuarios',
-        'root'
+        'root',
+        'replace'
       );
 
       return;
@@ -85,100 +48,81 @@ const Login: React.FC = () => {
 
     router.push(
       '/planejamentos',
-      'root'
+      'root',
+      'replace'
     );
-
   }, [router]);
 
 
-  /* =====================================================
-     ENTRAR
-     ===================================================== */
-
-  const entrar = (
+  const entrar = async (
     evento: FormEvent
   ) => {
-
     evento.preventDefault();
-
     setErro('');
 
-    if (
-      !email.trim()
-    ) {
-
-      setErro(
-        'Informe seu e-mail.'
-      );
-
+    if (!email.trim()) {
+      setErro('Informe seu e-mail.');
       return;
     }
 
     if (!senha) {
-
-      setErro(
-        'Informe sua senha.'
-      );
-
+      setErro('Informe sua senha.');
       return;
     }
 
     setCarregando(true);
 
-    const resultado =
-      fazerLogin(
+    try {
+      const resultado = await fazerLogin(
         email,
         senha
       );
 
-    if (
-      !resultado.sucesso
-    ) {
+      if (!resultado.sucesso) {
+        setErro(
+          resultado.mensagem ||
+          'Não foi possível entrar.'
+        );
 
-      setErro(
-        resultado.mensagem ||
-        'Não foi possível entrar.'
-      );
+        return;
+      }
 
-      setCarregando(false);
+      if (
+        resultado.usuario?.tipo ===
+        'admin'
+      ) {
+        router.push(
+          '/admin/usuarios',
+          'root',
+          'replace'
+        );
 
-      return;
-    }
-
-    setCarregando(false);
-
-    /*
-      Administrador vai para
-      gerenciamento de usuários.
-
-      Usuário comum vai para
-      seus planejamentos.
-    */
-
-    if (
-      resultado.usuario
-        ?.tipo ===
-      'admin'
-    ) {
+        return;
+      }
 
       router.push(
-        '/admin/usuarios',
-        'root'
+        '/planejamentos',
+        'root',
+        'replace'
       );
 
-      return;
+    } catch (erro) {
+      console.error(
+        'Erro ao realizar login:',
+        erro
+      );
+
+      setErro(
+        'Não foi possível conectar ao servidor.'
+      );
+
+    } finally {
+      setCarregando(false);
     }
-
-    router.push(
-      '/planejamentos',
-      'root'
-    );
-
   };
 
 
   return (
-
     <IonPage>
 
       <IonContent
@@ -189,23 +133,18 @@ const Login: React.FC = () => {
         <div className="pagina-auth">
 
           <div
-            className=
-              "auth-decoracao auth-decoracao-esquerda"
+            className="auth-decoracao auth-decoracao-esquerda"
+            aria-hidden="true"
           />
 
-          <main
-            className="auth-container"
-          >
 
-            {/* LOGO */}
+          <main className="auth-container">
 
-            <div
-              className="auth-marca"
-            >
+            <div className="auth-marca">
 
               <span
-                className=
-                  "auth-marca-simbolo"
+                className="auth-marca-simbolo"
+                aria-hidden="true"
               />
 
               <span>
@@ -215,24 +154,17 @@ const Login: React.FC = () => {
             </div>
 
 
-            {/* CARTÃO */}
-
-            <section
-              className="auth-card"
-            >
+            <section className="auth-card">
 
               <span
                 className="auth-fita"
+                aria-hidden="true"
               />
 
 
-              <div
-                className="auth-cabecalho"
-              >
+              <div className="auth-cabecalho">
 
-                <span
-                  className="auth-etiqueta"
-                >
+                <span className="auth-etiqueta">
                   bem-vindo de volta
                 </span>
 
@@ -241,10 +173,8 @@ const Login: React.FC = () => {
                 </h1>
 
                 <p>
-                  Acesse utilizando
-                  as credenciais
-                  fornecidas pelo
-                  administrador.
+                  Acesse utilizando as credenciais
+                  fornecidas pelo administrador.
                 </p>
 
               </div>
@@ -252,20 +182,13 @@ const Login: React.FC = () => {
 
               <form
                 onSubmit={entrar}
-                className=
-                  "auth-formulario"
+                className="auth-formulario"
                 noValidate
               >
 
-                {/* E-MAIL */}
+                <div className="auth-campo">
 
-                <div
-                  className="auth-campo"
-                >
-
-                  <label
-                    htmlFor="email"
-                  >
+                  <label htmlFor="email">
                     E-mail
                   </label>
 
@@ -273,110 +196,74 @@ const Login: React.FC = () => {
                     id="email"
                     name="email"
                     type="email"
-                    placeholder=
-                      "professor@email.com"
+                    placeholder="professor@email.com"
                     autoComplete="email"
                     value={email}
-
-                    aria-invalid={
-                      Boolean(erro)
-                    }
-
-                    onChange={(
-                      evento
-                    ) => {
-
+                    disabled={carregando}
+                    aria-invalid={Boolean(erro)}
+                    onChange={(evento) => {
                       setEmail(
-                        evento
-                          .target
-                          .value
+                        evento.target.value
                       );
 
                       setErro('');
-
                     }}
                   />
 
                 </div>
 
 
-                {/* SENHA */}
+                <div className="auth-campo">
 
-                <div
-                  className="auth-campo"
-                >
-
-                  <label
-                    htmlFor="senha"
-                  >
+                  <label htmlFor="senha">
                     Senha
                   </label>
 
 
-                  <div
-                    className=
-                      "auth-senha-wrapper"
-                  >
+                  <div className="auth-senha-wrapper">
 
                     <input
                       id="senha"
                       name="senha"
-
                       type={
                         mostrarSenha
                           ? 'text'
                           : 'password'
                       }
-
-                      placeholder=
-                        "Digite sua senha"
-
-                      autoComplete=
-                        "current-password"
-
+                      placeholder="Digite sua senha"
+                      autoComplete="current-password"
                       value={senha}
-
-                      onChange={(
-                        evento
-                      ) => {
-
+                      disabled={carregando}
+                      aria-invalid={Boolean(erro)}
+                      onChange={(evento) => {
                         setSenha(
-                          evento
-                            .target
-                            .value
+                          evento.target.value
                         );
 
                         setErro('');
-
                       }}
                     />
 
 
                     <button
                       type="button"
-
-                      className=
-                        "auth-mostrar-senha"
-
+                      className="auth-mostrar-senha"
+                      disabled={carregando}
                       aria-label={
                         mostrarSenha
                           ? 'Ocultar senha'
                           : 'Mostrar senha'
                       }
-
+                      aria-pressed={mostrarSenha}
                       onClick={() =>
                         setMostrarSenha(
                           !mostrarSenha
                         )
                       }
                     >
-
-                      {
-                        mostrarSenha
-                          ? 'Ocultar'
-                          : 'Mostrar'
-                      }
-
+                      {mostrarSenha
+                        ? 'Ocultar'
+                        : 'Mostrar'}
                     </button>
 
                   </div>
@@ -384,72 +271,48 @@ const Login: React.FC = () => {
                 </div>
 
 
-                {/* ERRO */}
-
                 {erro && (
-
                   <div
                     className="auth-erro"
                     role="alert"
                     aria-live="assertive"
                   >
-
-                    <span>
+                    <span aria-hidden="true">
                       !
                     </span>
 
                     <p>
                       {erro}
                     </p>
-
                   </div>
-
                 )}
 
 
-                {/* BOTÃO */}
-
                 <button
                   type="submit"
-
-                  className=
-                    "auth-botao-principal"
-
-                  disabled={
-                    carregando
-                  }
+                  className="auth-botao-principal"
+                  disabled={carregando}
+                  aria-busy={carregando}
                 >
-
-                  {
-                    carregando
-                      ? 'Entrando...'
-                      : 'Entrar'
-                  }
-
+                  {carregando
+                    ? 'Entrando...'
+                    : 'Entrar'}
                 </button>
 
               </form>
 
 
-              <p
-                className=
-                  "auth-ja-tem-conta"
-              >
+              <p className="auth-ja-tem-conta">
                 Não possui acesso?
-                Solicite uma conta
-                ao administrador.
+                Solicite uma conta ao administrador.
               </p>
 
             </section>
 
 
-            <p
-              className=
-                "auth-rodape"
-            >
-              Planejamentos mais
-              simples. Aulas mais
-              organizadas.
+            <p className="auth-rodape">
+              Planejamentos mais simples.
+              Aulas mais organizadas.
             </p>
 
           </main>
@@ -459,9 +322,7 @@ const Login: React.FC = () => {
       </IonContent>
 
     </IonPage>
-
   );
-
 };
 
 
