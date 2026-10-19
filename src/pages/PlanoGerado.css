@@ -723,3 +723,24 @@
       0.001ms !important;
   }
 }
+
+.bloco-plano p {
+  white-space: pre-line;
+  line-height: 1.75;
+}
+
+.bloco-plano p,
+.observacao-professor p {
+  overflow-wrap: anywhere;
+}
+
+.botao-exportar-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.botao-exportar-pdf > span {
+  white-space: nowrap;
+}

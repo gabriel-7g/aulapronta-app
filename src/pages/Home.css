@@ -774,3 +774,144 @@
   }
 
 }
+
+.campo-sem-borda {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.nivel-contexto {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 11px 13px;
+  border: 1px solid rgba(29, 72, 52, 0.13);
+  border-radius: 10px;
+  background: rgba(29, 72, 52, 0.045);
+}
+
+.nivel-contexto-marcador {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: #214d38;
+}
+
+.nivel-contexto p {
+  margin: 0;
+  color: #666156;
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+.campo-titulo-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.campo-opcional,
+.texto-opcional {
+  color: #928b7d;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.turma-opcoes,
+.duracao-opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 2px 0 10px;
+}
+
+.turma-chip,
+.duracao-chip {
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid #dedbd2;
+  border-radius: 999px;
+  background: #fff;
+  color: #504c44;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.turma-chip:hover,
+.duracao-chip:hover {
+  border-color: #8fa293;
+  transform: translateY(-1px);
+}
+
+.turma-chip.selecionada,
+.duracao-chip.selecionada {
+  border-color: #214d38;
+  background: #214d38;
+  color: #fff;
+}
+
+.campo-ajuda {
+  margin: 7px 2px 0;
+  color: #8b8578;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.duracao-personalizada {
+  position: relative;
+}
+
+.duracao-personalizada .campo-texto {
+  padding-right: 78px;
+}
+
+.duracao-personalizada > span {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  color: #8a857a;
+  font-size: 0.78rem;
+  pointer-events: none;
+}
+
+.rascunho-contexto {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(80, 75, 65, 0.16);
+  color: #827c70;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .campo-titulo-linha {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .turma-opcoes,
+  .duracao-opcoes {
+    gap: 6px;
+  }
+
+  .turma-chip,
+  .duracao-chip {
+    font-size: 0.76rem;
+    padding: 7px 10px;
+  }
+}

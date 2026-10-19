@@ -1,18 +1,32 @@
-import {
+import type {
   ConteudoPlano,
   DadosPlano,
   PlanejamentoSalvo
 } from '../types/planejamento';
 
-const CHAVE_SELECIONADO = 'planoSelecionado';
-const CHAVE_CRIACAO = 'planoEmCriacao';
+const CHAVE_SELECIONADO =
+  'planoSelecionado';
+
+const CHAVE_CRIACAO =
+  'planoEmCriacao';
+
+const CHAVE_CONTEUDO =
+  'conteudoPlanoGerado';
 
 export interface ContextoPlano {
   dados: DadosPlano;
   planoSelecionado: PlanejamentoSalvo | null;
+  conteudoGerado: ConteudoPlano | null;
 }
 
-const json = (valor: string): unknown => {
+const lerJson = (
+  chave: string
+): unknown => {
+  const valor =
+    sessionStorage.getItem(chave);
+
+  if (!valor) return null;
+
   try {
     return JSON.parse(valor);
   } catch {
@@ -23,7 +37,8 @@ const json = (valor: string): unknown => {
 const objeto = (
   valor: unknown
 ): valor is Record<string, unknown> =>
-  typeof valor === 'object' && valor !== null;
+  typeof valor === 'object' &&
+  valor !== null;
 
 const dadosValidos = (
   valor: unknown
@@ -33,17 +48,24 @@ const dadosValidos = (
   return (
     typeof valor.materia === 'string' &&
     valor.materia.trim().length > 0 &&
+
     (
+      valor.materiaId === undefined ||
       valor.materiaId === null ||
       typeof valor.materiaId === 'string'
     ) &&
+
     typeof valor.turma === 'string' &&
     valor.turma.trim().length > 0 &&
+
     typeof valor.duracao === 'string' &&
     valor.duracao.trim().length > 0 &&
+
     typeof valor.tema === 'string' &&
     valor.tema.trim().length > 0 &&
+
     typeof valor.observacoes === 'string' &&
+
     (
       valor.nivelEnsino === undefined ||
       typeof valor.nivelEnsino === 'string'
@@ -66,19 +88,16 @@ const conteudoValido = (
     'avaliacao'
   ].every(
     (campo) =>
-      typeof valor[campo] === 'string'
+      typeof valor[campo] === 'string' &&
+      valor[campo].trim().length > 0
   );
 };
 
 const obterPlanoSelecionado = (
   usuarioId: string
 ): PlanejamentoSalvo | null => {
-  const valor =
-    sessionStorage.getItem(CHAVE_SELECIONADO);
-
-  if (!valor) return null;
-
-  const plano = json(valor);
+  const plano =
+    lerJson(CHAVE_SELECIONADO);
 
   if (
     !objeto(plano) ||
@@ -90,27 +109,10 @@ const obterPlanoSelecionado = (
     !dadosValidos(plano.dados) ||
     !conteudoValido(plano.conteudo)
   ) {
-    sessionStorage.removeItem(CHAVE_SELECIONADO);
     return null;
   }
 
   return plano as unknown as PlanejamentoSalvo;
-};
-
-const obterPlanoEmCriacao = (): DadosPlano | null => {
-  const valor =
-    sessionStorage.getItem(CHAVE_CRIACAO);
-
-  if (!valor) return null;
-
-  const dados = json(valor);
-
-  if (!dadosValidos(dados)) {
-    sessionStorage.removeItem(CHAVE_CRIACAO);
-    return null;
-  }
-
-  return dados;
 };
 
 export const obterContextoPlano = (
@@ -118,29 +120,55 @@ export const obterContextoPlano = (
 ): ContextoPlano | null => {
   if (!usuarioId) return null;
 
-  const novoPlano = obterPlanoEmCriacao();
+  const dados =
+    lerJson(CHAVE_CRIACAO);
 
-  if (novoPlano) {
-    sessionStorage.removeItem(CHAVE_SELECIONADO);
+  if (dadosValidos(dados)) {
+    const conteudo =
+      lerJson(CHAVE_CONTEUDO);
+
+    sessionStorage.removeItem(
+      CHAVE_SELECIONADO
+    );
 
     return {
-      dados: novoPlano,
-      planoSelecionado: null
+      dados,
+      planoSelecionado: null,
+      conteudoGerado:
+        conteudoValido(conteudo)
+          ? conteudo
+          : null
     };
   }
 
   const selecionado =
     obterPlanoSelecionado(usuarioId);
 
-  if (!selecionado) return null;
+  if (!selecionado) {
+    return null;
+  }
+
+  sessionStorage.removeItem(
+    CHAVE_CONTEUDO
+  );
 
   return {
     dados: selecionado.dados,
-    planoSelecionado: selecionado
+    planoSelecionado: selecionado,
+    conteudoGerado: null
   };
 };
 
 export const limparContextoPlano = () => {
-  sessionStorage.removeItem(CHAVE_SELECIONADO);
-  sessionStorage.removeItem(CHAVE_CRIACAO);
+  sessionStorage.removeItem(
+    CHAVE_SELECIONADO
+  );
+
+  sessionStorage.removeItem(
+    CHAVE_CRIACAO
+  );
+
+  sessionStorage.removeItem(
+    CHAVE_CONTEUDO
+  );
 };
