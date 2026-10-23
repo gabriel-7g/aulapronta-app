@@ -1,8 +1,8 @@
 import { jsPDF } from 'jspdf';
-import type {
-  ConteudoPlano,
-  DadosPlano
-} from '../types/planejamento';
+import type { ConteudoPlano, DadosPlano } from '../types/planejamento';
+
+type RGB = readonly [number, number, number];
+type Fonte = 'normal' | 'bold';
 
 interface DadosPdf {
   dados: DadosPlano;
@@ -10,97 +10,44 @@ interface DadosPdf {
   professor?: string;
 }
 
-interface Secao {
-  numero: string;
-  titulo: string;
-}
-
-type RGB = readonly [number, number, number];
-type Fonte = 'normal' | 'bold';
-
-const PAGINA = {
-  largura: 210,
-  margem: 18,
-  limite: 274,
-  rodapeLinha: 282,
-  rodapeTexto: 288
-};
-
-const CORES = {
+const COR = {
   verde: [31, 75, 55],
-  verdeClaro: [237, 241, 236],
-  texto: [76, 73, 68],
-  titulo: [32, 30, 27],
-  cinza: [130, 126, 118],
-  linha: [224, 220, 210],
+  texto: [70, 69, 65],
+  cinza: [126, 124, 117],
+  claro: [223, 226, 220],
   branco: [255, 255, 255]
 } as const;
 
-const ROTULOS = [
-  'tempo',
-  'objetivo geral',
-  'objetivos específicos',
-  'objetivo',
-  'organização',
-  'instruções',
-  'resultado esperado',
-  'critérios',
-  'erros comuns',
-  'evidências',
-  'conceito',
-  'mecanismo',
-  'exemplo',
-  'aplicação',
-  'pergunta'
-];
+const MARGEM = 18;
+const LARGURA = 210 - MARGEM * 2;
+const LIMITE = 273;
 
-const normalizarTexto = (texto: string) =>
-  texto
+const limpar = (valor: string) =>
+  (valor || '')
     .normalize('NFC')
     .replace(/\r\n?/g, '\n')
-    .replace(/[\u00a0\u2000-\u200b\u202f\u205f\u3000]/g, ' ')
-    .replace(/^(\s*\d+)[º°ª]\s*[-:–—]?\s*/gm, '$1. ')
-    .replace(/[–—−]/g, '-')
-    .replace(/[“”„]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/…/g, '...')
+    .replace(/[\u00a0\u2000-\u200b\u202f]/g, ' ')
+    .replace(/^[ \t]*#{1,6}\s+/gm, '')
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/__(.*?)__/g, '$1')
     .replace(/`([^`]*)`/g, '$1')
-    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
-    .replace(/(\d)\s*\/\s*(anos?|min|cm\/s)\b/gi, '$1 $2')
+    .replace(/^(\s*\d+)[ºª°]\s*[-–—:.]?\s*/gm, '$1. ')
+    .replace(/[–—−]/g, '-')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/…/g, '...')
     .replace(/[ \t]{2,}/g, ' ')
-    .replace(/[ \t]+$/gm, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-const nomeArquivoSeguro = (texto: string) =>
-  texto
+const nomeSeguro = (valor: string) =>
+  valor
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .toLowerCase()
-    .slice(0, 70);
-
-const dataAtual = () =>
-  new Intl.DateTimeFormat('pt-BR').format(new Date());
-
-const ehMarcador = (texto: string) =>
-  /^[-•●▪◦]\s+/.test(texto);
-
-const ehRotulo = (texto: string) => {
-  const linha = texto.toLowerCase();
-
-  return ROTULOS.some(
-    (rotulo) =>
-      linha === `${rotulo}:` ||
-      linha.startsWith(`${rotulo}:`)
-  );
-};
-
-const removerMarcador = (texto: string) =>
-  texto.replace(/^[-•●▪◦]\s+/, '');
+    .slice(0, 65) || 'planejamento';
 
 export const exportarPlanejamentoPdf = ({
   dados,
@@ -113,554 +60,308 @@ export const exportarPlanejamentoPdf = ({
     format: 'a4'
   });
 
-  const largura =
-    PAGINA.largura - PAGINA.margem * 2;
+  let y = MARGEM;
 
-  let y = PAGINA.margem;
+  const textColor = ([r, g, b]: RGB) => pdf.setTextColor(r, g, b);
+  const fillColor = ([r, g, b]: RGB) => pdf.setFillColor(r, g, b);
+  const drawColor = ([r, g, b]: RGB) => pdf.setDrawColor(r, g, b);
+
+  const estilo = (
+    tamanho = 9.6,
+    fonte: Fonte = 'normal',
+    cor: RGB = COR.texto
+  ) => {
+    pdf.setFont('helvetica', fonte);
+    pdf.setFontSize(tamanho);
+    pdf.setCharSpace(0);
+    textColor(cor);
+  };
+
+  const quebrar = (
+    texto: string,
+    largura = LARGURA,
+    tamanho = 9.6,
+    fonte: Fonte = 'normal'
+  ) => {
+    pdf.setFont('helvetica', fonte);
+    pdf.setFontSize(tamanho);
+    pdf.setCharSpace(0);
+
+    return pdf.splitTextToSize(texto, largura) as string[];
+  };
+
+  const escrever = (texto: string, x: number, yy: number) =>
+    pdf.text(texto, x, yy, { charSpace: 0 });
+
+  const cabecalho = (continuacao?: string) => {
+    estilo(9.5, 'bold', COR.verde);
+    escrever('LOUSA | PLANO DE AULA', MARGEM, 13);
+
+    drawColor(COR.claro);
+    pdf.line(MARGEM, 17, 210 - MARGEM, 17);
+
+    y = 25;
+
+    if (continuacao) {
+      estilo(8.2, 'bold', COR.cinza);
+
+      const titulo = limpar(`${continuacao} - continuação`);
+
+      quebrar(titulo, LARGURA, 8.2, 'bold').forEach((linha) => {
+        estilo(8.2, 'bold', COR.cinza);
+        escrever(linha, MARGEM, y);
+        y += 4.3;
+      });
+
+      y += 2;
+    }
+  };
+
+  const novaPagina = (continuacao?: string) => {
+    pdf.addPage();
+    cabecalho(continuacao);
+  };
+
+  const garantir = (altura: number, continuacao?: string) => {
+    if (y + altura > LIMITE) novaPagina(continuacao);
+  };
+
+  const escreverBloco = (
+    texto: string,
+    tituloSecao: string,
+    marcador = false,
+    numerada = false
+  ) => {
+    const corpo = marcador
+      ? texto.replace(/^[-•●*]\s+/, '')
+      : texto;
+
+    const recuo = marcador ? 5 : numerada ? 2 : 0;
+    const tamanho = 9.6;
+    const passo = 4.6;
+
+    const linhas = quebrar(corpo, LARGURA - recuo, tamanho);
+
+    if (linhas.length * passo <= 65) {
+      garantir(linhas.length * passo + 1, tituloSecao);
+    }
+
+    linhas.forEach((linha, indice) => {
+      garantir(passo, tituloSecao);
+
+      if (marcador && indice === 0) {
+        fillColor(COR.verde);
+        pdf.circle(MARGEM + 1.7, y - 1.2, 0.6, 'F');
+      }
+
+      estilo(tamanho);
+      escrever(linha, MARGEM + recuo, y);
+      y += passo;
+    });
+
+    y += 0.5;
+  };
+
+  const escreverConteudo = (texto: string, tituloSecao: string) => {
+    const linhas = limpar(texto).split('\n');
+
+    linhas.forEach((original, indice) => {
+      const linha = original.trim();
+
+      if (!linha) {
+        y += 2.2;
+        return;
+      }
+
+      const marcador = /^[-•●*]\s+/.test(linha);
+      const numerada = /^\d+[.)]\s+/.test(linha);
+      const rotulo = linha.endsWith(':') && linha.length < 65;
+
+      if (rotulo) {
+        garantir(14, tituloSecao);
+        estilo(9.8, 'bold', COR.verde);
+
+        quebrar(linha, LARGURA, 9.8, 'bold').forEach((parte) => {
+          estilo(9.8, 'bold', COR.verde);
+          escrever(parte, MARGEM, y);
+          y += 4.8;
+        });
+
+        if (linhas[indice + 1]?.trim()) y += 1;
+        return;
+      }
+
+      escreverBloco(linha, tituloSecao, marcador, numerada);
+    });
+  };
 
   pdf.setProperties({
     title: conteudo.titulo,
-    subject: 'Plano de aula',
+    subject: 'Planejamento de aula',
     author: professor || 'Lousa',
     creator: 'Lousa'
   });
 
-  const textoCor = ([r, g, b]: RGB) =>
-    pdf.setTextColor(r, g, b);
-
-  const fundoCor = ([r, g, b]: RGB) =>
-    pdf.setFillColor(r, g, b);
-
-  const linhaCor = ([r, g, b]: RGB) =>
-    pdf.setDrawColor(r, g, b);
-
-  const estilo = (
-    tamanho = 9.5,
-    fonte: Fonte = 'normal',
-    cor: RGB = CORES.texto
-  ) => {
-    pdf.setFont('helvetica', fonte);
-    pdf.setFontSize(tamanho);
-    pdf.setCharSpace(0);
-    textoCor(cor);
-  };
-
-  /*
-    Só calcula a quebra.
-    Não altera cor nem outro estilo visual.
-  */
-  const quebrar = (
-    texto: string,
-    larguraMax = largura,
-    tamanho = 9.5,
-    fonte: Fonte = 'normal'
-  ): string[] => {
-    pdf.setFont('helvetica', fonte);
-    pdf.setFontSize(tamanho);
-    pdf.setCharSpace(0);
-
-    return pdf.splitTextToSize(
-      texto,
-      larguraMax
-    ) as string[];
-  };
-
-  const escrever = (
-    texto: string,
-    x: number,
-    yy: number
-  ) => {
-    pdf.setCharSpace(0);
-
-    pdf.text(texto, x, yy, {
-      charSpace: 0
-    });
-  };
-
-  const cabecalhoPagina = (secao?: Secao) => {
-    estilo(10, 'bold', CORES.verde);
-    escrever('LOUSA | PLANO DE AULA', PAGINA.margem, 13);
-
-    linhaCor(CORES.linha);
-    pdf.line(
-      PAGINA.margem,
-      18,
-      PAGINA.largura - PAGINA.margem,
-      18
-    );
-
-    y = 27;
-
-    if (secao) {
-      estilo(8.5, 'bold', CORES.verde);
-
-      escrever(
-        `${secao.numero}  ${secao.titulo} - continuação`,
-        PAGINA.margem,
-        y
-      );
-
-      y += 7;
-    }
-  };
-
-  const novaPagina = (secao?: Secao) => {
-    pdf.addPage();
-    cabecalhoPagina(secao);
-  };
-
-  const garantirEspaco = (
-    altura: number,
-    secao?: Secao
-  ) => {
-    if (y + altura > PAGINA.limite) {
-      novaPagina(secao);
-    }
-  };
-
-  const analisarLinha = (linha: string) => {
-    const marcador = ehMarcador(linha);
-    const rotulo = ehRotulo(linha);
-
-    return {
-      marcador,
-      rotulo,
-      texto: marcador
-        ? removerMarcador(linha)
-        : linha,
-      recuo: marcador ? 5 : 0,
-      fonte: rotulo
-        ? 'bold' as Fonte
-        : 'normal' as Fonte,
-      tamanho: marcador ? 9.2 : 9.4,
-      altura: marcador ? 3.9 : 4.1
-    };
-  };
-
-  const alturaTexto = (texto: string) => {
-    let total = 0;
-
-    for (const original of normalizarTexto(texto).split('\n')) {
-      const linha = original.trim();
-
-      if (!linha) {
-        total += 1.7;
-        continue;
-      }
-
-      const info = analisarLinha(linha);
-
-      const linhas = quebrar(
-        info.texto,
-        largura - info.recuo,
-        info.tamanho,
-        info.fonte
-      );
-
-      total += linhas.length * info.altura;
-
-      if (info.rotulo) {
-        total += 0.4;
-      }
-    }
-
-    return total;
-  };
-
-  const escreverLinha = (
-    original: string,
-    secao: Secao,
-    proxima?: string
-  ) => {
-    const linha = original.trim();
-
-    if (!linha) {
-      y += 1.7;
-      return;
-    }
-
-    const info = analisarLinha(linha);
-
-    const linhas = quebrar(
-      info.texto,
-      largura - info.recuo,
-      info.tamanho,
-      info.fonte
-    );
-
-    let necessario =
-      linhas.length * info.altura;
-
-    /*
-      Evita "Critérios:" sozinho
-      no final da página.
-    */
-    if (info.rotulo && proxima?.trim()) {
-      necessario += 4;
-    }
-
-    garantirEspaco(necessario, secao);
-
-    linhas.forEach((linhaAtual, indice) => {
-      garantirEspaco(info.altura, secao);
-
-      estilo(
-        info.tamanho,
-        info.fonte,
-        CORES.texto
-      );
-
-      if (
-        info.marcador &&
-        indice === 0
-      ) {
-        fundoCor(CORES.verde);
-
-        pdf.circle(
-          PAGINA.margem + 1.3,
-          y - 1.1,
-          0.55,
-          'F'
-        );
-      }
-
-      escrever(
-        linhaAtual,
-        PAGINA.margem + info.recuo,
-        y
-      );
-
-      y += info.altura;
-    });
-
-    if (info.rotulo) {
-      y += 0.4;
-    }
-  };
-
-  const tituloSecao = (
-    numero: string,
-    titulo: string
-  ) => {
-    garantirEspaco(14);
-    y += 2.5;
-
-    fundoCor(CORES.verdeClaro);
-
-    pdf.circle(
-      PAGINA.margem + 4,
-      y + 1,
-      4,
-      'F'
-    );
-
-    estilo(7.6, 'bold', CORES.verde);
-
-    pdf.text(
-      numero,
-      PAGINA.margem + 4,
-      y + 1.7,
-      { align: 'center', charSpace: 0 }
-    );
-
-    estilo(12.2, 'bold', CORES.verde);
-
-    escrever(
-      titulo,
-      PAGINA.margem + 12,
-      y + 2
-    );
-
-    y += 8.5;
-  };
-
-  const escreverSecao = (
-    numero: string,
-    titulo: string,
-    texto: string
-  ) => {
-    const secao = { numero, titulo };
-    const altura = alturaTexto(texto) + 14;
-    const restante = PAGINA.limite - y;
-
-    /*
-      Se for pequena, tenta manter
-      a seção inteira na mesma página.
-    */
-    if (
-      altura <= 90 &&
-      restante < altura
-    ) {
-      novaPagina();
-    } else {
-      garantirEspaco(21);
-    }
-
-    tituloSecao(numero, titulo);
-
-    const linhas =
-      normalizarTexto(texto).split('\n');
-
-    linhas.forEach((linha, indice) =>
-      escreverLinha(
-        linha,
-        secao,
-        linhas[indice + 1]
-      )
-    );
-
-    if (y + 5 <= PAGINA.limite) {
-      y += 2.8;
-
-      linhaCor(CORES.linha);
-
-      pdf.line(
-        PAGINA.margem,
-        y,
-        PAGINA.largura - PAGINA.margem,
-        y
-      );
-
-      y += 1.3;
-    }
-  };
-
-  const escreverInfo = (
-    rotulo: string,
-    valor: string,
-    x: number,
-    larguraMax: number
-  ) => {
-    estilo(
-      7.1,
-      'bold',
-      [177, 190, 180]
-    );
-
-    escrever(
-      rotulo.toUpperCase(),
-      x,
-      y
-    );
-
-    const linhas = quebrar(
-      normalizarTexto(valor || '-'),
-      larguraMax,
-      9.4,
-      'bold'
-    );
-
-    /*
-      Reaplica o branco DEPOIS de quebrar.
-    */
-    estilo(
-      9.4,
-      'bold',
-      CORES.branco
-    );
-
-    linhas.forEach(
-      (linhaAtual, indice) =>
-        escrever(
-          linhaAtual,
-          x,
-          y + 5 + indice * 4
-        )
-    );
-  };
-
-  // Cabeçalho principal
-  fundoCor(CORES.verde);
-
-  pdf.roundedRect(
-    PAGINA.margem,
-    y,
-    7,
-    7,
-    1.2,
-    1.2,
-    'F'
-  );
-
-  estilo(15, 'bold', CORES.titulo);
-  escrever('Lousa', PAGINA.margem + 11, y + 5.6);
-
+  // Identidade Lousa
+  fillColor(COR.verde);
+  pdf.roundedRect(MARGEM, y, 7, 7, 1, 1, 'F');
+
+  estilo(15, 'bold', COR.verde);
+  escrever('Lousa', MARGEM + 11, y + 5.8);
   y += 18;
 
-  estilo(8, 'bold', CORES.verde);
-  escrever('PLANO DE AULA', PAGINA.margem, y);
-
+  estilo(8, 'bold', COR.verde);
+  escrever('PLANEJAMENTO DE AULA', MARGEM, y);
   y += 9;
 
-  const titulo = quebrar(
-    normalizarTexto(conteudo.titulo),
-    largura,
-    21,
-    'bold'
-  );
+  // Título criado pela IA
+  const titulo = quebrar(limpar(conteudo.titulo), LARGURA, 19, 'bold');
 
-  estilo(21, 'bold', CORES.titulo);
+  estilo(19, 'bold', COR.texto);
 
-  titulo.forEach(
-    (linhaAtual, indice) =>
-      escrever(
-        linhaAtual,
-        PAGINA.margem,
-        y + indice * 8
-      )
-  );
+  titulo.forEach((linha) => {
+    escrever(linha, MARGEM, y);
+    y += 7.7;
+  });
 
-  y += titulo.length * 8 + 5;
+  y += 3;
 
-  // Professor e data
   if (professor) {
-    estilo(9.2);
-
-    escrever(
-      `Professor(a): ${professor}`,
-      PAGINA.margem,
-      y
+    const linhas = quebrar(
+      `Professor(a): ${limpar(professor)}`,
+      LARGURA,
+      9
     );
 
-    y += 5;
+    linhas.forEach((linha) => {
+      estilo(9);
+      escrever(linha, MARGEM, y);
+      y += 4.5;
+    });
   }
 
-  estilo(8.2, 'normal', CORES.cinza);
+  estilo(8, 'normal', COR.cinza);
 
   escrever(
-    `Gerado em: ${dataAtual()}`,
-    PAGINA.margem,
+    `Gerado em ${new Intl.DateTimeFormat('pt-BR').format(new Date())}`,
+    MARGEM,
     y
   );
 
   y += 10;
 
-  // Resumo da aula
-  garantirEspaco(36);
-
-  fundoCor(CORES.verde);
-
-  pdf.roundedRect(
-    PAGINA.margem,
-    y,
-    largura,
-    29,
-    3,
-    3,
-    'F'
-  );
-
-  const topoResumo = y;
-  y += 8;
-
-  escreverInfo(
-    'Nível',
-    dados.nivelEnsino || 'Não informado',
-    PAGINA.margem + 6,
-    37
-  );
-
-  escreverInfo(
-    'Matéria',
-    dados.materia,
-    PAGINA.margem + 51,
-    43
-  );
-
-  escreverInfo(
-    'Turma / período',
-    dados.turma,
-    PAGINA.margem + 103,
-    36
-  );
-
-  escreverInfo(
-    'Duração',
-    `${dados.duracao} min`,
-    PAGINA.margem + 147,
-    22
-  );
-
-  y = topoResumo + 38;
-
-  // Seções
-  const secoes: Array<
-    [string, string, string]
-  > = [
-    ['01', 'Objetivo', conteudo.objetivo],
-    ['02', 'Introdução', conteudo.introducao],
-    ['03', 'Desenvolvimento', conteudo.desenvolvimento],
-    ['04', 'Atividade', conteudo.atividade],
-    ['05', 'Recursos', conteudo.recursos],
-    ['06', 'Avaliação', conteudo.avaliacao]
+  // Dados da aula
+  const infos = [
+    ['Nível', dados.nivelEnsino || 'Não informado'],
+    ['Matéria', dados.materia],
+    ['Turma / período', dados.turma],
+    ['Duração', `${dados.duracao} min`]
   ];
 
-  if (dados.observacoes?.trim()) {
-    secoes.push([
-      '07',
-      'Observações do professor',
-      dados.observacoes
-    ]);
-  }
+  const col = (LARGURA - 18) / 2;
 
-  secoes.forEach(
-    ([numero, titulo, texto]) =>
-      escreverSecao(
-        numero,
-        titulo,
-        texto
-      )
+  const valores = infos.map(([rotulo, valor]) => ({
+    rotulo,
+    linhas: quebrar(limpar(valor), col - 5, 9.4, 'bold')
+  }));
+
+  const alturaLinha = (a: number, b: number) =>
+    Math.max(16, 8 + Math.max(a, b) * 4.3);
+
+  const h1 = alturaLinha(
+    valores[0].linhas.length,
+    valores[1].linhas.length
   );
+
+  const h2 = alturaLinha(
+    valores[2].linhas.length,
+    valores[3].linhas.length
+  );
+
+  const alturaQuadro = h1 + h2 + 12;
+
+  garantir(alturaQuadro + 10);
+
+  fillColor(COR.verde);
+  pdf.roundedRect(MARGEM, y, LARGURA, alturaQuadro, 3, 3, 'F');
+
+  const topo = y;
+
+  valores.forEach(({ rotulo, linhas }, i) => {
+    const coluna = i % 2;
+    const row = Math.floor(i / 2);
+    const x = MARGEM + 6 + coluna * (col + 6);
+    const yy = topo + 9 + (row ? h1 + 2 : 0);
+
+    estilo(7.3, 'bold', [182, 202, 190]);
+    escrever(rotulo.toUpperCase(), x, yy);
+
+    linhas.forEach((linha, index) => {
+      estilo(9.4, 'bold', COR.branco);
+      escrever(linha, x, yy + 5 + index * 4.3);
+    });
+  });
+
+  y = topo + alturaQuadro + 12;
+
+  // Seções livres definidas pela IA
+  conteudo.secoes.forEach((secao) => {
+    const tituloSecao = limpar(secao.titulo);
+    const linhasTitulo = quebrar(tituloSecao, LARGURA, 12, 'bold');
+
+    garantir(12 + linhasTitulo.length * 5.4, tituloSecao);
+    y += 2;
+
+    linhasTitulo.forEach((linha) => {
+      estilo(12, 'bold', COR.verde);
+      escrever(linha, MARGEM, y);
+      y += 5.4;
+    });
+
+    y += 3;
+
+    escreverConteudo(secao.conteudo, tituloSecao);
+
+    if (y + 7 <= LIMITE) {
+      y += 3;
+      drawColor(COR.claro);
+      pdf.line(MARGEM, y, 210 - MARGEM, y);
+      y += 4;
+    }
+  });
+
+  if (dados.observacoes?.trim()) {
+    garantir(14);
+
+    estilo(10, 'bold', COR.verde);
+    escrever('Observações informadas pelo professor', MARGEM, y);
+    y += 7;
+
+    escreverConteudo(
+      dados.observacoes,
+      'Observações do professor'
+    );
+  }
 
   // Rodapé
-  const totalPaginas =
-    pdf.getNumberOfPages();
+  const total = pdf.getNumberOfPages();
 
-  for (
-    let pagina = 1;
-    pagina <= totalPaginas;
-    pagina++
-  ) {
+  for (let pagina = 1; pagina <= total; pagina++) {
     pdf.setPage(pagina);
 
-    linhaCor(CORES.linha);
+    drawColor(COR.claro);
+    pdf.line(MARGEM, 281, 210 - MARGEM, 281);
 
-    pdf.line(
-      PAGINA.margem,
-      PAGINA.rodapeLinha,
-      PAGINA.largura - PAGINA.margem,
-      PAGINA.rodapeLinha
-    );
-
-    estilo(
-      7.2,
-      'normal',
-      CORES.cinza
-    );
-
-    escrever(
-      'Plano de aula - Lousa',
-      PAGINA.margem,
-      PAGINA.rodapeTexto
-    );
+    estilo(7.4, 'normal', COR.cinza);
+    escrever('Lousa | Plano de aula', MARGEM, 288);
 
     pdf.text(
-      `Página ${pagina} de ${totalPaginas}`,
-      PAGINA.largura - PAGINA.margem,
-      PAGINA.rodapeTexto,
-      {
-        align: 'right',
-        charSpace: 0
-      }
+      `Página ${pagina} de ${total}`,
+      210 - MARGEM,
+      288,
+      { align: 'right', charSpace: 0 }
     );
   }
 
-  const nome =
-    nomeArquivoSeguro(
-      conteudo.titulo || dados.tema
-    ) || 'planejamento';
-
-  pdf.save(
-    `plano-de-aula-${nome}.pdf`
-  );
+  pdf.save(`plano-de-aula-${nomeSeguro(conteudo.titulo)}.pdf`);
 };

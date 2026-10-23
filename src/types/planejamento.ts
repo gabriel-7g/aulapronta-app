@@ -8,29 +8,21 @@ export interface DadosPlano {
   observacoes: string;
 }
 
+export interface SecaoPlano {
+  titulo: string;
+  conteudo: string;
+}
+
 export interface ConteudoPlano {
   titulo: string;
-  objetivo: string;
-  introducao: string;
-  desenvolvimento: string;
-  atividade: string;
-  recursos: string;
-  avaliacao: string;
+  secoes: SecaoPlano[];
 }
 
 export interface PlanejamentoSalvo {
   id: string;
-
-  /*
-    Identifica qual usuário é dono
-    deste planejamento.
-  */
   usuarioId: string;
-
   criadoEm: string;
   atualizadoEm: string;
-
   dados: DadosPlano;
-
   conteudo: ConteudoPlano;
 }

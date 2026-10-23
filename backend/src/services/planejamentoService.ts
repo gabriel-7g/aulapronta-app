@@ -12,12 +12,7 @@ export interface DadosPlanoInput {
 
 export interface ConteudoPlanoInput {
   titulo: string;
-  objetivo: string;
-  introducao: string;
-  desenvolvimento: string;
-  atividade: string;
-  recursos: string;
-  avaliacao: string;
+  secoes: Array<{ titulo: string; conteudo: string }>;
 }
 
 export interface PlanoInput {
@@ -46,14 +41,65 @@ interface RegistroPlanejamento {
   atualizadoEm: string;
 }
 
-const formatarPlanejamento = (
+const PREFIXO = 'LOUSA_SECOES_V1:';
+
+const serializarConteudo = (conteudo: ConteudoPlanoInput) => ({
+  titulo: conteudo.titulo,
+  objetivo: '',
+  introducao: '',
+  desenvolvimento: PREFIXO + JSON.stringify(conteudo.secoes),
+  atividade: '',
+  recursos: '',
+  avaliacao: ''
+});
+
+const desserializarConteudo = (
   plano: RegistroPlanejamento
-) => ({
+): ConteudoPlanoInput => {
+  if (plano.desenvolvimento.startsWith(PREFIXO)) {
+    try {
+      const secoes: unknown = JSON.parse(
+        plano.desenvolvimento.slice(PREFIXO.length)
+      );
+
+      if (
+        Array.isArray(secoes) &&
+        secoes.length > 0 &&
+        secoes.every((secao) =>
+          secao &&
+          typeof secao.titulo === 'string' &&
+          typeof secao.conteudo === 'string'
+        )
+      ) {
+        return { titulo: plano.titulo, secoes };
+      }
+    } catch {
+      // Caso o JSON esteja inválido, tenta ler o formato antigo.
+    }
+  }
+
+  const historico = [
+    ['Objetivo', plano.objetivo],
+    ['Introdução', plano.introducao],
+    ['Desenvolvimento', plano.desenvolvimento],
+    ['Atividade', plano.atividade],
+    ['Recursos', plano.recursos],
+    ['Avaliação', plano.avaliacao]
+  ];
+
+  return {
+    titulo: plano.titulo,
+    secoes: historico
+      .filter(([, conteudo]) => conteudo.trim())
+      .map(([titulo, conteudo]) => ({ titulo, conteudo }))
+  };
+};
+
+const formatarPlanejamento = (plano: RegistroPlanejamento) => ({
   id: plano.id,
   usuarioId: plano.usuarioId,
   criadoEm: plano.criadoEm,
   atualizadoEm: plano.atualizadoEm,
-
   dados: {
     nivelEnsino: plano.nivelEnsino ?? undefined,
     materia: plano.materia,
@@ -63,22 +109,10 @@ const formatarPlanejamento = (
     tema: plano.tema,
     observacoes: plano.observacoes ?? ''
   },
-
-  conteudo: {
-    titulo: plano.titulo,
-    objetivo: plano.objetivo,
-    introducao: plano.introducao,
-    desenvolvimento: plano.desenvolvimento,
-    atividade: plano.atividade,
-    recursos: plano.recursos,
-    avaliacao: plano.avaliacao
-  }
+  conteudo: desserializarConteudo(plano)
 });
 
-
-export const listarPlanejamentos = async (
-  usuarioId: string
-) => {
+export const listarPlanejamentos = async (usuarioId: string) => {
   const planos = await db.orm.public.Planejamento
     .where({ usuarioId })
     .orderBy((plano) => plano.atualizadoEm.desc())
@@ -87,21 +121,13 @@ export const listarPlanejamentos = async (
   return planos.map(formatarPlanejamento);
 };
 
-
 export const buscarPlanejamento = async (
   id: string,
   usuarioId: string
 ) => {
-  const plano = await db.orm.public.Planejamento.first({
-    id,
-    usuarioId
-  });
-
-  return plano
-    ? formatarPlanejamento(plano)
-    : null;
+  const plano = await db.orm.public.Planejamento.first({ id, usuarioId });
+  return plano ? formatarPlanejamento(plano) : null;
 };
-
 
 export const criarPlanejamento = async (
   usuarioId: string,
@@ -109,7 +135,6 @@ export const criarPlanejamento = async (
 ) => {
   const plano = await db.orm.public.Planejamento.create({
     usuarioId,
-
     nivelEnsino: dados.nivelEnsino || null,
     materia: dados.materia,
     materiaId: dados.materiaId ?? null,
@@ -117,19 +142,11 @@ export const criarPlanejamento = async (
     duracao: dados.duracao,
     tema: dados.tema,
     observacoes: dados.observacoes || null,
-
-    titulo: conteudo.titulo,
-    objetivo: conteudo.objetivo,
-    introducao: conteudo.introducao,
-    desenvolvimento: conteudo.desenvolvimento,
-    atividade: conteudo.atividade,
-    recursos: conteudo.recursos,
-    avaliacao: conteudo.avaliacao
+    ...serializarConteudo(conteudo)
   });
 
   return formatarPlanejamento(plano);
 };
-
 
 export const atualizarPlanejamento = async (
   id: string,
@@ -137,10 +154,7 @@ export const atualizarPlanejamento = async (
   { dados, conteudo }: PlanoInput
 ) => {
   const plano = await db.orm.public.Planejamento
-    .where({
-      id,
-      usuarioId
-    })
+    .where({ id, usuarioId })
     .update({
       nivelEnsino: dados.nivelEnsino || null,
       materia: dados.materia,
@@ -149,30 +163,16 @@ export const atualizarPlanejamento = async (
       duracao: dados.duracao,
       tema: dados.tema,
       observacoes: dados.observacoes || null,
-
-      titulo: conteudo.titulo,
-      objetivo: conteudo.objetivo,
-      introducao: conteudo.introducao,
-      desenvolvimento: conteudo.desenvolvimento,
-      atividade: conteudo.atividade,
-      recursos: conteudo.recursos,
-      avaliacao: conteudo.avaliacao
+      ...serializarConteudo(conteudo)
     });
 
-  return plano
-    ? formatarPlanejamento(plano)
-    : null;
+  return plano ? formatarPlanejamento(plano) : null;
 };
-
 
 export const excluirPlanejamento = async (
   id: string,
   usuarioId: string
-) => {
-  return db.orm.public.Planejamento
-    .where({
-      id,
-      usuarioId
-    })
+) =>
+  db.orm.public.Planejamento
+    .where({ id, usuarioId })
     .delete();
-};

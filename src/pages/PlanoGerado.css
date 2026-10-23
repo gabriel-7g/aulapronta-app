@@ -744,3 +744,46 @@
 .botao-exportar-pdf > span {
   white-space: nowrap;
 }
+
+.pagina-plano-gerado .bloco-plano {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.pagina-plano-gerado .bloco-plano h2 {
+  margin-bottom: 12px;
+}
+
+.pagina-plano-gerado .bloco-plano p.texto-secao-livre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+
+.pagina-plano-gerado .campo-edicao-plano {
+  width: 100%;
+  margin-left: 0;
+}
+
+.pagina-plano-gerado .campo-titulo-secao {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1.5px solid rgba(32, 64, 47, 0.2);
+  border-radius: 8px;
+  font-family: var(--fonte-titulo);
+  font-size: 1.1rem;
+  color: var(--tinta);
+}
+
+.pagina-plano-gerado .botao-remover-secao {
+  margin-top: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--vermelho-caneta);
+  cursor: pointer;
+  font-size: 0.84rem;
+}

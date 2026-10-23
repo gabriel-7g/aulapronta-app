@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   duplicarPlanejamentoDoUsuario,
@@ -11,8 +6,8 @@ import {
   listarPlanejamentosDoUsuario
 } from '../services/planejamentoService';
 
-import { PlanejamentoSalvo } from '../types/planejamento';
-import { TipoOrdenacao } from '../types/filtrosPlanejamento';
+import type { PlanejamentoSalvo } from '../types/planejamento';
+import type { TipoOrdenacao } from '../types/filtrosPlanejamento';
 
 const normalizar = (texto: string) =>
   texto
@@ -21,23 +16,17 @@ const normalizar = (texto: string) =>
     .toLowerCase()
     .trim();
 
-const obterMensagemErro = (erro: unknown) =>
+const mensagemErro = (erro: unknown) =>
   erro instanceof Error
     ? erro.message
     : 'Ocorreu um erro inesperado.';
 
-export const usePlanejamentos = (
-  usuarioId?: string
-) => {
-  const [planejamentos, setPlanejamentos] =
-    useState<PlanejamentoSalvo[]>([]);
-
+export const usePlanejamentos = (usuarioId?: string) => {
+  const [planejamentos, setPlanejamentos] = useState<PlanejamentoSalvo[]>([]);
   const [busca, setBusca] = useState('');
   const [filtroMateria, setFiltroMateria] = useState('todas');
   const [filtroTurma, setFiltroTurma] = useState('todas');
-  const [ordenacao, setOrdenacao] =
-    useState<TipoOrdenacao>('recentes');
-
+  const [ordenacao, setOrdenacao] = useState<TipoOrdenacao>('recentes');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
@@ -52,12 +41,9 @@ export const usePlanejamentos = (
     setErro('');
 
     try {
-      const lista =
-        await listarPlanejamentosDoUsuario(usuarioId);
-
-      setPlanejamentos(lista);
+      setPlanejamentos(await listarPlanejamentosDoUsuario());
     } catch (erro) {
-      setErro(obterMensagemErro(erro));
+      setErro(mensagemErro(erro));
     } finally {
       setCarregando(false);
     }
@@ -98,20 +84,21 @@ export const usePlanejamentos = (
     const termo = normalizar(busca);
 
     if (termo) {
-      resultado = resultado.filter((plano) => {
-        const texto = normalizar(
+      resultado = resultado.filter((plano) =>
+        normalizar(
           [
             plano.conteudo.titulo,
             plano.dados.tema,
             plano.dados.materia,
             plano.dados.turma,
             plano.dados.nivelEnsino || '',
-            plano.conteudo.objetivo
+            ...plano.conteudo.secoes.flatMap((secao) => [
+              secao.titulo,
+              secao.conteudo
+            ])
           ].join(' ')
-        );
-
-        return texto.includes(termo);
-      });
+        ).includes(termo)
+      );
     }
 
     if (filtroMateria !== 'todas') {
@@ -183,17 +170,13 @@ export const usePlanejamentos = (
       setErro('');
 
       try {
-        const copia =
-          await duplicarPlanejamentoDoUsuario(
-            id,
-            usuarioId
-          );
+        const copia = await duplicarPlanejamentoDoUsuario(id);
 
         if (copia) await carregarPlanejamentos();
 
         return copia;
       } catch (erro) {
-        setErro(obterMensagemErro(erro));
+        setErro(mensagemErro(erro));
         return null;
       }
     },
@@ -207,17 +190,13 @@ export const usePlanejamentos = (
       setErro('');
 
       try {
-        const excluido =
-          await excluirPlanejamentoDoUsuario(
-            id,
-            usuarioId
-          );
+        const excluido = await excluirPlanejamentoDoUsuario(id);
 
         if (excluido) await carregarPlanejamentos();
 
         return excluido;
       } catch (erro) {
-        setErro(obterMensagemErro(erro));
+        setErro(mensagemErro(erro));
         return false;
       }
     },
@@ -235,7 +214,7 @@ export const usePlanejamentos = (
     setBusca,
     filtroMateria,
     setFiltroMateria,
-    filtroTurma,
+    turma: filtroTurma,
     setFiltroTurma,
     ordenacao,
     setOrdenacao,
@@ -243,7 +222,6 @@ export const usePlanejamentos = (
     materiasDisponiveis,
     turmasDisponiveis,
     filtrosAtivos,
-
     limparFiltros,
     carregarPlanejamentos,
     duplicarPlanejamento,

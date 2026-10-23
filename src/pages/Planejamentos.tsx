@@ -1,24 +1,18 @@
-import React, { useState } from 'react';
 
+import React, { useState } from 'react';
 import {
-  IonContent,
-  IonPage,
-  IonToast,
-  useIonRouter,
-  useIonViewWillEnter
+  IonContent, IonPage, IonToast,
+  useIonRouter, useIonViewWillEnter
 } from '@ionic/react';
 
-import {
-  obterUsuarioLogado,
-  sair
-} from '../utils/auth';
-
-import { PlanejamentoSalvo } from '../types/planejamento';
+import { obterUsuarioLogado, sair } from '../utils/auth';
+import type { PlanejamentoSalvo } from '../types/planejamento';
 import { usePlanejamentos } from '../hooks/usePlanejamentos';
 
 import ModalConfirmacao from '../components/ModalConfirmacao';
 import PlanejamentoCard from '../components/PlanejamentoCard';
 import FiltrosPlanejamentos from '../components/FiltrosPlanejamentos';
+import ConsumoIa from '../components/ConsumoIa';
 
 import './Planejamentos.css';
 import './FiltrosPlanejamentos.css';
@@ -33,30 +27,25 @@ const Planejamentos: React.FC = () => {
     carregando,
     erro,
     limparErro,
-
     busca,
     setBusca,
     filtroMateria,
     setFiltroMateria,
-    filtroTurma,
+    turma: filtroTurma,
     setFiltroTurma,
     ordenacao,
     setOrdenacao,
-
     materiasDisponiveis,
     turmasDisponiveis,
     filtrosAtivos,
-
     limparFiltros,
     carregarPlanejamentos,
     duplicarPlanejamento,
     excluirPlanejamento
   } = usePlanejamentos(usuario?.id);
 
-  const [
-    planoParaExcluir,
-    setPlanoParaExcluir
-  ] = useState<PlanejamentoSalvo | null>(null);
+  const [planoParaExcluir, setPlanoParaExcluir] =
+    useState<PlanejamentoSalvo | null>(null);
 
   const [mensagem, setMensagem] = useState('');
 
@@ -64,36 +53,20 @@ const Planejamentos: React.FC = () => {
     void carregarPlanejamentos();
   });
 
-  const abrirPlano = (
-    plano: PlanejamentoSalvo
-  ) => {
-    if (
-      !usuario ||
-      plano.usuarioId !== usuario.id
-    ) {
-      return;
-    }
+  const abrirPlano = (plano: PlanejamentoSalvo) => {
+    if (!usuario || plano.usuarioId !== usuario.id) return;
 
     sessionStorage.removeItem('planoEmCriacao');
-
-    sessionStorage.setItem(
-      'planoSelecionado',
-      JSON.stringify(plano)
-    );
+    sessionStorage.setItem('planoSelecionado', JSON.stringify(plano));
 
     router.push('/plano-gerado', 'forward');
   };
 
-  const duplicarPlano = async (
-    plano: PlanejamentoSalvo
-  ) => {
-    const copia =
-      await duplicarPlanejamento(plano.id);
+  const duplicarPlano = async (plano: PlanejamentoSalvo) => {
+    const copia = await duplicarPlanejamento(plano.id);
 
     if (copia) {
-      setMensagem(
-        `"${copia.conteudo.titulo}" criado com sucesso.`
-      );
+      setMensagem(`"${copia.conteudo.titulo}" criado com sucesso.`);
     }
   };
 
@@ -103,13 +76,10 @@ const Planejamentos: React.FC = () => {
     const id = planoParaExcluir.id;
     setPlanoParaExcluir(null);
 
-    const excluido =
-      await excluirPlanejamento(id);
+    const excluido = await excluirPlanejamento(id);
 
     if (excluido) {
-      setMensagem(
-        'Planejamento excluído com sucesso.'
-      );
+      setMensagem('Planejamento excluído com sucesso.');
     }
   };
 
@@ -137,19 +107,13 @@ const Planejamentos: React.FC = () => {
 
   return (
     <IonPage>
-      <IonContent
-        fullscreen
-        className="conteudo-planejamentos"
-      >
+      <IonContent fullscreen className="conteudo-planejamentos">
         <div className="pagina-planejamentos">
 
           <header className="planejamentos-topo">
-
             <div className="planejamentos-usuario">
               <div className="usuario-avatar">
-                {usuario?.nome
-                  ?.charAt(0)
-                  .toUpperCase() || 'U'}
+                {usuario?.nome?.charAt(0).toUpperCase() || 'U'}
               </div>
 
               <div className="usuario-informacoes">
@@ -163,12 +127,10 @@ const Planejamentos: React.FC = () => {
               </div>
             </div>
 
-
             <div className="marca-planejamentos">
               <span className="marca-simbolo-planejamentos" />
               Lousa
             </div>
-
 
             <div className="acoes-topo-planejamentos">
               <button
@@ -187,9 +149,7 @@ const Planejamentos: React.FC = () => {
                 Sair
               </button>
             </div>
-
           </header>
-
 
           <main className="planejamentos-container">
 
@@ -205,29 +165,25 @@ const Planejamentos: React.FC = () => {
               </p>
             </section>
 
+            {/* PAINEL DE CONSUMO DA IA */}
+            {usuario && <ConsumoIa />}
 
+            {/* LISTAGEM DOS PLANEJAMENTOS */}
             {carregando && total === 0 ? (
 
               <section className="estado-vazio">
                 <h2>Carregando planejamentos...</h2>
-                <p>
-                  Buscando seus dados no servidor.
-                </p>
+                <p>Buscando seus dados no servidor.</p>
               </section>
 
             ) : total === 0 ? (
 
               <section className="estado-vazio">
-                <div
-                  className="estado-vazio-icone"
-                  aria-hidden="true"
-                >
+                <div className="estado-vazio-icone" aria-hidden="true">
                   ✎
                 </div>
 
-                <h2>
-                  Você ainda não possui planejamentos
-                </h2>
+                <h2>Você ainda não possui planejamentos</h2>
 
                 <p>
                   Crie seu primeiro planejamento e ele aparecerá aqui.
@@ -260,7 +216,6 @@ const Planejamentos: React.FC = () => {
                   onLimpar={limparFiltros}
                 />
 
-
                 <div
                   className="lista-cabecalho lista-cabecalho-filtros"
                   aria-live="polite"
@@ -274,7 +229,6 @@ const Planejamentos: React.FC = () => {
                   )}
                 </div>
 
-
                 {exibidos === 0 ? (
 
                   <section className="estado-sem-resultados">
@@ -285,9 +239,7 @@ const Planejamentos: React.FC = () => {
                       ⌕
                     </div>
 
-                    <h2>
-                      Nenhum planejamento encontrado
-                    </h2>
+                    <h2>Nenhum planejamento encontrado</h2>
 
                     <p>
                       Não encontramos planejamentos com os filtros selecionados.
@@ -305,26 +257,22 @@ const Planejamentos: React.FC = () => {
                 ) : (
 
                   <section className="grade-planejamentos">
-                    {planejamentosFiltrados.map(
-                      (plano) => (
-                        <PlanejamentoCard
-                          key={plano.id}
-                          plano={plano}
-                          onAbrir={abrirPlano}
-                          onDuplicar={duplicarPlano}
-                          onExcluir={setPlanoParaExcluir}
-                        />
-                      )
-                    )}
+                    {planejamentosFiltrados.map((plano) => (
+                      <PlanejamentoCard
+                        key={plano.id}
+                        plano={plano}
+                        onAbrir={abrirPlano}
+                        onDuplicar={duplicarPlano}
+                        onExcluir={setPlanoParaExcluir}
+                      />
+                    ))}
                   </section>
 
                 )}
               </>
 
             )}
-
           </main>
-
 
           <ModalConfirmacao
             aberto={Boolean(planoParaExcluir)}
@@ -337,25 +285,19 @@ const Planejamentos: React.FC = () => {
             textoCancelar="Cancelar"
             textoConfirmar="Excluir planejamento"
             perigo
-            onCancelar={() =>
-              setPlanoParaExcluir(null)
-            }
+            onCancelar={() => setPlanoParaExcluir(null)}
             onConfirmar={() => {
               void confirmarExclusao();
             }}
           />
-
 
           <IonToast
             isOpen={Boolean(mensagem)}
             message={mensagem}
             duration={1800}
             position="top"
-            onDidDismiss={() =>
-              setMensagem('')
-            }
+            onDidDismiss={() => setMensagem('')}
           />
-
 
           <IonToast
             isOpen={Boolean(erro)}

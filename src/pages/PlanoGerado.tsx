@@ -14,59 +14,21 @@ import {
   obterContextoPlano
 } from '../utils/planoSessao';
 
-import type { ConteudoPlano } from '../types/planejamento';
+import type {
+  ConteudoPlano,
+  SecaoPlano
+} from '../types/planejamento';
 
 import './PlanoGerado.css';
 
-interface ResumoProps {
-  rotulo: string;
-  valor: string;
-}
-
-interface BlocoPlanoProps {
-  numero: string;
-  titulo: string;
-  campo: keyof ConteudoPlano;
-  valor: string;
-  editando: boolean;
-  atualizar: (
-    campo: keyof ConteudoPlano,
-    valor: string
-  ) => void;
-}
-
-const Resumo: React.FC<ResumoProps> = ({ rotulo, valor }) => (
+const Resumo: React.FC<{ rotulo: string; valor: string }> = ({
+  rotulo,
+  valor
+}) => (
   <div>
     <span className="resumo-rotulo">{rotulo}</span>
     <strong>{valor}</strong>
   </div>
-);
-
-const BlocoPlano: React.FC<BlocoPlanoProps> = ({
-  numero,
-  titulo,
-  campo,
-  valor,
-  editando,
-  atualizar
-}) => (
-  <article className="bloco-plano">
-    <div className="bloco-cabecalho">
-      <span className="bloco-numero">{numero}</span>
-      <h2>{titulo}</h2>
-    </div>
-
-    {editando ? (
-      <textarea
-        className="campo-edicao-plano"
-        aria-label={titulo}
-        value={valor}
-        onChange={(e) => atualizar(campo, e.target.value)}
-      />
-    ) : (
-      <p>{valor}</p>
-    )}
-  </article>
 );
 
 const PlanoGerado: React.FC = () => {
@@ -77,11 +39,10 @@ const PlanoGerado: React.FC = () => {
     obterContextoPlano(usuario?.id)
   );
 
-  const [conteudo, setConteudo] = useState<ConteudoPlano | null>(
-    () =>
-      contexto?.planoSelecionado?.conteudo ??
-      contexto?.conteudoGerado ??
-      null
+  const [conteudo, setConteudo] = useState<ConteudoPlano | null>(() =>
+    contexto?.planoSelecionado?.conteudo ??
+    contexto?.conteudoGerado ??
+    null
   );
 
   const [editando, setEditando] = useState(false);
@@ -90,12 +51,12 @@ const PlanoGerado: React.FC = () => {
   const [mensagemErro, setMensagemErro] = useState('');
 
   useIonViewWillEnter(() => {
-    const contextoAtual = obterContextoPlano(usuario?.id);
+    const atual = obterContextoPlano(usuario?.id);
 
-    setContexto(contextoAtual);
+    setContexto(atual);
     setConteudo(
-      contextoAtual?.planoSelecionado?.conteudo ??
-      contextoAtual?.conteudoGerado ??
+      atual?.planoSelecionado?.conteudo ??
+      atual?.conteudoGerado ??
       null
     );
 
@@ -104,6 +65,56 @@ const PlanoGerado: React.FC = () => {
     setMensagemSucesso('');
     setMensagemErro('');
   });
+
+  const atualizarTitulo = (valor: string) => {
+    setConteudo((anterior) =>
+      anterior ? { ...anterior, titulo: valor } : null
+    );
+  };
+
+  const atualizarSecao = (
+    indice: number,
+    campo: keyof SecaoPlano,
+    valor: string
+  ) => {
+    setConteudo((anterior) =>
+      anterior
+        ? {
+            ...anterior,
+            secoes: anterior.secoes.map((secao, i) =>
+              i === indice
+                ? { ...secao, [campo]: valor }
+                : secao
+            )
+          }
+        : null
+    );
+  };
+
+  const adicionarSecao = () => {
+    setConteudo((anterior) =>
+      anterior
+        ? {
+            ...anterior,
+            secoes: [
+              ...anterior.secoes,
+              { titulo: '', conteudo: '' }
+            ]
+          }
+        : null
+    );
+  };
+
+  const removerSecao = (indice: number) => {
+    setConteudo((anterior) =>
+      anterior && anterior.secoes.length > 1
+        ? {
+            ...anterior,
+            secoes: anterior.secoes.filter((_, i) => i !== indice)
+          }
+        : anterior
+    );
+  };
 
   const voltarPlanejamentos = () => {
     limparContextoPlano();
@@ -117,24 +128,16 @@ const PlanoGerado: React.FC = () => {
           <div className="pagina-plano-gerado">
             <main className="plano-container">
               <section className="folha-plano">
-                <span className="fita-plano" aria-hidden="true" />
-
                 <div className="plano-cabecalho">
                   <span className="plano-etiqueta">acesso inválido</span>
-
                   <h1>Sessão não encontrada</h1>
-
-                  <p>
-                    Faça login novamente para acessar seus planejamentos.
-                  </p>
+                  <p>Faça login novamente para acessar seus planejamentos.</p>
 
                   <div className="acoes-plano">
                     <button
                       type="button"
-                      className="botao-salvar botao-salvar-grande"
-                      onClick={() =>
-                        router.push('/login', 'root', 'replace')
-                      }
+                      className="botao-salvar"
+                      onClick={() => router.push('/login', 'root', 'replace')}
                     >
                       Ir para o login
                     </button>
@@ -155,26 +158,20 @@ const PlanoGerado: React.FC = () => {
           <div className="pagina-plano-gerado">
             <header className="plano-topo">
               <div className="topo-espaco" />
-
               <div className="marca-plano">
                 <span className="marca-simbolo-plano" />
                 Lousa
               </div>
-
               <div className="topo-espaco" />
             </header>
 
             <main className="plano-container">
               <section className="folha-plano">
-                <span className="fita-plano" aria-hidden="true" />
-
                 <div className="plano-cabecalho">
                   <span className="plano-etiqueta">
                     planejamento indisponível
                   </span>
-
                   <h1>Nenhum conteúdo foi gerado</h1>
-
                   <p>
                     O planejamento não possui conteúdo válido gerado pela IA.
                   </p>
@@ -182,10 +179,8 @@ const PlanoGerado: React.FC = () => {
                   <div className="acoes-plano">
                     <button
                       type="button"
-                      className="botao-salvar botao-salvar-grande"
-                      onClick={() =>
-                        router.push('/home', 'root', 'replace')
-                      }
+                      className="botao-salvar"
+                      onClick={() => router.push('/home', 'root', 'replace')}
                     >
                       Criar novamente
                     </button>
@@ -201,26 +196,7 @@ const PlanoGerado: React.FC = () => {
 
   const { dados, planoSelecionado } = contexto;
 
-  const atualizarCampo = (
-    campo: keyof ConteudoPlano,
-    valor: string
-  ) => {
-    setConteudo((anterior) =>
-      anterior
-        ? { ...anterior, [campo]: valor }
-        : anterior
-    );
-  };
-
-  const editarPlano = () => {
-    setMensagemSucesso('');
-    setMensagemErro('');
-    setEditando(true);
-  };
-
   const exportarPdf = () => {
-    if (!conteudo) return;
-
     try {
       setMensagemErro('');
 
@@ -231,15 +207,25 @@ const PlanoGerado: React.FC = () => {
       });
     } catch (erro) {
       console.error('Erro ao exportar PDF:', erro);
-
-      setMensagemErro(
-        'Não foi possível gerar o PDF. Tente novamente.'
-      );
+      setMensagemErro('Não foi possível gerar o PDF. Tente novamente.');
     }
   };
 
   const salvarPlano = async () => {
-    if (salvando || !conteudo) return;
+    if (salvando) return;
+
+    if (
+      !conteudo.titulo.trim() ||
+      conteudo.secoes.length < 1 ||
+      conteudo.secoes.some(
+        (secao) => !secao.titulo.trim() || !secao.conteudo.trim()
+      )
+    ) {
+      setMensagemErro(
+        'Preencha o título do plano e o título e conteúdo de todos os tópicos.'
+      );
+      return;
+    }
 
     setSalvando(true);
     setMensagemErro('');
@@ -282,7 +268,6 @@ const PlanoGerado: React.FC = () => {
     <IonPage>
       <IonContent fullscreen>
         <div className="pagina-plano-gerado">
-
           <header className="plano-topo">
             <button
               type="button"
@@ -302,7 +287,6 @@ const PlanoGerado: React.FC = () => {
           </header>
 
           <main className="plano-container">
-
             <section className="plano-cabecalho">
               <span className="plano-etiqueta">planejamento</span>
 
@@ -311,9 +295,7 @@ const PlanoGerado: React.FC = () => {
                   className="titulo-edicao"
                   value={conteudo.titulo}
                   aria-label="Título do planejamento"
-                  onChange={(e) =>
-                    atualizarCampo('titulo', e.target.value)
-                  }
+                  onChange={(e) => atualizarTitulo(e.target.value)}
                 />
               ) : (
                 <h1>{conteudo.titulo}</h1>
@@ -338,59 +320,58 @@ const PlanoGerado: React.FC = () => {
             <section className="folha-plano">
               <span className="fita-plano" aria-hidden="true" />
 
-              <BlocoPlano
-                numero="01"
-                titulo="Objetivo"
-                campo="objetivo"
-                valor={conteudo.objetivo}
-                editando={editando}
-                atualizar={atualizarCampo}
-              />
+              {conteudo.secoes.map((secao, indice) => (
+                <article className="bloco-plano" key={indice}>
+                  {editando ? (
+                    <>
+                      <input
+                        className="campo-titulo-secao"
+                        value={secao.titulo}
+                        placeholder="Título do tópico"
+                        aria-label={`Título do tópico ${indice + 1}`}
+                        onChange={(e) =>
+                          atualizarSecao(indice, 'titulo', e.target.value)
+                        }
+                      />
 
-              <BlocoPlano
-                numero="02"
-                titulo="Introdução"
-                campo="introducao"
-                valor={conteudo.introducao}
-                editando={editando}
-                atualizar={atualizarCampo}
-              />
+                      <textarea
+                        className="campo-edicao-plano"
+                        value={secao.conteudo}
+                        rows={6}
+                        aria-label={`Conteúdo de ${secao.titulo || `tópico ${indice + 1}`}`}
+                        onChange={(e) =>
+                          atualizarSecao(indice, 'conteudo', e.target.value)
+                        }
+                      />
 
-              <BlocoPlano
-                numero="03"
-                titulo="Desenvolvimento"
-                campo="desenvolvimento"
-                valor={conteudo.desenvolvimento}
-                editando={editando}
-                atualizar={atualizarCampo}
-              />
+                      {conteudo.secoes.length > 1 && (
+                        <button
+                          type="button"
+                          className="botao-remover-secao"
+                          onClick={() => removerSecao(indice)}
+                        >
+                          Remover tópico
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <h2>{secao.titulo}</h2>
+                      <p className="texto-secao-livre">{secao.conteudo}</p>
+                    </>
+                  )}
+                </article>
+              ))}
 
-              <BlocoPlano
-                numero="04"
-                titulo="Atividade"
-                campo="atividade"
-                valor={conteudo.atividade}
-                editando={editando}
-                atualizar={atualizarCampo}
-              />
-
-              <BlocoPlano
-                numero="05"
-                titulo="Recursos"
-                campo="recursos"
-                valor={conteudo.recursos}
-                editando={editando}
-                atualizar={atualizarCampo}
-              />
-
-              <BlocoPlano
-                numero="06"
-                titulo="Avaliação"
-                campo="avaliacao"
-                valor={conteudo.avaliacao}
-                editando={editando}
-                atualizar={atualizarCampo}
-              />
+              {editando && (
+                <button
+                  type="button"
+                  className="botao-editar"
+                  onClick={adicionarSecao}
+                >
+                  + Adicionar tópico
+                </button>
+              )}
             </section>
 
             {dados.observacoes && (
@@ -401,13 +382,8 @@ const PlanoGerado: React.FC = () => {
             )}
 
             {mensagemSucesso && (
-              <div
-                className="mensagem-sucesso"
-                role="status"
-                aria-live="polite"
-              >
+              <div className="mensagem-sucesso" role="status" aria-live="polite">
                 <span aria-hidden="true">✓</span>
-
                 <div>
                   <strong>{mensagemSucesso}</strong>
                   <p>Abrindo seus planejamentos...</p>
@@ -416,23 +392,22 @@ const PlanoGerado: React.FC = () => {
             )}
 
             {mensagemErro && (
-              <div
-                className="mensagem-erro"
-                role="alert"
-                aria-live="assertive"
-              >
+              <div className="mensagem-erro" role="alert" aria-live="assertive">
                 {mensagemErro}
               </div>
             )}
 
             <div className="acoes-plano">
-
               {!editando && (
                 <button
                   type="button"
                   className="botao-editar"
                   disabled={salvando}
-                  onClick={editarPlano}
+                  onClick={() => {
+                    setMensagemErro('');
+                    setMensagemSucesso('');
+                    setEditando(true);
+                  }}
                 >
                   <span aria-hidden="true">✎</span>
                   Editar planejamento
@@ -445,8 +420,7 @@ const PlanoGerado: React.FC = () => {
                 disabled={salvando}
                 onClick={exportarPdf}
               >
-                PDF
-                <span>Exportar PDF</span>
+                PDF <span>Exportar PDF</span>
               </button>
 
               <button
@@ -461,16 +435,13 @@ const PlanoGerado: React.FC = () => {
                 onClick={salvarPlano}
               >
                 <span aria-hidden="true">✓</span>
-
                 {salvando
                   ? 'Salvando...'
                   : editando
                     ? 'Salvar alterações'
                     : 'Salvar planejamento'}
               </button>
-
             </div>
-
           </main>
         </div>
       </IonContent>
