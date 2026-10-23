@@ -1,8 +1,5 @@
 import React from 'react';
-
-import {
-  Route
-} from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 import {
   IonApp,
@@ -10,14 +7,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 
-import {
-  IonReactRouter
-} from '@ionic/react-router';
-
-
-/* =========================================================
-   PÁGINAS
-   ========================================================= */
+import { IonReactRouter } from '@ionic/react-router';
 
 import Login from './pages/login';
 import Home from './pages/Home';
@@ -27,21 +17,13 @@ import PlanoGerado from './pages/PlanoGerado';
 import AdminUsuarios from './pages/AdminUsuarios';
 import PaginaNaoEncontrada from './pages/PaginaNaoEncontrada';
 
-
-/* =========================================================
-   ROTAS
-   ========================================================= */
+import BotaoTema from './components/BotaoTema';
 
 import {
   PaginaInicial,
   RotaAdmin,
   RotaProtegida
 } from './rotas/RotasProtegidas';
-
-
-/* =========================================================
-   IONIC
-   ========================================================= */
 
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
@@ -52,127 +34,76 @@ import '@ionic/react/css/float-elements.css';
 import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
-import '@ionic/react/css/display.css';
 
-import '@ionic/react/css/palettes/dark.system.css';
-
-
-/* =========================================================
-   TEMA GLOBAL
-   ========================================================= */
+import '@ionic/react/css/palettes/dark.class.css';
 
 import './theme/variables.css';
 import './theme/responsive.css';
 import './theme/acessibility.css';
-
+import './theme/dark.css';
 
 setupIonicReact();
 
+const App: React.FC = () => (
+  <IonApp>
+    <IonReactRouter>
+      <IonRouterOutlet>
 
-/* =========================================================
-   APP
-   ========================================================= */
+        <Route path="/login" element={<Login />} />
 
-const App: React.FC = () => {
-  return (
-    <IonApp>
+        <Route
+          path="/admin/usuarios"
+          element={
+            <RotaAdmin>
+              <AdminUsuarios />
+            </RotaAdmin>
+          }
+        />
 
-      <IonReactRouter>
+        <Route
+          path="/planejamentos"
+          element={
+            <RotaProtegida>
+              <Planejamentos />
+            </RotaProtegida>
+          }
+        />
 
-        <IonRouterOutlet>
+        <Route
+          path="/home"
+          element={
+            <RotaProtegida>
+              <Home />
+            </RotaProtegida>
+          }
+        />
 
+        <Route
+          path="/gerando-plano"
+          element={
+            <RotaProtegida>
+              <GerandoPlano />
+            </RotaProtegida>
+          }
+        />
 
-          {/* LOGIN */}
+        <Route
+          path="/plano-gerado"
+          element={
+            <RotaProtegida>
+              <PlanoGerado />
+            </RotaProtegida>
+          }
+        />
 
-          <Route
-            path="/login"
-            element={<Login />}
-          />
+        <Route path="/" element={<PaginaInicial />} />
+        <Route path="*" element={<PaginaNaoEncontrada />} />
 
+      </IonRouterOutlet>
 
-          {/* ADMIN */}
-
-          <Route
-            path="/admin/usuarios"
-            element={
-              <RotaAdmin>
-                <AdminUsuarios />
-              </RotaAdmin>
-            }
-          />
-
-
-          {/* PLANEJAMENTOS */}
-
-          <Route
-            path="/planejamentos"
-            element={
-              <RotaProtegida>
-                <Planejamentos />
-              </RotaProtegida>
-            }
-          />
-
-
-          {/* NOVO PLANO */}
-
-          <Route
-            path="/home"
-            element={
-              <RotaProtegida>
-                <Home />
-              </RotaProtegida>
-            }
-          />
-
-
-          {/* GERANDO */}
-
-          <Route
-            path="/gerando-plano"
-            element={
-              <RotaProtegida>
-                <GerandoPlano />
-              </RotaProtegida>
-            }
-          />
-
-
-          {/* PLANO GERADO */}
-
-          <Route
-            path="/plano-gerado"
-            element={
-              <RotaProtegida>
-                <PlanoGerado />
-              </RotaProtegida>
-            }
-          />
-
-
-          {/* INÍCIO */}
-
-          <Route
-            path="/"
-            element={<PaginaInicial />}
-          />
-
-
-          {/* 404 */}
-
-          <Route
-            path="*"
-            element={<PaginaNaoEncontrada />}
-          />
-
-
-        </IonRouterOutlet>
-
-      </IonReactRouter>
-
-    </IonApp>
-  );
-};
-
+      <BotaoTema />
+    </IonReactRouter>
+  </IonApp>
+);
 
 export default App;

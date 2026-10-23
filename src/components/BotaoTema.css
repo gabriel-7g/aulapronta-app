@@ -1,0 +1,66 @@
+.botao-tema {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 11px 17px;
+  border: 1px solid rgba(31, 75, 55, 0.2);
+  border-radius: 30px;
+
+  background: #20402f;
+  color: #fffdf7;
+
+  font-family: 'Work Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.botao-tema:hover {
+  transform: translateY(-2px);
+  background: #315a43;
+}
+
+.botao-tema:focus-visible {
+  outline: 3px solid #e5c35d;
+  outline-offset: 3px;
+}
+
+.botao-tema span:first-child {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+html.ion-palette-dark .botao-tema {
+  background: #e5c35d;
+  border-color: #e5c35d;
+  color: #17241d;
+}
+
+html.ion-palette-dark .botao-tema:hover {
+  background: #f1d477;
+}
+
+@media (max-width: 480px) {
+  .botao-tema {
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    padding: 11px 13px;
+    font-size: 0.76rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botao-tema {
+    transition: none;
+  }
+}

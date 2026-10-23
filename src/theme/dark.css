@@ -1,0 +1,381 @@
+/* =========================================
+   LOUSA — MODO ESCURO
+   ========================================= */
+
+html.ion-palette-dark {
+  color-scheme: dark;
+  --ion-background-color: #101a17;
+  --ion-text-color: #f1eee8;
+}
+
+html.ion-palette-dark ion-content {
+  --background: #101a17;
+}
+
+/* PALETA PRINCIPAL */
+
+html.ion-palette-dark :is(
+  .pagina-criar-plano,
+  .pagina-planejamentos,
+  .pagina-plano-gerado,
+  .pagina-gerando,
+  .pagina-auth
+) {
+  --verde-lousa-900: #e0efe3;
+  --verde-lousa-800: #c3e2ce;
+  --verde-lousa-700: #98d4aa;
+
+  --papel: #101a17;
+  --papel-escuro: #24342c;
+  --papel-claro: #1b2924;
+
+  --branco-giz: #f6f1e4;
+  --amarelo-giz: #e5c35d;
+  --vermelho-caneta: #ec9b8b;
+
+  --tinta: #f1eee8;
+  --tinta-suave: #b8c5ba;
+  --borda: rgba(218, 232, 221, 0.16);
+
+  background: var(--papel);
+  color: var(--tinta);
+}
+
+/* ADMINISTRADOR */
+
+html.ion-palette-dark .admin-pagina {
+  --verde-lousa: #98d4aa;
+  --verde-escuro: #2c5a41;
+  --papel: #1b2924;
+  --fundo: #101a17;
+  --texto: #f1eee8;
+  --texto-suave: #b8c5ba;
+  --amarelo: #e5c35d;
+  --vermelho: #ec9b8b;
+
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+/* FUNDOS E CARTÕES */
+
+html.ion-palette-dark :is(
+  .planejamento-card,
+  .estado-vazio,
+  .folha-plano,
+  .gerando-cartao,
+  .auth-card,
+  .admin-card,
+  .admin-modal,
+  .rascunho-cartao,
+  .planejamentos-ferramentas,
+  .card-404
+) {
+  background: #1b2924;
+  border-color: rgba(218, 232, 221, 0.12);
+  color: #f1eee8;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.16);
+}
+
+html.ion-palette-dark .pagina-plano-gerado {
+  background: #101a17;
+}
+
+html.ion-palette-dark .pagina-404 {
+  background: #101a17;
+  color: #f1eee8;
+}
+
+/* CAMPOS DE FORMULÁRIO */
+
+html.ion-palette-dark :is(
+  .pagina-criar-plano,
+  .pagina-auth,
+  .pagina-plano-gerado,
+  .admin-pagina,
+  .pagina-planejamentos
+) :is(input, textarea, select) {
+  background: #23332c;
+  color: #f1eee8;
+  border-color: #425b4b;
+  color-scheme: dark;
+}
+
+html.ion-palette-dark :is(input, textarea)::placeholder {
+  color: #a8b9aa;
+  opacity: 1;
+}
+
+html.ion-palette-dark :is(input, textarea, select):focus {
+  border-color: #98d4aa;
+}
+
+/* BOTÕES PRINCIPAIS */
+
+html.ion-palette-dark :is(
+  .botao-gerar,
+  .botao-salvar,
+  .botao-novo-topo:hover,
+  .botao-criar-primeiro,
+  .botao-tentar-novamente,
+  .auth-botao-principal,
+  .admin-botao-principal,
+  .botao-limpar-resultados:hover
+) {
+  background: #2b6248;
+  color: #fffdf7;
+}
+
+html.ion-palette-dark :is(
+  .botao-gerar,
+  .botao-salvar,
+  .botao-criar-primeiro,
+  .botao-tentar-novamente,
+  .auth-botao-principal,
+  .admin-botao-principal
+):hover:not(:disabled) {
+  background: #357553;
+}
+
+/* HOME — SELEÇÕES */
+
+html.ion-palette-dark :is(
+  .materia-cartao,
+  .turma-chip,
+  .duracao-chip
+) {
+  background: #23332c;
+  border-color: #425b4b;
+  color: #e7eee8;
+}
+
+html.ion-palette-dark .materia-nome {
+  color: #e7eee8;
+}
+
+html.ion-palette-dark :is(
+  .materia-cartao.selecionada,
+  .turma-chip.selecionada,
+  .duracao-chip.selecionada
+) {
+  background: #315d43;
+  border-color: #e5c35d;
+  color: #fffdf7;
+}
+
+html.ion-palette-dark .materia-cartao.selecionada .materia-nome {
+  color: #fff4cd;
+}
+
+html.ion-palette-dark .nivel-contexto,
+html.ion-palette-dark .gerando-status,
+html.ion-palette-dark .erro-geracao-aviso {
+  background: #23352b;
+}
+
+html.ion-palette-dark :is(
+  .nivel-contexto p,
+  .campo-ajuda,
+  .campo-opcional,
+  .texto-opcional,
+  .duracao-personalizada > span,
+  .rascunho-contexto
+) {
+  color: #b8c5ba;
+}
+
+/* PLANEJAMENTOS */
+
+html.ion-palette-dark .planejamento-tags span,
+html.ion-palette-dark .bloco-numero,
+html.ion-palette-dark .estado-vazio-icone,
+html.ion-palette-dark .estado-sem-resultados-icone {
+  background: #293f32;
+  color: #b1dfbe;
+}
+
+html.ion-palette-dark .bloco-plano h2 {
+  color: #e0efe3;
+}
+
+html.ion-palette-dark .bloco-plano p,
+html.ion-palette-dark .planejamento-resumo,
+html.ion-palette-dark .planejamento-data {
+  color: #b8c5ba;
+}
+
+html.ion-palette-dark .resumo-aula {
+  background: #254b36;
+}
+
+html.ion-palette-dark .resumo-aula > div {
+  color: #fffdf7;
+}
+
+/* FILTROS E BUSCA */
+
+html.ion-palette-dark :is(
+  .campo-filtro label,
+  .icone-busca,
+  .estado-sem-resultados p
+) {
+  color: #b8c5ba;
+}
+
+html.ion-palette-dark .indicador-filtro-ativo {
+  background: #293f32;
+  color: #b1dfbe;
+}
+
+html.ion-palette-dark .botao-limpar-busca {
+  background: #293f32;
+  color: #e7eee8;
+}
+
+html.ion-palette-dark .estado-sem-resultados {
+  background: #192720;
+}
+
+html.ion-palette-dark .estado-sem-resultados h2 {
+  color: #f1eee8;
+}
+
+/* ADMINISTRADOR */
+
+html.ion-palette-dark .admin-usuario {
+  background: #24362c;
+}
+
+html.ion-palette-dark .admin-avatar {
+  background: #354f3e;
+  color: #d3efdc;
+}
+
+html.ion-palette-dark .admin-usuario-info > span,
+html.ion-palette-dark .admin-modal p {
+  color: #b8c5ba;
+}
+
+html.ion-palette-dark .admin-modal h2 {
+  color: #f1eee8;
+}
+
+html.ion-palette-dark .admin-contador {
+  background: #2b6248;
+  color: #fffdf7;
+}
+
+html.ion-palette-dark .admin-badge {
+  background: #4b401e;
+  color: #f6d981;
+}
+
+/* TELA DE GERAÇÃO */
+
+html.ion-palette-dark .folha-gerando {
+  background: #293e33;
+}
+
+html.ion-palette-dark .linha {
+  background: #688c71;
+}
+
+html.ion-palette-dark .gerando-barra {
+  background: #35483c;
+}
+
+html.ion-palette-dark .gerando-status p,
+html.ion-palette-dark .erro-geracao-aviso strong {
+  color: #b1dfbe;
+}
+
+/* MENSAGENS */
+
+html.ion-palette-dark :is(
+  .mensagem-sucesso,
+  .auth-sucesso,
+  .admin-mensagem-sucesso
+) {
+  background: #213b2c;
+  color: #b1dfbe;
+}
+
+html.ion-palette-dark :is(
+  .mensagem-erro,
+  .auth-erro,
+  .admin-mensagem-erro,
+  .erro-geracao-icone
+) {
+  background: #3c2928;
+  color: #f4aa9b;
+}
+
+/* CONSUMO DA IA */
+
+html.ion-palette-dark .consumo-ia {
+  background: #1b2924;
+  color: #f1eee8;
+  border-color: #344c3b;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+html.ion-palette-dark .consumo-ia-topo p,
+html.ion-palette-dark .consumo-ia-rodape,
+html.ion-palette-dark .consumo-ia-observacao,
+html.ion-palette-dark .consumo-ia-progresso-topo {
+  color: #b8c5ba;
+}
+
+html.ion-palette-dark .consumo-ia-etiqueta,
+html.ion-palette-dark .consumo-ia-progresso-topo strong {
+  color: #a6dcb6;
+}
+
+html.ion-palette-dark .consumo-ia-destaque {
+  background: #2b6248;
+  color: #fffdf7;
+}
+
+html.ion-palette-dark .consumo-ia-metrica {
+  background: #293b30;
+  color: #e0efe3;
+}
+
+html.ion-palette-dark .consumo-ia-atualizar {
+  border-color: #476550;
+  color: #b1dfbe;
+}
+
+html.ion-palette-dark .consumo-ia-barra {
+  background: #35483c;
+}
+
+html.ion-palette-dark .consumo-ia-barra-preenchimento {
+  background: #8dcfa2;
+}
+
+html.ion-palette-dark .consumo-ia-aviso,
+html.ion-palette-dark .consumo-ia-erro {
+  background: #3c2928;
+  color: #f4aa9b;
+}
+
+/* PÁGINA 404 */
+
+html.ion-palette-dark :is(
+  .marca-404,
+  .card-404 h1,
+  .card-404 h2,
+  .numero-404
+) {
+  color: #e0efe3;
+}
+
+html.ion-palette-dark .card-404 p {
+  color: #b8c5ba;
+}
+
+html.ion-palette-dark .botao-voltar-404 {
+  background: #2b6248;
+  color: #fffdf7;
+}
