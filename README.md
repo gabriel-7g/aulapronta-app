@@ -79,18 +79,6 @@ O acesso ao sistema é realizado por **e-mail e senha**. Na versão atual, o cad
 | **Testes** | Vitest, Cypress | Ferramentas de testes unitários e ponta a ponta |
 | **Hospedagem** | Netlify, Render, Supabase | Frontend, backend e banco de dados |
 
-## Como a plataforma se conecta
-
-```mermaid
-flowchart LR
-    A["Interface Lousa<br/>React + Ionic<br/>Netlify"] -->|Requisições HTTPS| B["API AulaPronta<br/>Node.js + Express<br/>Render"]
-    B -->|Usuários e planos| C[("PostgreSQL<br/>Supabase")]
-    B -->|Geração de aulas| D["Groq API"]
-    A -->|Exportação| E["PDF<br/>jsPDF"]
-```
-
-O **frontend** concentra a experiência de uso; o **backend** valida permissões, processa as operações e integra a IA; o **banco de dados** mantém os registros; e o **gerador de PDF** permite levar os planejamentos para fora da plataforma.
-
 ## Propósito
 
 Mais do que automatizar um documento, o AulaPronta busca oferecer um **ambiente de trabalho organizado para professores**, reunindo preparação, personalização e histórico de aulas em um só lugar.
