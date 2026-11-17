@@ -1,14 +1,11 @@
+
 import React, { useState } from 'react';
 import { IonContent, IonPage, useIonRouter } from '@ionic/react';
-
 import './Home.css';
 
-interface Materia {
-  id: string;
-  nome: string;
-}
+type Materia = { id: string; nome: string };
 
-interface ConfigNivel {
+type ConfigNivel = {
   rotuloTurma: string;
   ajudaTurma: string;
   placeholderTurma: string;
@@ -16,12 +13,17 @@ interface ConfigNivel {
   descricao: string;
   turmas: string[];
   materias: Materia[];
-}
+};
 
-const materia = (id: string, nome: string): Materia => ({ id, nome });
-const OUTRA = materia('outra', 'Outra matéria');
+const OUTRA: Materia = { id: 'outra', nome: 'Outra matéria' };
 const DURACOES = ['30', '45', '50', '60', '90'];
 
+const criarMaterias = (itens: [string, string][]): Materia[] => [
+  ...itens.map(([id, nome]) => ({ id, nome })),
+  OUTRA
+];
+
+// Configurações de cada nível de ensino
 const CONFIG_NIVEIS: Record<string, ConfigNivel> = {
   'Educação Infantil': {
     rotuloTurma: 'Grupo / faixa etária',
@@ -30,15 +32,11 @@ const CONFIG_NIVEIS: Record<string, ConfigNivel> = {
     placeholderTema: 'Ex: Cores, animais, coordenação motora...',
     descricao: 'A Lousa priorizará atividades lúdicas, concretas e adequadas à faixa etária.',
     turmas: ['Berçário', 'Maternal I', 'Maternal II', 'Pré I', 'Pré II'],
-    materias: [
-      materia('linguagem', 'Linguagem'),
-      materia('matematica', 'Matemática'),
-      materia('natureza', 'Natureza'),
-      materia('artes', 'Artes'),
-      materia('musica', 'Música'),
-      materia('movimento', 'Movimento'),
-      OUTRA
-    ]
+    materias: criarMaterias([
+      ['linguagem', 'Linguagem'], ['matematica', 'Matemática'],
+      ['natureza', 'Natureza'], ['artes', 'Artes'],
+      ['musica', 'Música'], ['movimento', 'Movimento']
+    ])
   },
 
   'Ensino Fundamental': {
@@ -51,17 +49,12 @@ const CONFIG_NIVEIS: Record<string, ConfigNivel> = {
       '1º ano', '2º ano', '3º ano', '4º ano', '5º ano',
       '6º ano', '7º ano', '8º ano', '9º ano'
     ],
-    materias: [
-      materia('portugues', 'Português'),
-      materia('matematica', 'Matemática'),
-      materia('ciencias', 'Ciências'),
-      materia('historia', 'História'),
-      materia('geografia', 'Geografia'),
-      materia('ingles', 'Inglês'),
-      materia('artes', 'Artes'),
-      materia('educacao-fisica', 'Educação Física'),
-      OUTRA
-    ]
+    materias: criarMaterias([
+      ['portugues', 'Português'], ['matematica', 'Matemática'],
+      ['ciencias', 'Ciências'], ['historia', 'História'],
+      ['geografia', 'Geografia'], ['ingles', 'Inglês'],
+      ['artes', 'Artes'], ['educacao-fisica', 'Educação Física']
+    ])
   },
 
   'Ensino Médio': {
@@ -71,20 +64,14 @@ const CONFIG_NIVEIS: Record<string, ConfigNivel> = {
     placeholderTema: 'Ex: Funções orgânicas, Modernismo, eletrodinâmica...',
     descricao: 'A Lousa priorizará maior aprofundamento conceitual e aplicação dos conteúdos.',
     turmas: ['1ª série', '2ª série', '3ª série'],
-    materias: [
-      materia('portugues', 'Português'),
-      materia('matematica', 'Matemática'),
-      materia('biologia', 'Biologia'),
-      materia('fisica', 'Física'),
-      materia('quimica', 'Química'),
-      materia('historia', 'História'),
-      materia('geografia', 'Geografia'),
-      materia('ingles', 'Inglês'),
-      materia('filosofia', 'Filosofia'),
-      materia('sociologia', 'Sociologia'),
-      materia('redacao', 'Redação'),
-      OUTRA
-    ]
+    materias: criarMaterias([
+      ['portugues', 'Português'], ['matematica', 'Matemática'],
+      ['biologia', 'Biologia'], ['fisica', 'Física'],
+      ['quimica', 'Química'], ['historia', 'História'],
+      ['geografia', 'Geografia'], ['ingles', 'Inglês'],
+      ['filosofia', 'Filosofia'], ['sociologia', 'Sociologia'],
+      ['redacao', 'Redação']
+    ])
   },
 
   'Ensino Técnico': {
@@ -97,15 +84,11 @@ const CONFIG_NIVEIS: Record<string, ConfigNivel> = {
       '1º módulo', '2º módulo', '3º módulo', '4º módulo',
       '1º semestre', '2º semestre', '3º semestre', '4º semestre'
     ],
-    materias: [
-      materia('programacao', 'Programação'),
-      materia('informatica', 'Informática'),
-      materia('administracao', 'Administração'),
-      materia('eletronica', 'Eletrônica'),
-      materia('logistica', 'Logística'),
-      materia('seguranca-trabalho', 'Segurança do Trabalho'),
-      OUTRA
-    ]
+    materias: criarMaterias([
+      ['programacao', 'Programação'], ['informatica', 'Informática'],
+      ['administracao', 'Administração'], ['eletronica', 'Eletrônica'],
+      ['logistica', 'Logística'], ['seguranca-trabalho', 'Segurança do Trabalho']
+    ])
   },
 
   'Ensino Superior': {
@@ -118,16 +101,12 @@ const CONFIG_NIVEIS: Record<string, ConfigNivel> = {
       '1º período', '2º período', '3º período', '4º período', '5º período',
       '6º período', '7º período', '8º período', '9º período', '10º período'
     ],
-    materias: [
-      materia('programacao', 'Programação'),
-      materia('calculo', 'Cálculo'),
-      materia('estatistica', 'Estatística'),
-      materia('administracao', 'Administração'),
-      materia('direito', 'Direito'),
-      materia('anatomia', 'Anatomia'),
-      materia('metodologia', 'Metodologia'),
-      OUTRA
-    ]
+    materias: criarMaterias([
+      ['programacao', 'Programação'], ['calculo', 'Cálculo'],
+      ['estatistica', 'Estatística'], ['administracao', 'Administração'],
+      ['direito', 'Direito'], ['anatomia', 'Anatomia'],
+      ['metodologia', 'Metodologia']
+    ])
   },
 
   'Curso Livre': {
@@ -137,15 +116,11 @@ const CONFIG_NIVEIS: Record<string, ConfigNivel> = {
     placeholderTema: 'Ex: Excel básico, conversação em inglês...',
     descricao: 'A Lousa priorizará objetivos práticos e aplicação direta do conhecimento.',
     turmas: ['Iniciante', 'Básico', 'Intermediário', 'Avançado'],
-    materias: [
-      materia('idiomas', 'Idiomas'),
-      materia('tecnologia', 'Tecnologia'),
-      materia('negocios', 'Negócios'),
-      materia('artes', 'Artes'),
-      materia('musica', 'Música'),
-      materia('fotografia', 'Fotografia'),
-      OUTRA
-    ]
+    materias: criarMaterias([
+      ['idiomas', 'Idiomas'], ['tecnologia', 'Tecnologia'],
+      ['negocios', 'Negócios'], ['artes', 'Artes'],
+      ['musica', 'Música'], ['fotografia', 'Fotografia']
+    ])
   },
 
   Outro: {
@@ -159,34 +134,45 @@ const CONFIG_NIVEIS: Record<string, ConfigNivel> = {
   }
 };
 
+// Componente reutilizável para os campos do formulário
+const Campo = ({ id, rotulo, children }: {
+  id: string;
+  rotulo: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <div className="campo-grupo">
+    <label className="campo-rotulo" htmlFor={id}>{rotulo}</label>
+    {children}
+  </div>
+);
+
 const Home: React.FC = () => {
   const router = useIonRouter();
 
+  // Dados do formulário
   const [nivelEnsino, setNivelEnsino] = useState('');
   const [materiaSelecionada, setMateriaSelecionada] = useState<string | null>(null);
   const [outraMateria, setOutraMateria] = useState('');
   const [turma, setTurma] = useState('');
   const [duracao, setDuracao] = useState('');
+  const [quantidadeAulas, setQuantidadeAulas] = useState(1);
   const [tema, setTema] = useState('');
   const [observacoes, setObservacoes] = useState('');
 
   const config = CONFIG_NIVEIS[nivelEnsino];
-  const materias = config?.materias ?? [];
-  const materiaAtual = materias.find((item) => item.id === materiaSelecionada);
+  const materiaAtual = config?.materias.find((item) => item.id === materiaSelecionada);
 
-  const materiaFinal =
-    materiaSelecionada === 'outra'
-      ? outraMateria.trim()
-      : materiaAtual?.nome ?? '';
+  const materiaFinal = materiaSelecionada === 'outra'
+    ? outraMateria.trim()
+    : materiaAtual?.nome ?? '';
 
   const podeGerar = Boolean(
-    nivelEnsino &&
-    materiaFinal &&
-    turma.trim() &&
-    duracao &&
-    tema.trim()
+    nivelEnsino && materiaFinal && turma.trim() && Number(duracao) > 0 &&
+    Number.isInteger(quantidadeAulas) && quantidadeAulas >= 1 &&
+    quantidadeAulas <= 5 && tema.trim()
   );
 
+  // Seleção de nível e matéria
   const selecionarNivel = (nivel: string) => {
     setNivelEnsino(nivel);
     setMateriaSelecionada(null);
@@ -199,27 +185,34 @@ const Home: React.FC = () => {
     if (id !== 'outra') setOutraMateria('');
   };
 
+  // Guarda os dados e abre a tela de geração
   const gerarPlano = () => {
     if (!podeGerar) return;
 
     sessionStorage.removeItem('planoSelecionado');
     sessionStorage.removeItem('conteudoPlanoGerado');
 
-    sessionStorage.setItem(
-      'planoEmCriacao',
-      JSON.stringify({
-        nivelEnsino,
-        materia: materiaFinal,
-        materiaId: materiaSelecionada,
-        turma: turma.trim(),
-        duracao,
-        tema: tema.trim(),
-        observacoes: observacoes.trim()
-      })
-    );
+    sessionStorage.setItem('planoEmCriacao', JSON.stringify({
+      nivelEnsino,
+      materia: materiaFinal,
+      materiaId: materiaSelecionada,
+      turma: turma.trim(),
+      duracao,
+      quantidadeAulas,
+      tema: tema.trim(),
+      observacoes: observacoes.trim()
+    }));
 
     router.push('/gerando-plano', 'forward');
   };
+
+  // Informações exibidas no resumo lateral
+  const tagsResumo = [
+    { id: 'nivel', texto: nivelEnsino || 'nível', preenchida: !!nivelEnsino },
+    { id: 'turma', texto: turma || config?.rotuloTurma || 'turma', preenchida: !!turma },
+    { id: 'duracao', texto: duracao ? `${duracao} min` : 'duração', preenchida: !!duracao },
+    { id: 'aulas', texto: `${quantidadeAulas} ${quantidadeAulas === 1 ? 'aula' : 'aulas'}`, preenchida: true }
+  ];
 
   return (
     <IonPage>
@@ -227,14 +220,10 @@ const Home: React.FC = () => {
         <div className="pagina-criar-plano">
 
           <header className="cabecalho">
-            <div className="marca">
-              <span className="marca-simbolo" />
-              Lousa
-            </div>
+            <div className="marca"><span className="marca-simbolo" />Lousa</div>
           </header>
 
           <div className="layout-principal">
-
             <section className="secao-formulario">
 
               <div className="formulario-cabecalho">
@@ -252,18 +241,14 @@ const Home: React.FC = () => {
                     </svg>
                   </span>.
                 </h1>
-
                 <p className="formulario-descricao">
                   Conte o contexto da turma. A Lousa adapta profundidade,
                   linguagem e atividades ao nível escolhido.
                 </p>
               </div>
 
-              <div className="campo-grupo">
-                <label className="campo-rotulo" htmlFor="nivelEnsino">
-                  Nível de ensino
-                </label>
-
+              {/* Nível de ensino */}
+              <Campo id="nivelEnsino" rotulo="Nível de ensino">
                 <select
                   id="nivelEnsino"
                   className="campo-select"
@@ -271,11 +256,8 @@ const Home: React.FC = () => {
                   onChange={(e) => selecionarNivel(e.target.value)}
                 >
                   <option value="">Selecione</option>
-
                   {Object.keys(CONFIG_NIVEIS).map((nivel) => (
-                    <option key={nivel} value={nivel}>
-                      {nivel}
-                    </option>
+                    <option key={nivel} value={nivel}>{nivel}</option>
                   ))}
                 </select>
 
@@ -285,23 +267,23 @@ const Home: React.FC = () => {
                     <p>{config.descricao}</p>
                   </div>
                 )}
-              </div>
+              </Campo>
 
               {config && (
                 <>
+                  {/* Matérias */}
                   <fieldset className="campo-grupo campo-sem-borda">
                     <legend className="campo-rotulo">Matéria / disciplina</legend>
-
                     <div className="grade-materias">
-                      {materias.map((item) => {
+                      {config.materias.map((item) => {
                         const selecionada = materiaSelecionada === item.id;
 
                         return (
                           <button
                             key={item.id}
                             type="button"
-                            className={`materia-cartao ${selecionada ? 'selecionada' : ''}`}
                             aria-pressed={selecionada}
+                            className={`materia-cartao ${selecionada ? 'selecionada' : ''}`}
                             onClick={() => selecionarMateria(item.id)}
                           >
                             <span className="materia-nome">{item.nome}</span>
@@ -312,26 +294,21 @@ const Home: React.FC = () => {
                   </fieldset>
 
                   {materiaSelecionada === 'outra' && (
-                    <div className="campo-grupo">
-                      <label className="campo-rotulo" htmlFor="outraMateria">
-                        Qual disciplina?
-                      </label>
-
+                    <Campo id="outraMateria" rotulo="Qual disciplina?">
                       <input
                         id="outraMateria"
                         className="campo-texto"
                         type="text"
-                        placeholder={
-                          nivelEnsino === 'Ensino Superior'
-                            ? 'Ex: Estrutura de Dados, Direito Penal...'
-                            : 'Digite o nome da disciplina...'
-                        }
+                        placeholder={nivelEnsino === 'Ensino Superior'
+                          ? 'Ex: Estrutura de Dados, Direito Penal...'
+                          : 'Digite o nome da disciplina...'}
                         value={outraMateria}
                         onChange={(e) => setOutraMateria(e.target.value)}
                       />
-                    </div>
+                    </Campo>
                   )}
 
+                  {/* Turma */}
                   <div className="campo-grupo">
                     <div className="campo-titulo-linha">
                       <label className="campo-rotulo" htmlFor="turma">
@@ -346,8 +323,8 @@ const Home: React.FC = () => {
                           <button
                             key={opcao}
                             type="button"
-                            className={`turma-chip ${turma === opcao ? 'selecionada' : ''}`}
                             aria-pressed={turma === opcao}
+                            className={`turma-chip ${turma === opcao ? 'selecionada' : ''}`}
                             onClick={() => setTurma(opcao)}
                           >
                             {opcao}
@@ -364,24 +341,18 @@ const Home: React.FC = () => {
                       value={turma}
                       onChange={(e) => setTurma(e.target.value)}
                     />
-
                     <p className="campo-ajuda">{config.ajudaTurma}</p>
                   </div>
 
-                  <div className="campo-grupo">
-                    <label className="campo-rotulo" htmlFor="duracao">
-                      Duração da aula
-                    </label>
-
+                  {/* Duração */}
+                  <Campo id="duracao" rotulo="Duração da aula">
                     <div className="duracao-opcoes">
                       {DURACOES.map((minutos) => (
                         <button
                           key={minutos}
                           type="button"
-                          className={`duracao-chip ${
-                            duracao === minutos ? 'selecionada' : ''
-                          }`}
                           aria-pressed={duracao === minutos}
+                          className={`duracao-chip ${duracao === minutos ? 'selecionada' : ''}`}
                           onClick={() => setDuracao(minutos)}
                         >
                           {minutos} min
@@ -401,13 +372,28 @@ const Home: React.FC = () => {
                       />
                       <span>minutos</span>
                     </div>
-                  </div>
+                  </Campo>
 
-                  <div className="campo-grupo">
-                    <label className="campo-rotulo" htmlFor="tema">
-                      Tema da aula
-                    </label>
+                  {/* Quantidade de aulas */}
+                  <Campo id="quantidadeAulas" rotulo="Quantidade de aulas">
+                    <input
+                      id="quantidadeAulas"
+                      className="campo-texto"
+                      type="number"
+                      min={1}
+                      max={5}
+                      step={1}
+                      value={quantidadeAulas || ''}
+                      onChange={(e) => setQuantidadeAulas(Number(e.target.value))}
+                    />
+                    <p className="campo-ajuda">
+                      Escolha de 1 a 5 aulas. A duração informada acima
+                      será considerada para cada aula.
+                    </p>
+                  </Campo>
 
+                  {/* Tema */}
+                  <Campo id="tema" rotulo="Tema da aula">
                     <input
                       id="tema"
                       className="campo-texto"
@@ -416,14 +402,18 @@ const Home: React.FC = () => {
                       value={tema}
                       onChange={(e) => setTema(e.target.value)}
                     />
-                  </div>
+                  </Campo>
 
-                  <div className="campo-grupo">
-                    <label className="campo-rotulo" htmlFor="observacoes">
-                      Algo que a Lousa deveria saber?{' '}
-                      <span className="texto-opcional">(opcional)</span>
-                    </label>
-
+                  {/* Observações */}
+                  <Campo
+                    id="observacoes"
+                    rotulo={
+                      <>
+                        Algo que a Lousa deveria saber?{' '}
+                        <span className="texto-opcional">(opcional)</span>
+                      </>
+                    }
+                  >
                     <textarea
                       id="observacoes"
                       className="campo-textarea"
@@ -432,8 +422,9 @@ const Home: React.FC = () => {
                       value={observacoes}
                       onChange={(e) => setObservacoes(e.target.value)}
                     />
-                  </div>
+                  </Campo>
 
+                  {/* Gerar planejamento */}
                   <button
                     type="button"
                     className="botao-gerar"
@@ -445,16 +436,17 @@ const Home: React.FC = () => {
 
                   {!podeGerar && (
                     <p className="dica-preenchimento">
-                      Complete nível, matéria, turma, duração e tema.
+                      Complete nível, matéria, turma, duração,
+                      quantidade de aulas e tema.
                     </p>
                   )}
                 </>
               )}
             </section>
 
+            {/* Resumo lateral */}
             <aside className="pre-visualizacao">
               <div className="rascunho-cartao">
-
                 <span className="rascunho-fita" aria-hidden="true" />
                 <span className="rascunho-etiqueta">contexto da aula</span>
 
@@ -465,17 +457,14 @@ const Home: React.FC = () => {
                 </div>
 
                 <div className="rascunho-tags">
-                  <span className={`rascunho-tag ${nivelEnsino ? 'preenchida' : ''}`}>
-                    {nivelEnsino || 'nível'}
-                  </span>
-
-                  <span className={`rascunho-tag ${turma ? 'preenchida' : ''}`}>
-                    {turma || config?.rotuloTurma || 'turma'}
-                  </span>
-
-                  <span className={`rascunho-tag ${duracao ? 'preenchida' : ''}`}>
-                    {duracao ? `${duracao} min` : 'duração'}
-                  </span>
+                  {tagsResumo.map(({ id, texto, preenchida }) => (
+                    <span
+                      key={id}
+                      className={`rascunho-tag ${preenchida ? 'preenchida' : ''}`}
+                    >
+                      {texto}
+                    </span>
+                  ))}
                 </div>
 
                 <p className={`rascunho-tema ${tema ? 'preenchida' : ''}`}>

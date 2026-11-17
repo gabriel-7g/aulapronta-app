@@ -4,6 +4,7 @@ export interface DadosPlano {
   materiaId: string | null;
   turma: string;
   duracao: string;
+  quantidadeAulas?: number;
   tema: string;
   observacoes: string;
 }

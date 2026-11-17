@@ -78,3 +78,40 @@ export const excluirUsuario = async (
 
   return usuario;
 };
+
+
+export const redefinirSenhaUsuario = async (
+  administradorId: string,
+  usuarioId: string,
+  novaSenha: string
+) => {
+  // Confirma que o administrador ainda possui permissão.
+  const administrador = await db.orm.public.Usuario.first({
+    id: administradorId
+  });
+
+  if (administrador?.tipo !== 'admin') {
+    return 'SEM_PERMISSAO' as const;
+  }
+
+  const usuario = await db.orm.public.Usuario.first({
+    id: usuarioId
+  });
+
+  if (!usuario) {
+    return 'NAO_ENCONTRADO' as const;
+  }
+
+  // Somente contas de professores podem ser alteradas.
+  if (usuario.tipo !== 'usuario') {
+    return 'TIPO_NAO_PERMITIDO' as const;
+  }
+
+  const senhaHash = await bcrypt.hash(novaSenha, 12);
+
+  await db.orm.public.Usuario
+    .where({ id: usuarioId })
+    .update({ senha: senhaHash });
+
+  return 'OK' as const;
+};
