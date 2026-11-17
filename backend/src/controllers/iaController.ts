@@ -1,3 +1,4 @@
+
 import { Request, Response } from 'express';
 
 import {
@@ -16,13 +17,13 @@ import {
   type UsoIa
 } from '../services/controleIaService';
 
+// VALIDAÇÕES
+
 const textoValido = (valor: unknown): valor is string =>
   typeof valor === 'string' && valor.trim().length > 0;
 
 const planoValido = (valor: unknown): valor is ConteudoGerado => {
-  if (typeof valor !== 'object' || valor === null) {
-    return false;
-  }
+  if (typeof valor !== 'object' || valor === null) return false;
 
   const plano = valor as Record<string, unknown>;
 
@@ -37,9 +38,7 @@ const planoValido = (valor: unknown): valor is ConteudoGerado => {
   }
 
   return plano.secoes.every((secao: unknown) => {
-    if (typeof secao !== 'object' || secao === null) {
-      return false;
-    }
+    if (typeof secao !== 'object' || secao === null) return false;
 
     const item = secao as Record<string, unknown>;
 
@@ -64,6 +63,7 @@ export const gerarPlano = async (req: Request, res: Response) => {
       materia,
       turma,
       duracao,
+      quantidadeAulas,
       tema,
       observacoes
     } = req.body ?? {};
@@ -87,14 +87,23 @@ export const gerarPlano = async (req: Request, res: Response) => {
       });
     }
 
+    // Permite de 1 a 5 aulas
+    const aulas = quantidadeAulas === undefined
+      ? 1
+      : Number(quantidadeAulas);
+
+    if (!Number.isInteger(aulas) || aulas < 1 || aulas > 5) {
+      return res.status(400).json({
+        erro: 'Escolha entre 1 e 5 aulas.'
+      });
+    }
+
     if (
       materia.length > 120 ||
       turma.length > 120 ||
       tema.length > 220 ||
-      (typeof nivelEnsino === 'string' &&
-        nivelEnsino.length > 120) ||
-      (typeof observacoes === 'string' &&
-        observacoes.length > 1000)
+      (typeof nivelEnsino === 'string' && nivelEnsino.length > 120) ||
+      (typeof observacoes === 'string' && observacoes.length > 1000)
     ) {
       return res.status(400).json({
         erro: 'Uma das informações ultrapassa o tamanho permitido.'
@@ -102,28 +111,29 @@ export const gerarPlano = async (req: Request, res: Response) => {
     }
 
     const dados: DadosGeracaoPlano = {
-      nivelEnsino:
-        typeof nivelEnsino === 'string'
-          ? nivelEnsino.trim()
-          : undefined,
+      nivelEnsino: typeof nivelEnsino === 'string'
+        ? nivelEnsino.trim()
+        : undefined,
 
       materia: materia.trim(),
       turma: turma.trim(),
       duracao: String(minutos),
+      quantidadeAulas: aulas,
       tema: tema.trim(),
 
-      observacoes:
-        typeof observacoes === 'string'
-          ? observacoes.trim()
-          : undefined
+      observacoes: typeof observacoes === 'string'
+        ? observacoes.trim()
+        : undefined
     };
 
+    // Reserva tokens antes da geração
     reserva = await reservarGeracao(req.usuario!.id, dados);
 
     const conteudo = await gerarPlanoComIa(dados, (consumo) => {
       uso = consumo;
     });
 
+    // Registra consumo real
     await finalizarGeracao(reserva, uso, true);
     reserva = null;
 
@@ -134,17 +144,12 @@ export const gerarPlano = async (req: Request, res: Response) => {
       try {
         await finalizarGeracao(reserva, uso, false);
       } catch (erroRegistro) {
-        console.error(
-          'Erro ao finalizar consumo da IA:',
-          erroRegistro
-        );
+        console.error('Erro ao finalizar consumo da IA:', erroRegistro);
       }
     }
 
     if (erro instanceof LimiteIaError) {
-      return res.status(429).json({
-        erro: erro.message
-      });
+      return res.status(429).json({ erro: erro.message });
     }
 
     console.error('Erro ao gerar plano com IA:', erro);
@@ -205,26 +210,40 @@ export const editarPlano = async (req: Request, res: Response) => {
       });
     }
 
+    // Preserva a quantidade de aulas durante a edição
+    const aulasEdicao = dados.quantidadeAulas === undefined
+      ? 1
+      : Number(dados.quantidadeAulas);
+
+    if (
+      !Number.isInteger(aulasEdicao) ||
+      aulasEdicao < 1 ||
+      aulasEdicao > 5
+    ) {
+      return res.status(400).json({
+        erro: 'Quantidade de aulas inválida.'
+      });
+    }
+
     const contexto: DadosGeracaoPlano = {
-      nivelEnsino:
-        typeof dados.nivelEnsino === 'string'
-          ? dados.nivelEnsino.trim()
-          : undefined,
+      nivelEnsino: typeof dados.nivelEnsino === 'string'
+        ? dados.nivelEnsino.trim()
+        : undefined,
 
       materia: dados.materia.trim(),
       turma: dados.turma.trim(),
       duracao: String(minutos),
+      quantidadeAulas: aulasEdicao,
       tema: dados.tema.trim(),
 
-      observacoes:
-        typeof dados.observacoes === 'string'
-          ? dados.observacoes.trim()
-          : undefined
+      observacoes: typeof dados.observacoes === 'string'
+        ? dados.observacoes.trim()
+        : undefined
     };
 
     const pedido = instrucao.trim();
 
-    // Reserva tokens considerando o plano atual e o pedido de edição.
+    // Reserva tokens considerando o plano e a instrução
     reserva = await reservarGeracao(req.usuario!.id, {
       ...contexto,
       observacoes: JSON.stringify({
@@ -234,6 +253,7 @@ export const editarPlano = async (req: Request, res: Response) => {
       })
     });
 
+    // Solicita alterações sem modificar o plano original
     const conteudoEditado = await editarPlanoComIa(
       contexto,
       conteudo,
@@ -243,11 +263,10 @@ export const editarPlano = async (req: Request, res: Response) => {
       }
     );
 
-    // Registra o consumo real da edição.
     await finalizarGeracao(reserva, uso, true);
     reserva = null;
 
-    // Devolve a sugestão sem salvar no banco.
+    // Retorna sugestão sem salvar no banco
     return res.status(200).json({
       conteudo: conteudoEditado
     });
@@ -257,17 +276,12 @@ export const editarPlano = async (req: Request, res: Response) => {
       try {
         await finalizarGeracao(reserva, uso, false);
       } catch (erroRegistro) {
-        console.error(
-          'Erro ao registrar consumo da edição:',
-          erroRegistro
-        );
+        console.error('Erro ao registrar consumo da edição:', erroRegistro);
       }
     }
 
     if (erro instanceof LimiteIaError) {
-      return res.status(429).json({
-        erro: erro.message
-      });
+      return res.status(429).json({ erro: erro.message });
     }
 
     console.error('Erro ao editar planejamento com IA:', erro);

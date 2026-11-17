@@ -1,11 +1,9 @@
+
 import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 
 import { env } from '../config/env';
-import {
-  limiteTokens,
-  type DadosGeracaoPlano
-} from './iaService';
+import { limiteTokens, type DadosGeracaoPlano } from './iaService';
 
 export interface UsoIa {
   entrada: number;
@@ -33,6 +31,7 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000
 });
 
+// Limites diários
 const lerLimite = (nome: string, padrao: number) => {
   const valor = process.env[nome];
   if (!valor) return padrao;
@@ -66,10 +65,14 @@ const diaAtual = () => {
   return `${valores.year}-${valores.month}-${valores.day}`;
 };
 
+// Reserva tokens considerando a quantidade de aulas
 const calcularReserva = (dados: DadosGeracaoPlano) => {
-  const saidaMaxima = limiteTokens(Number(dados.duracao));
+  const saidaMaxima = limiteTokens(
+    Number(dados.duracao),
+    dados.quantidadeAulas ?? 1
+  );
 
-  // Margem conservadora para instruções, contexto e dados da aula.
+  // Margem conservadora para instruções, contexto e dados.
   const entradaEstimada = 2200 + Math.ceil(
     Buffer.byteLength(JSON.stringify(dados), 'utf8') / 2
   );
@@ -77,6 +80,7 @@ const calcularReserva = (dados: DadosGeracaoPlano) => {
   return saidaMaxima + entradaEstimada;
 };
 
+// Reserva tokens na cota global ou individual
 const reservarNaChave = async (
   cliente: PoolClient,
   dia: string,
@@ -107,6 +111,7 @@ const reservarNaChave = async (
   }
 };
 
+// Criar reserva antes de chamar a IA
 export const reservarGeracao = async (
   usuarioId: string,
   dados: DadosGeracaoPlano
@@ -126,7 +131,7 @@ export const reservarGeracao = async (
   try {
     await cliente.query('BEGIN');
 
-    // Sempre reserva primeiro a cota global e depois a individual.
+    // Reserva primeiro a cota global
     await reservarNaChave(
       cliente,
       dia,
@@ -136,6 +141,7 @@ export const reservarGeracao = async (
       'A cota diária de IA do Lousa está esgotada ou insuficiente.'
     );
 
+    // Depois reserva a cota do usuário
     await reservarNaChave(
       cliente,
       dia,
@@ -163,6 +169,7 @@ export const reservarGeracao = async (
   }
 };
 
+// Finalizar reserva e registrar consumo real
 export const finalizarGeracao = async (
   reserva: ReservaIa,
   uso: UsoIa | null,
@@ -171,8 +178,7 @@ export const finalizarGeracao = async (
   const entrada = Math.max(0, Math.trunc(uso?.entrada ?? 0));
   const saida = Math.max(0, Math.trunc(uso?.saida ?? 0));
 
-  // Se a resposta teve sucesso mas não trouxe usage,
-  // cobra a reserva inteira para não subcontabilizar.
+  // Se a API não informar o consumo, cobra a reserva em caso de sucesso.
   const total = uso
     ? Math.max(0, Math.trunc(uso.total))
     : sucesso
@@ -206,10 +212,7 @@ export const finalizarGeracao = async (
       throw new Error('Reserva de IA inexistente ou já finalizada.');
     }
 
-    for (const chave of [
-      'GLOBAL',
-      chaveUsuario(reserva.usuarioId)
-    ]) {
+    for (const chave of ['GLOBAL', chaveUsuario(reserva.usuarioId)]) {
       await cliente.query(
         `UPDATE public.ia_cotas_diarias
          SET tokens_reservados = tokens_reservados - $3,
@@ -242,6 +245,7 @@ export const finalizarGeracao = async (
   }
 };
 
+// Consultar o consumo diário da IA
 export const consultarConsumoIa = async (usuarioId: string) => {
   const dia = diaAtual();
 

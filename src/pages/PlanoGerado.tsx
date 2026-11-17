@@ -1,48 +1,77 @@
-import React, { useState } from 'react';
-import {
-  IonContent,
-  IonPage,
-  useIonRouter,
-  useIonViewWillEnter
-} from '@ionic/react';
 
+import React, { useState } from 'react';
+import { IonContent, IonPage, useIonRouter, useIonViewWillEnter } from '@ionic/react';
+
+import EditarComIa from '../components/EditarComIa';
 import { exportarPlanejamentoPdf } from '../services/pdfService';
 import { salvarPlanejamento } from '../services/planejamentoService';
 import { obterUsuarioLogado } from '../utils/auth';
-import {
-  limparContextoPlano,
-  obterContextoPlano
-} from '../utils/planoSessao';
+import { limparContextoPlano, obterContextoPlano } from '../utils/planoSessao';
 
-import type {
-  ConteudoPlano,
-  SecaoPlano
-} from '../types/planejamento';
-
+import type { ConteudoPlano, SecaoPlano } from '../types/planejamento';
 import './PlanoGerado.css';
 
-const Resumo: React.FC<{ rotulo: string; valor: string }> = ({
-  rotulo,
-  valor
-}) => (
+const Resumo = ({ rotulo, valor }: { rotulo: string; valor: string }) => (
   <div>
     <span className="resumo-rotulo">{rotulo}</span>
     <strong>{valor}</strong>
   </div>
 );
 
+type AvisoProps = {
+  etiqueta: string;
+  titulo: string;
+  descricao: string;
+  botao: string;
+  onClick: () => void;
+  mostrarTopo?: boolean;
+};
+
+// Tela reutilizável para avisos de acesso e planejamento indisponível
+const TelaAviso = ({
+  etiqueta, titulo, descricao, botao, onClick, mostrarTopo = false
+}: AvisoProps) => (
+  <IonPage>
+    <IonContent fullscreen>
+      <div className="pagina-plano-gerado">
+        {mostrarTopo && (
+          <header className="plano-topo">
+            <div className="topo-espaco" />
+            <div className="marca-plano">
+              <span className="marca-simbolo-plano" />Lousa
+            </div>
+            <div className="topo-espaco" />
+          </header>
+        )}
+
+        <main className="plano-container">
+          <section className="folha-plano">
+            <div className="plano-cabecalho">
+              <span className="plano-etiqueta">{etiqueta}</span>
+              <h1>{titulo}</h1>
+              <p>{descricao}</p>
+
+              <div className="acoes-plano">
+                <button type="button" className="botao-salvar" onClick={onClick}>
+                  {botao}
+                </button>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </IonContent>
+  </IonPage>
+);
+
 const PlanoGerado: React.FC = () => {
   const router = useIonRouter();
   const usuario = obterUsuarioLogado();
 
-  const [contexto, setContexto] = useState(() =>
-    obterContextoPlano(usuario?.id)
-  );
-
+  // Dados e estados
+  const [contexto, setContexto] = useState(() => obterContextoPlano(usuario?.id));
   const [conteudo, setConteudo] = useState<ConteudoPlano | null>(() =>
-    contexto?.planoSelecionado?.conteudo ??
-    contexto?.conteudoGerado ??
-    null
+    contexto?.planoSelecionado?.conteudo ?? contexto?.conteudoGerado ?? null
   );
 
   const [editando, setEditando] = useState(false);
@@ -50,70 +79,48 @@ const PlanoGerado: React.FC = () => {
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [mensagemErro, setMensagemErro] = useState('');
 
+  // Atualiza os dados sempre que a página é aberta
   useIonViewWillEnter(() => {
     const atual = obterContextoPlano(usuario?.id);
 
     setContexto(atual);
-    setConteudo(
-      atual?.planoSelecionado?.conteudo ??
-      atual?.conteudoGerado ??
-      null
-    );
-
+    setConteudo(atual?.planoSelecionado?.conteudo ?? atual?.conteudoGerado ?? null);
     setEditando(false);
     setSalvando(false);
     setMensagemSucesso('');
     setMensagemErro('');
   });
 
-  const atualizarTitulo = (valor: string) => {
-    setConteudo((anterior) =>
-      anterior ? { ...anterior, titulo: valor } : null
-    );
-  };
+  // Edição manual
+  const atualizarTitulo = (titulo: string) =>
+    setConteudo((plano) => plano ? { ...plano, titulo } : null);
 
-  const atualizarSecao = (
-    indice: number,
-    campo: keyof SecaoPlano,
-    valor: string
-  ) => {
-    setConteudo((anterior) =>
-      anterior
-        ? {
-            ...anterior,
-            secoes: anterior.secoes.map((secao, i) =>
-              i === indice
-                ? { ...secao, [campo]: valor }
-                : secao
-            )
-          }
-        : null
-    );
-  };
+  const atualizarSecao = (indice: number, campo: keyof SecaoPlano, valor: string) =>
+    setConteudo((plano) => plano ? {
+      ...plano,
+      secoes: plano.secoes.map((secao, i) =>
+        i === indice ? { ...secao, [campo]: valor } : secao
+      )
+    } : null);
 
-  const adicionarSecao = () => {
-    setConteudo((anterior) =>
-      anterior
-        ? {
-            ...anterior,
-            secoes: [
-              ...anterior.secoes,
-              { titulo: '', conteudo: '' }
-            ]
-          }
-        : null
-    );
-  };
+  const adicionarSecao = () =>
+    setConteudo((plano) => plano ? {
+      ...plano,
+      secoes: [...plano.secoes, { titulo: '', conteudo: '' }]
+    } : null);
 
-  const removerSecao = (indice: number) => {
-    setConteudo((anterior) =>
-      anterior && anterior.secoes.length > 1
-        ? {
-            ...anterior,
-            secoes: anterior.secoes.filter((_, i) => i !== indice)
-          }
-        : anterior
-    );
+  const removerSecao = (indice: number) =>
+    setConteudo((plano) => plano && plano.secoes.length > 1 ? {
+      ...plano,
+      secoes: plano.secoes.filter((_, i) => i !== indice)
+    } : plano);
+
+  // Aplica a sugestão da IA sem salvar automaticamente
+  const aplicarSugestao = (sugestao: ConteudoPlano) => {
+    setConteudo(sugestao);
+    setEditando(true);
+    setMensagemErro('');
+    setMensagemSucesso('');
   };
 
   const voltarPlanejamentos = () => {
@@ -121,109 +128,54 @@ const PlanoGerado: React.FC = () => {
     window.location.replace('/planejamentos');
   };
 
+  // Verificação de acesso
   if (!usuario) {
     return (
-      <IonPage>
-        <IonContent fullscreen>
-          <div className="pagina-plano-gerado">
-            <main className="plano-container">
-              <section className="folha-plano">
-                <div className="plano-cabecalho">
-                  <span className="plano-etiqueta">acesso inválido</span>
-                  <h1>Sessão não encontrada</h1>
-                  <p>Faça login novamente para acessar seus planejamentos.</p>
-
-                  <div className="acoes-plano">
-                    <button
-                      type="button"
-                      className="botao-salvar"
-                      onClick={() => router.push('/login', 'root', 'replace')}
-                    >
-                      Ir para o login
-                    </button>
-                  </div>
-                </div>
-              </section>
-            </main>
-          </div>
-        </IonContent>
-      </IonPage>
+      <TelaAviso
+        etiqueta="acesso inválido"
+        titulo="Sessão não encontrada"
+        descricao="Faça login novamente para acessar seus planejamentos."
+        botao="Ir para o login"
+        onClick={() => router.push('/login', 'root', 'replace')}
+      />
     );
   }
 
   if (!contexto || !conteudo) {
     return (
-      <IonPage>
-        <IonContent fullscreen>
-          <div className="pagina-plano-gerado">
-            <header className="plano-topo">
-              <div className="topo-espaco" />
-              <div className="marca-plano">
-                <span className="marca-simbolo-plano" />
-                Lousa
-              </div>
-              <div className="topo-espaco" />
-            </header>
-
-            <main className="plano-container">
-              <section className="folha-plano">
-                <div className="plano-cabecalho">
-                  <span className="plano-etiqueta">
-                    planejamento indisponível
-                  </span>
-                  <h1>Nenhum conteúdo foi gerado</h1>
-                  <p>
-                    O planejamento não possui conteúdo válido gerado pela IA.
-                  </p>
-
-                  <div className="acoes-plano">
-                    <button
-                      type="button"
-                      className="botao-salvar"
-                      onClick={() => router.push('/home', 'root', 'replace')}
-                    >
-                      Criar novamente
-                    </button>
-                  </div>
-                </div>
-              </section>
-            </main>
-          </div>
-        </IonContent>
-      </IonPage>
+      <TelaAviso
+        etiqueta="planejamento indisponível"
+        titulo="Nenhum conteúdo foi gerado"
+        descricao="O planejamento não possui conteúdo válido gerado pela IA."
+        botao="Criar novamente"
+        mostrarTopo
+        onClick={() => router.push('/home', 'root', 'replace')}
+      />
     );
   }
 
   const { dados, planoSelecionado } = contexto;
 
+  // Exportar PDF
   const exportarPdf = () => {
     try {
       setMensagemErro('');
-
-      exportarPlanejamentoPdf({
-        dados,
-        conteudo,
-        professor: usuario.nome
-      });
+      exportarPlanejamentoPdf({ dados, conteudo, professor: usuario.nome });
     } catch (erro) {
       console.error('Erro ao exportar PDF:', erro);
       setMensagemErro('Não foi possível gerar o PDF. Tente novamente.');
     }
   };
 
+  // Salvar planejamento
   const salvarPlano = async () => {
     if (salvando) return;
 
-    if (
-      !conteudo.titulo.trim() ||
-      conteudo.secoes.length < 1 ||
-      conteudo.secoes.some(
-        (secao) => !secao.titulo.trim() || !secao.conteudo.trim()
-      )
-    ) {
-      setMensagemErro(
-        'Preencha o título do plano e o título e conteúdo de todos os tópicos.'
-      );
+    const invalido = !conteudo.titulo.trim() || !conteudo.secoes.length ||
+      conteudo.secoes.some((secao) => !secao.titulo.trim() || !secao.conteudo.trim());
+
+    if (invalido) {
+      setMensagemErro('Preencha o título do plano e o título e conteúdo de todos os tópicos.');
       return;
     }
 
@@ -232,34 +184,20 @@ const PlanoGerado: React.FC = () => {
     setMensagemSucesso('');
 
     try {
-      await salvarPlanejamento(
-        dados,
-        conteudo,
-        planoSelecionado?.id
-      );
+      await salvarPlanejamento(dados, conteudo, planoSelecionado?.id);
 
       setEditando(false);
-
-      setMensagemSucesso(
-        planoSelecionado
-          ? 'Alterações salvas com sucesso.'
-          : 'Planejamento salvo com sucesso.'
-      );
+      setMensagemSucesso(planoSelecionado
+        ? 'Alterações salvas com sucesso.'
+        : 'Planejamento salvo com sucesso.');
 
       limparContextoPlano();
-
-      window.setTimeout(() => {
-        window.location.replace('/planejamentos');
-      }, 700);
+      window.setTimeout(() => window.location.replace('/planejamentos'), 700);
     } catch (erro) {
       console.error('Erro ao salvar planejamento:', erro);
-
-      setMensagemErro(
-        erro instanceof Error
-          ? erro.message
-          : 'Não foi possível salvar o planejamento.'
-      );
-
+      setMensagemErro(erro instanceof Error
+        ? erro.message
+        : 'Não foi possível salvar o planejamento.');
       setSalvando(false);
     }
   };
@@ -268,25 +206,23 @@ const PlanoGerado: React.FC = () => {
     <IonPage>
       <IonContent fullscreen>
         <div className="pagina-plano-gerado">
+
+          {/* Cabeçalho */}
           <header className="plano-topo">
-            <button
-              type="button"
-              className="botao-voltar"
-              disabled={salvando}
-              onClick={voltarPlanejamentos}
-            >
+            <button type="button" className="botao-voltar"
+              disabled={salvando} onClick={voltarPlanejamentos}>
               ← Voltar
             </button>
 
             <div className="marca-plano">
-              <span className="marca-simbolo-plano" />
-              Lousa
+              <span className="marca-simbolo-plano" />Lousa
             </div>
-
             <div className="topo-espaco" />
           </header>
 
           <main className="plano-container">
+
+            {/* Título */}
             <section className="plano-cabecalho">
               <span className="plano-etiqueta">planejamento</span>
 
@@ -297,9 +233,7 @@ const PlanoGerado: React.FC = () => {
                   aria-label="Título do planejamento"
                   onChange={(e) => atualizarTitulo(e.target.value)}
                 />
-              ) : (
-                <h1>{conteudo.titulo}</h1>
-              )}
+              ) : <h1>{conteudo.titulo}</h1>}
 
               <p>
                 Seu planejamento está pronto. Você pode revisar,
@@ -307,16 +241,23 @@ const PlanoGerado: React.FC = () => {
               </p>
             </section>
 
+            {/* Resumo */}
             <section className="resumo-aula">
-              {dados.nivelEnsino && (
-                <Resumo rotulo="Nível" valor={dados.nivelEnsino} />
-              )}
-
+              {dados.nivelEnsino && <Resumo rotulo="Nível" valor={dados.nivelEnsino} />}
               <Resumo rotulo="Matéria" valor={dados.materia} />
               <Resumo rotulo="Turma / período" valor={dados.turma} />
               <Resumo rotulo="Duração" valor={`${dados.duracao} min`} />
             </section>
 
+            {/* Edição com IA */}
+            <EditarComIa
+              dados={dados}
+              conteudo={conteudo}
+              desabilitado={salvando}
+              onAplicar={aplicarSugestao}
+            />
+
+            {/* Conteúdo do planejamento */}
             <section className="folha-plano">
               <span className="fita-plano" aria-hidden="true" />
 
@@ -329,9 +270,7 @@ const PlanoGerado: React.FC = () => {
                         value={secao.titulo}
                         placeholder="Título do tópico"
                         aria-label={`Título do tópico ${indice + 1}`}
-                        onChange={(e) =>
-                          atualizarSecao(indice, 'titulo', e.target.value)
-                        }
+                        onChange={(e) => atualizarSecao(indice, 'titulo', e.target.value)}
                       />
 
                       <textarea
@@ -339,9 +278,7 @@ const PlanoGerado: React.FC = () => {
                         value={secao.conteudo}
                         rows={6}
                         aria-label={`Conteúdo de ${secao.titulo || `tópico ${indice + 1}`}`}
-                        onChange={(e) =>
-                          atualizarSecao(indice, 'conteudo', e.target.value)
-                        }
+                        onChange={(e) => atualizarSecao(indice, 'conteudo', e.target.value)}
                       />
 
                       {conteudo.secoes.length > 1 && (
@@ -374,6 +311,7 @@ const PlanoGerado: React.FC = () => {
               )}
             </section>
 
+            {/* Observações */}
             {dados.observacoes && (
               <section className="observacao-professor">
                 <span>Observação informada pelo professor</span>
@@ -381,6 +319,7 @@ const PlanoGerado: React.FC = () => {
               </section>
             )}
 
+            {/* Mensagens */}
             {mensagemSucesso && (
               <div className="mensagem-sucesso" role="status" aria-live="polite">
                 <span aria-hidden="true">✓</span>
@@ -397,6 +336,7 @@ const PlanoGerado: React.FC = () => {
               </div>
             )}
 
+            {/* Botões */}
             <div className="acoes-plano">
               {!editando && (
                 <button
@@ -409,8 +349,7 @@ const PlanoGerado: React.FC = () => {
                     setEditando(true);
                   }}
                 >
-                  <span aria-hidden="true">✎</span>
-                  Editar planejamento
+                  <span aria-hidden="true">✎</span> Editar planejamento
                 </button>
               )}
 
@@ -425,23 +364,16 @@ const PlanoGerado: React.FC = () => {
 
               <button
                 type="button"
-                className={
-                  editando
-                    ? 'botao-salvar botao-salvar-grande'
-                    : 'botao-salvar'
-                }
+                className={editando ? 'botao-salvar botao-salvar-grande' : 'botao-salvar'}
                 disabled={salvando}
                 aria-busy={salvando}
                 onClick={salvarPlano}
               >
                 <span aria-hidden="true">✓</span>
-                {salvando
-                  ? 'Salvando...'
-                  : editando
-                    ? 'Salvar alterações'
-                    : 'Salvar planejamento'}
+                {salvando ? 'Salvando...' : editando ? 'Salvar alterações' : 'Salvar planejamento'}
               </button>
             </div>
+
           </main>
         </div>
       </IonContent>

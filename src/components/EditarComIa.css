@@ -1,0 +1,131 @@
+
+.editar-ia {
+  margin: 24px 0;
+  font-family: 'Work Sans', sans-serif;
+}
+
+.editar-ia-abrir,
+.editar-ia-enviar,
+.editar-ia-aplicar {
+  padding: 13px 20px;
+  border: 0;
+  border-radius: 9px;
+  background: #20402f;
+  color: #fffdf7;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.editar-ia-abrir:hover,
+.editar-ia-enviar:hover,
+.editar-ia-aplicar:hover {
+  background: #193227;
+}
+
+.editar-ia-painel {
+  margin-top: 14px;
+  padding: 24px;
+  border: 1px solid #d8dfd6;
+  border-radius: 12px;
+  background: #fffdf7;
+  color: #221f19;
+}
+
+.editar-ia-painel h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+
+.editar-ia-painel > p {
+  margin: 0 0 18px;
+  color: #625d50;
+  line-height: 1.6;
+}
+
+.editar-ia-painel textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 1px solid #ccd6cb;
+  border-radius: 9px;
+  background: #fff;
+  color: #221f19;
+  font: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.editar-ia-enviar {
+  margin-top: 12px;
+}
+
+.editar-ia button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.editar-ia-erro {
+  color: #b04a3a;
+  font-weight: 600;
+}
+
+.editar-ia-previa {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid #d8dfd6;
+}
+
+.editar-ia-secoes {
+  max-height: 380px;
+  margin: 14px 0;
+  overflow-y: auto;
+  border: 1px solid #e2e5df;
+  border-radius: 9px;
+  padding: 16px;
+}
+
+.editar-ia-secoes article + article {
+  border-top: 1px dashed #ddd;
+  margin-top: 15px;
+  padding-top: 15px;
+}
+
+.editar-ia-secoes h4 {
+  margin: 0 0 8px;
+}
+
+.editar-ia-secoes p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.editar-ia-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.editar-ia-acoes button {
+  padding: 12px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+@media (max-width: 650px) {
+  .editar-ia-abrir,
+  .editar-ia-enviar {
+    width: 100%;
+  }
+
+  .editar-ia-painel {
+    padding: 18px;
+  }
+
+  .editar-ia-acoes button {
+    flex: 1;
+  }
+}

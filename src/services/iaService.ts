@@ -1,3 +1,4 @@
+
 import type { ConteudoPlano, DadosPlano } from '../types/planejamento';
 
 import { obterToken, sair } from '../utils/auth';
@@ -10,8 +11,10 @@ interface RespostaIa {
   erro?: string;
 }
 
-export const gerarPlanoComIa = async (
-  dados: DadosPlano,
+// Requisição autenticada para o backend
+const requisicaoIa = async (
+  rota: string,
+  corpo: unknown,
   signal?: AbortSignal
 ): Promise<ConteudoPlano> => {
   const token = obterToken();
@@ -21,21 +24,14 @@ export const gerarPlanoComIa = async (
     throw new Error('Sua sessão expirou. Faça login novamente.');
   }
 
-  const resposta = await fetch(`${API_URL}/api/ia/gerar-plano`, {
+  const resposta = await fetch(`${API_URL}/api/ia/${rota}`, {
     method: 'POST',
     signal,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({
-      nivelEnsino: dados.nivelEnsino,
-      materia: dados.materia,
-      turma: dados.turma,
-      duracao: dados.duracao,
-      tema: dados.tema,
-      observacoes: dados.observacoes
-    })
+    body: JSON.stringify(corpo)
   });
 
   const resultado: RespostaIa = await resposta.json().catch(() => ({}));
@@ -44,7 +40,10 @@ export const gerarPlanoComIa = async (
     if (resposta.status === 401) sair();
 
     throw new Error(
-      resultado.erro || 'Não foi possível gerar o planejamento.'
+      resultado.erro ||
+      (rota === 'gerar-plano'
+        ? 'Não foi possível gerar o planejamento.'
+        : 'Não foi possível editar o planejamento com IA.')
     );
   }
 
@@ -55,4 +54,37 @@ export const gerarPlanoComIa = async (
   }
 
   return conteudo;
+};
+
+// GERAR PLANEJAMENTO COM IA
+export const gerarPlanoComIa = async (
+  dados: DadosPlano,
+  signal?: AbortSignal
+): Promise<ConteudoPlano> => {
+  return requisicaoIa(
+    'gerar-plano',
+    {
+      nivelEnsino: dados.nivelEnsino,
+      materia: dados.materia,
+      turma: dados.turma,
+      duracao: dados.duracao,
+      quantidadeAulas: dados.quantidadeAulas ?? 1,
+      tema: dados.tema,
+      observacoes: dados.observacoes
+    },
+    signal
+  );
+};
+
+// EDITAR PLANEJAMENTO COM IA
+export const editarPlanejamentoComIa = async (
+  dados: DadosPlano,
+  conteudo: ConteudoPlano,
+  instrucao: string
+): Promise<ConteudoPlano> => {
+  return requisicaoIa('editar-plano', {
+    dados,
+    conteudo,
+    instrucao
+  });
 };
